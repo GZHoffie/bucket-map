@@ -1,4 +1,4 @@
-# Background Knowledge
+# Notes
 
 ## Concepts
 
@@ -17,6 +17,8 @@
 
    - **LF Mapping Character**: Relative order of same character remains the same for the last column and first column of BWM.
 
+    Good reference: [cmu bioinfo lecture](https://www.cs.cmu.edu/~ckingsf/bioinfo-lectures/bwt.pdf)
+
 1. **Suffix array interval (SA interval)**: If `W` is a substring of `X`, then the interval is \[*smallest index suffix with prefix `W`* in suffix array, index of *largest index suffix with prefix `W`*\]. These are denoted $[\underline{R}(W),\overline{R}(W)]$.
 
    Example: `X='GOOGOL`, `W=GO`, then the largest index suffix with prefix `W` is `GOOGOL` (`i=2,S[i]=0,B[i]=(googol)$`) while the smallest index is `GOL` (`i=1,S[i]=3,B[i]=(gol$go)o`), therefore the SA interval would be `[1,2]`.
@@ -31,3 +33,40 @@
    and
    $$\overline{R}(aW)=C(a)+O(a,\overline{R}(W))$$
    Then $aW$ is a substring of $X$ iff $\underline{R}(aW)\leq \overline{R}(aW)$. We can start from the end of $W$ and check one by one whether we have $\underline{R}(aW)\leq \overline{R}(aW)$ to test if $W$ is a substring.
+
+## BWT Inexact Matching
+
+**Idea**: Use a `D` array where `D[i]` stores the lower bound number of differences in `W[0,i]`.
+
+**Algorithm**: use a recursive algorithm to calculate the SA interval of all similar matches. Kind of like a DFS on the prefix trie.
+
+- `CalculateD(W)` function calculates the number of differences in `W[0, i]` and a substring of `X` (how many should be deleted to make it a substring of `X`). 
+
+- `INEXRECUR(W, i, z, k, l)` recursively calculates the SA intervals of substrings that match `W[0, i]` with no more than `z` differences on the condition that suffix $W_{i+1}$ matches interval `[k, l]`.
+
+**Features**:
+
+1. Different penalties for mismatches and gaps.
+2. heap-like data structure to store partial hits.
+3. Iterative strategy: finds biggest interval by default.
+4. Allow to set max differences.
+5. save memory by calculating `O` and `S` arrays on the fly.
+6. *What are SOLiD reads? (study later).*
+
+## DNMFilter_Indel
+
+**Goal**: to decrease false positive rate of de novo indels (rare, and high false positive rate).
+
+**Method**:
+
+- Training: Use state-of-the-art de novo indel detection methods; Use **synthetic**(simulated) and cross validated de novo indels as positive samples and random sampled indels as negative samples; refine alignment and extracts sequence features.
+
+- Prediction: Use **gradient boosting classification model**, (so basically logical regression?)
+
+## HAST
+
+ Haplotype-resolved Assembly for Synthetic long reads using a Trio-binning strategy.
+
+**Goal**: Accurate haplotyping
+
+**Idea**: Use 
