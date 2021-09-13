@@ -67,6 +67,48 @@
 
  Haplotype-resolved Assembly for Synthetic long reads using a Trio-binning strategy.
 
-**Goal**: Accurate haplotyping
+**Goal**: High haplotyping precision/recall
 
-**Idea**: Use 
+**Idea**: Use parental information to classify reads into maternal or paternal
+
+**Tools**:
+
+|Tools used|Purpose|
+|--|--|
+|SOAPfilter|filter low quality reads, duplicated reads and PE reads|
+|TrioCanu (Canu)|classification of k-mers|
+|Jellyfish|generate, count, output distinct k-mers in parental genomes|
+|Merqury|k-mer analysis, haplotype evaluation|
+
+**Methods**:
+
+Hast steps:
+
+1. Generate unshared k-mers between materal/pateral genomes.
+2. *stLFR (What is that?)* sequencing of the child genome.
+3. determine the origin of each long fragment in child's genome. Assign into 4 groups: paternal, ambiguous, maternal and homozygous. longer DNA fragments may be more easily categorized.
+4. haplotype-resolved assemblies of both parental-inherited chromosomes.
+
+Details:
+
+1. Identifying maternal/paternal genome: have 1 copy of paternal k-mers and 2 copies of maternal k-mers and count the total frequencies.
+2. limit parental k-mer library size based on the coverage distribution. Fit by a *mixture model of negative binomial model*. 
+   k-mer with too large frequency (high-frequency duplications) and too small frequency (sequencing errors) are removed.
+3. choose large `k` for small *collision rate* in large genomes.
+4. To neutralize *inherent discrepancy* of parents, we
+   - calculate the probability of the parent genome to be mapped by a DNA fragment.
+   - Normailize to the parent k-mer library
+   - Multiply by a correction factor of sex chromosome size variance.
+5. binarize k-mer characters and use hash tables for k-mer database.
+
+
+## Terms
+
+|Vocabulary|Meaning|
+|----------|-------|
+|Phenotype|the observable physical properties of an organism|
+|chromosomes|染色体|
+|Diploid|二倍体 the number of each type of chromosome that an organism has|
+|haplotype|单体型 a group of genes within an organism that was inherited together from a single parent|
+|k-mer|substrings of length `k` contained within a biological sequence|
+|heterozygosity|杂合性|
