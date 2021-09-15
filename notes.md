@@ -23,6 +23,10 @@
 
    Example: `X='GOOGOL`, `W=GO`, then the largest index suffix with prefix `W` is `GOOGOL` (`i=2,S[i]=0,B[i]=(googol)$`) while the smallest index is `GOL` (`i=1,S[i]=3,B[i]=(gol$go)o`), therefore the SA interval would be `[1,2]`.
 
+1. **CSA (Compressed Suffix Arrays)**: Main component, the $\Psi$ function,
+   
+   $$\Psi[i]=\left\{\begin{array}{ll}S^{-1}[S[i]+1],&S[i]\ne n-1\\S^{-1}[0],&\text{otherwise}\end{array}\right.$$
+
 1. **Backward Search**: For a character $a\in\Sigma$, and $W$ be a substring of $X$, we let
 
    $C(a):=$ the number of symbols in $X[0,n-2]$ that are lexicographically smaller than $a\in\Sigma$,
@@ -34,7 +38,14 @@
    $$\overline{R}(aW)=C(a)+O(a,\overline{R}(W))$$
    Then $aW$ is a substring of $X$ iff $\underline{R}(aW)\leq \overline{R}(aW)$. We can start from the end of $W$ and check one by one whether we have $\underline{R}(aW)\leq \overline{R}(aW)$ to test if $W$ is a substring.
 
+## Background of family trio sequencing
+
+[Reference](https://experiment.com/u/oSMmA)
+
+
 ## BWT Inexact Matching
+
+Link: [Fast and accurate short read alignment with Burrows–Wheeler transform](https://academic.oup.com/bioinformatics/article/25/14/1754/225615)
 
 **Idea**: Use a `D` array where `D[i]` stores the lower bound number of differences in `W[0,i]`.
 
