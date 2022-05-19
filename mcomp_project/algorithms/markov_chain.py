@@ -127,7 +127,21 @@ class DNAMarkovChain:
         #print(self.M)
         if output_file:
             with open(f"{fasta_file_name}_markov_chain.pickle", "wb") as f:
-                pickle.dump(self.M, f)
+                pickle.dump(self.M, f, pickle.HIGHEST_PROTOCOL)
+    
+    def store(self, pickle_file_name):
+        """
+        Store the self.M matrix into a pickle file.
+        """
+        with open(pickle_file_name, "wb") as f:
+            pickle.dump(self.M, f)
+    
+    def load(self, pickle_file_name):
+        """
+        load the pickle file into self.M.
+        """
+        with open(pickle_file_name, 'rb') as f:
+            self.M = pickle.load(f)
     
     def query(self, sequence):
         k_mers = np.zeros((4 ** self.order, 1))
