@@ -2,6 +2,7 @@ from Bio import SeqIO
 from mcomp_project.utils import *
 import numpy as np
 import pickle
+import math
 
 class DNAMarkovChain:
     def __init__(self, order=7, region_length=100000, read_length=100, substitution_rate=0.02, prior=0.001) -> None:
@@ -10,19 +11,22 @@ class DNAMarkovChain:
         self.read_length = read_length
         self.substitution_rate = substitution_rate
         self.prior = prior
-        self.M = None
+        self.pi = None
+        self.A = None
     
 
     def _new_markov_chain(self):
         """
         Initialize a new vector and fill everything with `self.prior`
         """
-        markov_chain = np.zeros([4] * self.order)
-        markov_chain.fill(self.prior)
-        return markov_chain
+        pi = np.zeros([4] * self.order)
+        A = np.zeros([4] * (self.order + 1))
+        pi.fill(self.prior)
+        A.fill(self.prior)
+        return pi, A
     
 
-    def _insert_into_markov_chain(self, sequence, markov_chain, allow_substitution=True):
+    def _insert_into_A(self, sequence, A, allow_substitution=True):
         """
         Count the sequence into the markov chain. In particular, we want
         markov_chain[sequence] += 1. If we allow substitution, we also do
@@ -44,12 +48,31 @@ class DNAMarkovChain:
             for i in range(self.order):
                 index_i = index[i]
                 index[i] = ...
-                markov_chain[tuple(index)] += self.substitution_rate
+                A[tuple(index)] += self.substitution_rate
                 index[i] = index_i
             
-            markov_chain[tuple(index)] += 1 - self.order * self.substitution_rate
+            A[tuple(index)] += 1 - self.order * self.substitution_rate
         else:
-            markov_chain[tuple(index)] += 1
+            A[tuple(index)] += 1
+    
+
+    def _insert_into_pi(self, sequence, pi, allow_substitution=True):
+
+        try:
+            index = [char_to_index_map[c] for c in sequence]
+        except:
+            return
+        if allow_substitution:
+            for i in range(self.order):
+                index_i = index[i]
+                index[i] = ...
+                pi[tuple(index)] += self.substitution_rate
+                index[i] = index_i
+            
+            pi[tuple(index)] += 1 - self.order * self.substitution_rate
+        else:
+            pi[tuple(index)] += 1
+
 
 
         
@@ -66,32 +89,35 @@ class DNAMarkovChain:
             The index of the sequence or None if illegal characters appear
             in the sequence.
         """
-        assert len(sequence) == self.order, f"The length of input sequence {sequence} should be of length {self.order}"
+        #assert len(sequence) == self.order, f"The length of input sequence {sequence} should be of length {self.order}"
         try:
             index = [char_to_index_map[c] for c in sequence]
         except:
             return None
-        return np.ravel_multi_index(index, [4] * self.order)
+        return np.ravel_multi_index(index, [4] * len(sequence))
     
 
-    def _store_markov_chain(self, markov_chain):
+    def _store_markov_chain(self, pi, A):
         """
-        Store the current markov chain parameters in self.M. We do a
+        Store the current markov chain parameters in self.pi and self.A. We do a
         normalization and store the log of each parameters.
-
-        Args:
-            markov_chain: an array of markov chain parameters
         """
-        markov_chain /= np.sum(markov_chain)
-        markov_chain = np.log(markov_chain)
-        self.M = markov_chain.flatten() if self.M is None else np.vstack([self.M, markov_chain.flatten()])
+        normalized_pi /= np.sum(pi)
+        normalized_pi = np.log(normalized_pi)
+        self.pi = normalized_pi.flatten() if self.pi is None else np.vstack([self.pi, normalized_pi.flatten()])
+
+        # Normalize A with respect to the last axis
+        normalized_A = A / A.sum(axis=-1)
+        normalized_A = np.log(normalized_A)
+        self.A = normalized_A.flatten() if self.A is None else np.vstack([self.A, normalized_A.flatten()])
+
 
             
 
     def read(self, fasta_file_name, output_file=True):
         """
         Read the fasta file and store the Markov Chain frequencies in
-        self.M, and print the related information.
+        self.A and self.pi, and print the related information.
 
         Args:
             fasta_file_name: the string consisting of the path to the
@@ -105,55 +131,61 @@ class DNAMarkovChain:
             print("Estimated space usage: ", sequence_length / self.region_length * (4 ** self.order) * 4 / (1024 ** 2), "MB")
             
             # start counting the frequency the k-mers
-            index = 0
-            markov_chain = self._new_markov_chain()
-            while index + self.order < sequence_length:
+            num_chunks = math.ceil(float(sequence_length) / self.region_length)
 
-                current_k_mer = fasta.seq[index:index + self.order]
-                self._insert_into_markov_chain(current_k_mer, markov_chain)
-                #print(current_k_mer, self._sequence_to_index(current_k_mer))
-                index += 1
-                if index % self.region_length == 0:
-                    # Complete this region, store the markov chain parameters
-                    self._store_markov_chain(markov_chain)
-                    
-                    # Create new Markov chain
-                    markov_chain = self._new_markov_chain()
-            
-            # Complete this region, store the markov chain parameters
-            self._store_markov_chain(markov_chain)
-                    
-        
+
+            for chunk in range(num_chunks):
+                # Initialize pi and A
+                pi, A = self._new_markov_chain()
+
+                # First step: store the first read in the chunk to pi and A
+                index = chunk * self.region_length
+                self._insert_into_pi(fasta.seq[index:index + self.order], pi)
+                for i in range(1, self.read_length + 1):
+                    self._insert_into_A(fasta.seq[index + i:index + i + self.order + 1], A)
+                
+                # Repeat until we read all k-mers in the chunk
+                for i in range(1, self.region_length):
+                    self._insert_into_pi(fasta.seq[index + i:index + i + self.order], pi)
+                    self._insert_into_A(fasta.seq[index + i + self.read_length:index + i + self.read_length + self.order], A)
+                
+                # Complete this region, store the markov chain parameters
+                self._store_markov_chain(pi, A)
+
         #print(self.M)
         if output_file:
             with open(f"{fasta_file_name}_markov_chain.pickle", "wb") as f:
-                pickle.dump(self.M, f, pickle.HIGHEST_PROTOCOL)
+                pickle.dump((self.pi, self.A), f, pickle.HIGHEST_PROTOCOL)
     
     def store(self, pickle_file_name):
         """
         Store the self.M matrix into a pickle file.
         """
         with open(pickle_file_name, "wb") as f:
-            pickle.dump(self.M, f)
+            pickle.dump((self.pi, self.A), f, pickle.HIGHEST_PROTOCOL)
     
     def load(self, pickle_file_name):
         """
         load the pickle file into self.M.
         """
         with open(pickle_file_name, 'rb') as f:
-            self.M = pickle.load(f)
+            self.pi, self.A = pickle.load(f)
     
     def query(self, sequence):
-        k_mers = np.zeros((4 ** self.order, 1))
-        for i in range(len(sequence) - self.order):
-            current_k_mer = sequence[i:i + self.order]
+        # Find the first k-mer's corresponding probability
+        first_k_mer = sequence[:self.order]
+        init_probability = self.pi[:, self._sequence_to_index(first_k_mer)]
+
+        k_mers = np.zeros((4 ** (self.order + 1), 1))
+        for i in range(1, len(sequence) - self.order - 1):
+            current_k_mer = sequence[i:i + self.order + 1]
             index = self._sequence_to_index(current_k_mer)
             if index is not None:
                 k_mers[index] += 1
         
-        log_probability = np.dot(self.M, k_mers)
-        #print(log_probability)
+        log_probability = np.dot(self.A, k_mers) + init_probability
         return np.argmax(log_probability)
+
 
         
 

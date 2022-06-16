@@ -20,7 +20,7 @@ def modify_sequence(sequence, num_errors, substitution_percentage=0.95):
             (mismatch / (mismatch + indel)).
     """
     sequence_copy = sequence
-    print("--", sequence_copy)
+    #print("--", sequence_copy)
     for _ in range(num_errors):
         random_number = random.uniform(0, 1)
         if random_number < substitution_percentage:
@@ -39,7 +39,7 @@ def modify_sequence(sequence, num_errors, substitution_percentage=0.95):
             i = random.randint(0, len(sequence_copy) - 1)
             sequence_copy = sequence_copy[:i] + sequence_copy[i+1:]
         
-        print("->", sequence_copy)
+        #print("->", sequence_copy)
         
     return sequence_copy
 
