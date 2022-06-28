@@ -45,7 +45,7 @@ class DNAMarkovChain:
         except:
             return
         if allow_substitution:
-            for i in range(self.order):
+            for i in range(len(sequence)):
                 index_i = index[i]
                 index[i] = ...
                 A[tuple(index)] += self.substitution_rate
@@ -63,7 +63,7 @@ class DNAMarkovChain:
         except:
             return
         if allow_substitution:
-            for i in range(self.order):
+            for i in range(len(sequence)):
                 index_i = index[i]
                 index[i] = ...
                 pi[tuple(index)] += self.substitution_rate
@@ -102,7 +102,7 @@ class DNAMarkovChain:
         Store the current markov chain parameters in self.pi and self.A. We do a
         normalization and store the log of each parameters.
         """
-        normalized_pi /= np.sum(pi)
+        normalized_pi = pi / np.sum(pi)
         normalized_pi = np.log(normalized_pi)
         self.pi = normalized_pi.flatten() if self.pi is None else np.vstack([self.pi, normalized_pi.flatten()])
 
@@ -195,8 +195,8 @@ class DNAMarkovChain:
 
 
 if __name__ == "__main__":
-    mc = DNAMarkovChain(order=7, region_length=20000)
-    mc._insert_into_markov_chain("ACNCN", mc._new_markov_chain())
+    mc = DNAMarkovChain(order=6, region_length=20000)
+    #mc._insert_into_markov_chain("ACNCN", mc._new_markov_chain())
     #mc.read("/home/zhenhao/data/SRR611076/sequence.fasta")
     #print(mc.query("GCTCTTTCCCCGGAAACCATTGAAATCGGACGGTTTAGTGAAAATGGAGGATCAAGTTGGGTTTGGGTTC"))
         
