@@ -107,7 +107,9 @@ class DNAMarkovChain:
         self.pi = normalized_pi.flatten() if self.pi is None else np.vstack([self.pi, normalized_pi.flatten()])
 
         # Normalize A with respect to the last axis
-        normalized_A = A / A.sum(axis=-1)
+        #print(np.sum(A, axis=-1, keepdims=True).shape)
+        normalized_A = A / np.sum(A, axis=0, keepdims=True)
+        #print(normalized_A.sum(axis=-1))
         normalized_A = np.log(normalized_A)
         self.A = normalized_A.flatten() if self.A is None else np.vstack([self.A, normalized_A.flatten()])
 
@@ -175,6 +177,7 @@ class DNAMarkovChain:
         # Find the first k-mer's corresponding probability
         first_k_mer = sequence[:self.order]
         init_probability = self.pi[:, self._sequence_to_index(first_k_mer)]
+        #print(init_probability)
 
         k_mers = np.zeros((4 ** (self.order + 1), 1))
         for i in range(1, len(sequence) - self.order - 1):
@@ -183,7 +186,9 @@ class DNAMarkovChain:
             if index is not None:
                 k_mers[index] += 1
         
-        log_probability = np.dot(self.A, k_mers) + init_probability
+        #print(np.dot(self.A, k_mers).flatten())
+        #print(init_probability)
+        log_probability = np.dot(self.A, k_mers).flatten() + init_probability
         return np.argmax(log_probability)
 
 
