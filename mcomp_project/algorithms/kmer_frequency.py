@@ -141,7 +141,7 @@ class KMerFrequency:
         load the pickle file into self.M.
         """
         with open(pickle_file_name, 'rb') as f:
-            self.M = pickle.load(f)
+            self.M = pickle.load(f)[0]
     
     def query(self, sequence):
         k_mers = np.zeros((4 ** self.order, 1))

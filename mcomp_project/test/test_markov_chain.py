@@ -29,4 +29,4 @@ def test_markov_chain(fasta_file_name, pickle_file_name=None, test_num=10000, or
     print("Correct rate:", correct / test_num)
 
 if __name__ == "__main__":
-    test_markov_chain("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta", "/home/zhenhao/mcomp-dissertation/sequence_sample.fasta_markov_chain.pickle")
+    test_markov_chain("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta")#, "/home/zhenhao/mcomp-dissertation/sequence_sample.fasta_markov_chain.pickle")
