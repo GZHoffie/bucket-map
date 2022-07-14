@@ -54,6 +54,6 @@ class ReferenceGenome(Env):
 
 if __name__ == "__main__":
     env = ReferenceGenome("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta")
-    model = DQN("MlpPolicy", env, verbose=1)
-    model.learn(total_timesteps=1000000, log_interval=4)
+    model = DQN("MlpPolicy", env, tensorboard_log="./mapper_rl/")
+    model.learn(total_timesteps=2000000)
     model.save("mapper")

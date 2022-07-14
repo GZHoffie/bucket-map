@@ -1,7 +1,9 @@
+from typing import overload
 from Bio import SeqIO
 from mcomp_project.utils import *
 import numpy as np
 import pickle
+from typing import List
 
 class KMerFrequency:
     def __init__(self, order=7, region_length=100000, read_length=100, substitution_rate=0.02, prior=0.001) -> None:
@@ -156,8 +158,85 @@ class KMerFrequency:
         return np.argmax(log_probability)
 
         
+class GappedKMerFrequency(KMerFrequency):
+    def __init__(self, order=7, region_length=100000, read_length=100, substitution_rate=0.02, prior=0.001, gapped_k_mer_sequence=5) -> None:
+        super().__init__(order, region_length, read_length, substitution_rate, prior)
+        if isinstance(gapped_k_mer_sequence, int):
+            # Randomly generate a gapped k-mer sequence between 0-(order+gapped_k_mer_sequence)
+            self.gapped_k_mer = random.sample(range(order + gapped_k_mer_sequence), k=order)
+            self.gapped_k_mer.sort()
+        elif isinstance(gapped_k_mer_sequence, List):
+            self.gapped_k_mer = gapped_k_mer_sequence
+        
+        print("Using gapped k-mer sequence:", self.gapped_k_mer)
+    
+
+    def _get_current_k_mer(self, sequence, starting_index):
+        """
+        Return the current gapped k-mer.
+        """
+        return "".join([sequence[i + starting_index] for i in self.gapped_k_mer])
 
             
+
+    
+    @overload
+    def read(self, fasta_file_name, output_file=True):
+        """
+        Read the fasta file and store the Markov Chain frequencies in
+        self.M, and print the related information.
+
+        Args:
+            fasta_file_name: the string consisting of the path to the
+                fasta file.
+        """
+        print("Opening FASTA file:", fasta_file_name)
+        fasta_sequences = SeqIO.parse(open(fasta_file_name), 'fasta')
+        for fasta in fasta_sequences:
+            sequence_length = len(str(fasta.seq))
+            print("... processing sequence", fasta.id, "with length", sequence_length)
+            print("Estimated space usage: ", sequence_length / self.region_length * (4 ** self.order) * 4 / (1024 ** 2), "MB")
+            
+            # start counting the frequency the k-mers
+            index = 0
+            frequency_list = self._new_frequency_list()
+            while index + np.max(self.gapped_k_mer) < sequence_length:
+
+                current_k_mer = self._get_current_k_mer(fasta.seq, index)
+                self._insert_into_frequency_list(current_k_mer, frequency_list)
+                #print(current_k_mer, self._sequence_to_index(current_k_mer))
+                index += 1
+                if index % self.region_length == 0:
+                    # Complete this region, store the markov chain parameters
+                    self._store_frequency_list(frequency_list)
+                    
+                    # Create new Markov chain
+                    frequency_list = self._new_frequency_list()
+            
+            # Complete this region, store the markov chain parameters
+            self._store_frequency_list(frequency_list)
+                    
+        
+        #print(self.M)
+        if output_file:
+            with open(f"{fasta_file_name}_frequency_list.pickle", "wb") as f:
+                pickle.dump(self.M, f, pickle.HIGHEST_PROTOCOL)
+    
+    @overload
+    def query(self, sequence):
+        k_mers = np.zeros((4 ** self.order, 1))
+        for i in range(len(sequence) - np.max(self.gapped_k_mer)):
+            current_k_mer = self._get_current_k_mer(sequence, i)
+            index = self._sequence_to_index(current_k_mer)
+            if index is not None:
+                k_mers[index] += 1
+        
+        log_probability = np.dot(self.M, k_mers)
+        #print(log_probability)
+        return np.argmax(log_probability)
+    
+
+
         
 
 
