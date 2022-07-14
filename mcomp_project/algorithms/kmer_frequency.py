@@ -233,6 +233,20 @@ class GappedKMerFrequency(KMerFrequency):
         #print(log_probability)
         return np.argmax(log_probability)
     
+    def store(self, pickle_file_name):
+        """
+        Store the self.M matrix into a pickle file.
+        """
+        with open(pickle_file_name, "wb") as f:
+            pickle.dump((self.M, self.gapped_k_mer), f)
+    
+    def load(self, pickle_file_name):
+        """
+        load the pickle file into self.M.
+        """
+        with open(pickle_file_name, 'rb') as f:
+            self.M, self.gapped_k_mer = pickle.load(f)
+    
 
 
         

@@ -69,6 +69,6 @@ def try_PCA(fasta_file_name, pickle_file_name, test_num=1000, order=7, region_le
 
 if __name__ == "__main__":
     #test_kmer_frequency("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta")#, "/home/zhenhao/mcomp-dissertation/sequence_sample.fasta_markov_chain.pickle")
-    test_gapped_kmer_frequency("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta")#, "/home/zhenhao/mcomp-dissertation/sequence_sample.fasta_markov_chain.pickle")
+    test_gapped_kmer_frequency("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta")#, "/home/zhenhao/mcomp-dissertation/sequence_sample.fasta_frequency_list_gapped.pickle")
     
     #try_PCA("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta", "/home/zhenhao/mcomp-dissertation/sequence_sample.fasta_markov_chain.pickle")

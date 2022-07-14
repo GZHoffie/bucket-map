@@ -3,7 +3,7 @@ from Bio import SeqIO
 import numpy as np
 import time
 
-def test_markov_chain(fasta_file_name, pickle_file_name=None, test_num=10000, order=6, region_length=10000, read_length=100, substitution_rate=0.02, prior=0.001):
+def test_markov_chain(fasta_file_name, pickle_file_name=None, test_num=1000, order=6, region_length=10000, read_length=100, substitution_rate=0.02, prior=0.001):
     mc = DNAMarkovChain(order, region_length, read_length, substitution_rate, prior)
     start_time = time.time()
     if pickle_file_name is None:
@@ -29,4 +29,4 @@ def test_markov_chain(fasta_file_name, pickle_file_name=None, test_num=10000, or
     print("Correct rate:", correct / test_num)
 
 if __name__ == "__main__":
-    test_markov_chain("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta")#, "/home/zhenhao/mcomp-dissertation/sequence_sample.fasta_markov_chain.pickle")
+    test_markov_chain("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta", "/home/zhenhao/mcomp-dissertation/sequence_sample.fasta_markov_chain.pickle")
