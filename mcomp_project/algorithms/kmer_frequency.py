@@ -179,8 +179,6 @@ class GappedKMerFrequency(KMerFrequency):
 
             
 
-    
-    @overload
     def read(self, fasta_file_name, output_file=True):
         """
         Read the fasta file and store the Markov Chain frequencies in
@@ -219,10 +217,10 @@ class GappedKMerFrequency(KMerFrequency):
         
         #print(self.M)
         if output_file:
-            with open(f"{fasta_file_name}_frequency_list.pickle", "wb") as f:
+            with open(f"{fasta_file_name}_frequency_list_gapped.pickle", "wb") as f:
                 pickle.dump(self.M, f, pickle.HIGHEST_PROTOCOL)
     
-    @overload
+
     def query(self, sequence):
         k_mers = np.zeros((4 ** self.order, 1))
         for i in range(len(sequence) - np.max(self.gapped_k_mer)):
