@@ -2,7 +2,10 @@ from mcomp_project.algorithms.kmer_frequency import KMerFrequency, GappedKMerFre
 from Bio import SeqIO
 import numpy as np
 import time
+import math
 from sklearn.decomposition import PCA
+from mcomp_project.utils import *
+
 
 def test_kmer_frequency(fasta_file_name, pickle_file_name=None, test_num=1000, order=7, region_length=10000, read_length=100, substitution_rate=0.02, prior=0.001):
     mc = KMerFrequency(order, region_length, read_length, substitution_rate, prior)
@@ -29,8 +32,8 @@ def test_kmer_frequency(fasta_file_name, pickle_file_name=None, test_num=1000, o
     print("Correct rate:", correct / test_num)
 
 
-def test_gapped_kmer_frequency(fasta_file_name, pickle_file_name=None, test_num=1000, order=7, region_length=10000, read_length=100, substitution_rate=0.02, prior=0.001):
-    mc = GappedKMerFrequency(order, region_length, read_length, substitution_rate, prior)
+def test_gapped_kmer_frequency(fasta_file_name, pickle_file_name=None, test_num=1000, order=7, region_length=10000, read_length=100, substitution_rate=0.02, prior=0.001, test_reads=True):
+    mc = GappedKMerFrequency(order, region_length, read_length, substitution_rate, prior, 4)
     start_time = time.time()
     if pickle_file_name is None:
         mc.read(fasta_file_name)
@@ -45,7 +48,10 @@ def test_gapped_kmer_frequency(fasta_file_name, pickle_file_name=None, test_num=
         for _ in range(test_num):
             index = np.random.randint(0, sequence_length - read_length - 1)
             region = index // region_length
-            predict_region = mc.query(fasta.seq[index:index + read_length])
+            test_sequence = fasta.seq[index:index + read_length]
+            if test_reads:
+                test_sequence = modify_sequence(test_sequence, math.floor(substitution_rate * len(test_sequence)))
+            predict_region = mc.query(test_sequence)
             correct += (region == predict_region)
             #print(region, predict_region)
     
@@ -69,6 +75,6 @@ def try_PCA(fasta_file_name, pickle_file_name, test_num=1000, order=7, region_le
 
 if __name__ == "__main__":
     #test_kmer_frequency("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta")#, "/home/zhenhao/mcomp-dissertation/sequence_sample.fasta_markov_chain.pickle")
-    test_gapped_kmer_frequency("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta")#, "/home/zhenhao/mcomp-dissertation/sequence_sample.fasta_frequency_list_gapped.pickle")
+    test_gapped_kmer_frequency("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta", "/home/zhenhao/mcomp-dissertation/sequence_sample.fasta_frequency_list_gapped.pickle", substitution_rate=0.1, test_reads=False)
     
     #try_PCA("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta", "/home/zhenhao/mcomp-dissertation/sequence_sample.fasta_markov_chain.pickle")

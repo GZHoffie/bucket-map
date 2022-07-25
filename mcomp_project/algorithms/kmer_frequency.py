@@ -217,8 +217,7 @@ class GappedKMerFrequency(KMerFrequency):
         
         #print(self.M)
         if output_file:
-            with open(f"{fasta_file_name}_frequency_list_gapped.pickle", "wb") as f:
-                pickle.dump(self.M, f, pickle.HIGHEST_PROTOCOL)
+            self.store(f"{fasta_file_name}_frequency_list_gapped.pickle")
     
 
     def query(self, sequence):
@@ -238,14 +237,16 @@ class GappedKMerFrequency(KMerFrequency):
         Store the self.M matrix into a pickle file.
         """
         with open(pickle_file_name, "wb") as f:
-            pickle.dump((self.M, self.gapped_k_mer), f)
+            pickle.dump({'M': self.M, 'gapped_k_mer': self.gapped_k_mer}, f)
     
     def load(self, pickle_file_name):
         """
         load the pickle file into self.M.
         """
         with open(pickle_file_name, 'rb') as f:
-            self.M, self.gapped_k_mer = pickle.load(f)
+            res = pickle.load(f)
+            self.M = res['M']
+            self.gapped_k_mer = res['gapped_k_mer']
     
 
 
