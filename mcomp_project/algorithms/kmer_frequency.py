@@ -146,14 +146,13 @@ class KMerFrequency:
             self.M = pickle.load(f)[0]
     
     def query(self, sequence):
-        k_mers = np.zeros((4 ** self.order, 1))
+        log_probability = np.zeros((4 ** self.order, 1))
         for i in range(len(sequence) - self.order):
             current_k_mer = sequence[i:i + self.order]
             index = self._sequence_to_index(current_k_mer)
             if index is not None:
-                k_mers[index] += 1
-        
-        log_probability = np.dot(self.M, k_mers)
+                log_probability += self.M[:, index]
+
         #print(log_probability)
         return np.argmax(log_probability)
 
@@ -221,14 +220,13 @@ class GappedKMerFrequency(KMerFrequency):
     
 
     def query(self, sequence):
-        k_mers = np.zeros((4 ** self.order, 1))
-        for i in range(len(sequence) - np.max(self.gapped_k_mer)):
+        log_probability = np.zeros(self.M.shape[0])
+        for i in random.sample(range(len(sequence) - np.max(self.gapped_k_mer)), 50):
             current_k_mer = self._get_current_k_mer(sequence, i)
             index = self._sequence_to_index(current_k_mer)
             if index is not None:
-                k_mers[index] += 1
-        
-        log_probability = np.dot(self.M, k_mers)
+                log_probability += self.M[:, index]
+
         #print(log_probability)
         return np.argmax(log_probability)
     
