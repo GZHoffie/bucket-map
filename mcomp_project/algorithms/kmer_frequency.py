@@ -5,12 +5,14 @@ import numpy as np
 import pickle
 from typing import List
 
+
 class KMerFrequency:
-    def __init__(self, order=7, region_length=100000, read_length=100, substitution_rate=0.02, prior=0.001) -> None:
+    def __init__(self, order=7, bucket_length=100000, read_length=100, sample_num=50, substitution_rate=0.02, prior=0.001) -> None:
         self.order = order
-        self.region_length = region_length
+        self.bucket_length = bucket_length
         self.read_length = read_length
         self.substitution_rate = substitution_rate
+        self.sample_num = sample_num
         self.prior = prior
         self.M = None
     
@@ -84,7 +86,7 @@ class KMerFrequency:
         Args:
             frequency_list: an array of markov chain parameters
         """
-        frequency_list /= np.sum(frequency_list)
+        #frequency_list /= np.sum(frequency_list)
         frequency_list = np.log(frequency_list)
         self.M = frequency_list.flatten() if self.M is None else np.vstack([self.M, frequency_list.flatten()])
 
@@ -104,7 +106,7 @@ class KMerFrequency:
         for fasta in fasta_sequences:
             sequence_length = len(str(fasta.seq))
             print("... processing sequence", fasta.id, "with length", sequence_length)
-            print("Estimated space usage: ", sequence_length / self.region_length * (4 ** self.order) * 4 / (1024 ** 2), "MB")
+            print("Estimated space usage: ", sequence_length / self.bucket_length * (4 ** self.order) * 4 / (1024 ** 2), "MB")
             
             # start counting the frequency the k-mers
             index = 0
@@ -115,14 +117,14 @@ class KMerFrequency:
                 self._insert_into_frequency_list(current_k_mer, frequency_list)
                 #print(current_k_mer, self._sequence_to_index(current_k_mer))
                 index += 1
-                if index % self.region_length == 0:
-                    # Complete this region, store the markov chain parameters
+                if index % self.bucket_length == 0:
+                    # Complete this bucket, store the markov chain parameters
                     self._store_frequency_list(frequency_list)
                     
                     # Create new Markov chain
                     frequency_list = self._new_frequency_list()
             
-            # Complete this region, store the markov chain parameters
+            # Complete this bucket, store the markov chain parameters
             self._store_frequency_list(frequency_list)
                     
         
@@ -158,8 +160,8 @@ class KMerFrequency:
 
         
 class GappedKMerFrequency(KMerFrequency):
-    def __init__(self, order=7, region_length=100000, read_length=100, substitution_rate=0.02, prior=0.001, gapped_k_mer_sequence=5) -> None:
-        super().__init__(order, region_length, read_length, substitution_rate, prior)
+    def __init__(self, order=7, bucket_length=100000, read_length=100, sample_num=50, substitution_rate=0.02, prior=0.001, gapped_k_mer_sequence=5) -> None:
+        super().__init__(order, bucket_length, read_length, sample_num, substitution_rate, prior)
         if isinstance(gapped_k_mer_sequence, int):
             # Randomly generate a gapped k-mer sequence between 0-(order+gapped_k_mer_sequence)
             self.gapped_k_mer = random.sample(range(order + gapped_k_mer_sequence), k=order)
@@ -168,6 +170,7 @@ class GappedKMerFrequency(KMerFrequency):
             self.gapped_k_mer = gapped_k_mer_sequence
         
         print("Using gapped k-mer sequence:", self.gapped_k_mer)
+        
     
 
     def _get_current_k_mer(self, sequence, starting_index):
@@ -192,7 +195,7 @@ class GappedKMerFrequency(KMerFrequency):
         for fasta in fasta_sequences:
             sequence_length = len(str(fasta.seq))
             print("... processing sequence", fasta.id, "with length", sequence_length)
-            print("Estimated space usage: ", sequence_length / self.region_length * (4 ** self.order) * 4 / (1024 ** 2), "MB")
+            print("Estimated space usage: ", sequence_length / self.bucket_length * (4 ** self.order) * 4 / (1024 ** 2), "MB")
             
             # start counting the frequency the k-mers
             index = 0
@@ -203,14 +206,14 @@ class GappedKMerFrequency(KMerFrequency):
                 self._insert_into_frequency_list(current_k_mer, frequency_list)
                 #print(current_k_mer, self._sequence_to_index(current_k_mer))
                 index += 1
-                if index % self.region_length == 0:
-                    # Complete this region, store the markov chain parameters
+                if index % self.bucket_length == 0:
+                    # Complete this bucket, store the markov chain parameters
                     self._store_frequency_list(frequency_list)
                     
                     # Create new Markov chain
                     frequency_list = self._new_frequency_list()
             
-            # Complete this region, store the markov chain parameters
+            # Complete this bucket, store the markov chain parameters
             self._store_frequency_list(frequency_list)
                     
         
@@ -221,14 +224,17 @@ class GappedKMerFrequency(KMerFrequency):
 
     def query(self, sequence):
         log_probability = np.zeros(self.M.shape[0])
-        for i in random.sample(range(len(sequence) - np.max(self.gapped_k_mer)), 50):
-            current_k_mer = self._get_current_k_mer(sequence, i)
+        selected_k_mer = random.sample(range(len(sequence) - np.max(self.gapped_k_mer)), self.sample_num)
+        indices = []
+        for k_mer_pos in selected_k_mer:
+            current_k_mer = self._get_current_k_mer(sequence, k_mer_pos)
             index = self._sequence_to_index(current_k_mer)
             if index is not None:
-                log_probability += self.M[:, index]
+                indices.append(index)
+        log_probability += np.sum(self.M[:, indices], axis=1)
 
         #print(log_probability)
-        return np.argmax(log_probability)
+        return np.argmax(log_probability), log_probability #FIXME: delete the second return value
     
     def store(self, pickle_file_name):
         """
@@ -245,6 +251,8 @@ class GappedKMerFrequency(KMerFrequency):
             res = pickle.load(f)
             self.M = res['M']
             self.gapped_k_mer = res['gapped_k_mer']
+        
+        print("Using gapped k-mer sequence:", self.gapped_k_mer)
     
 
 
@@ -253,7 +261,7 @@ class GappedKMerFrequency(KMerFrequency):
 
 
 if __name__ == "__main__":
-    mc = KMerFrequency(order=7, region_length=20000)
+    mc = KMerFrequency(order=7, bucket_length=20000)
     mc._insert_into_frequency_list("ACNCN", mc._new_frequency_list())
     #mc.read("/home/zhenhao/data/SRR611076/sequence.fasta")
     #print(mc.query("GCTCTTTCCCCGGAAACCATTGAAATCGGACGGTTTAGTGAAAATGGAGGATCAAGTTGGGTTTGGGTTC"))
