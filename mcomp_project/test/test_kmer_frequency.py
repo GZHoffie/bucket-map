@@ -34,7 +34,7 @@ def test_kmer_frequency(fasta_file_name, pickle_file_name=None, test_num=1000, o
     print("Correct rate:", correct / test_num)
 
 
-def test_gapped_kmer_frequency(fasta_file_name, pickle_file_name=None, test_num=100000, order=8, bucket_length=10000, read_length=100, sample_num=30, substitution_rate=0, prior=0.001, test_reads=False):
+def test_gapped_kmer_frequency(fasta_file_name, pickle_file_name=None, test_num=100000, order=8, bucket_length=10000, read_length=100, sample_num=10, substitution_rate=0, prior=0.001, test_reads=False):
     mc = GappedKMerFrequency(order, bucket_length, read_length, sample_num, substitution_rate, prior, 4)
     start_time = time.time()
     if pickle_file_name is None:

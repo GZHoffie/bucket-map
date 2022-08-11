@@ -18,7 +18,7 @@ class SimulateKMerFrequency:
             k: the effective neucleotides of the seed we are using 
                 (e.g. for seed 11011011000011011, we have k=10)
             l: the length of the seed
-                (e.g. for seed 11011011000011011, we have k=17)
+                (e.g. for seed 11011011000011011, we have l=17)
             r: length of each short read
             rho: parameter for the negative binomial distribution
         """
@@ -48,7 +48,7 @@ class SimulateKMerFrequency:
         largest_samples = np.zeros(simulate_num)
         for i in range(simulate_num):
             largest_num = float('-inf')
-            samples = np.random.negative_binomial(n=self.mu, p=self.mu/self.rho, size=self.sample_num * (self.bucket_num - 1)) + self.prior
+            samples = np.random.negative_binomial(n=self.mu, p=self.rho, size=self.sample_num * (self.bucket_num - 1)) + self.prior
             samples = np.reshape(samples, (self.bucket_num - 1, self.sample_num))
             samples = np.sum(np.log(samples), axis=1)
             largest_samples[i] = np.max(samples)
@@ -75,7 +75,7 @@ class SimulateKMerFrequency:
         print("Worst case correctness:", np.sum(samples < lower_bound) / simulate_num)
 
 if __name__ == "__main__":
-    sim = SimulateKMerFrequency(7000000, 700, 30, 8, 10)
-    sim.simulate_correctness(1000, plot=False)
+    sim = SimulateKMerFrequency(7000000, 700, 50, 7, 11)
+    sim.simulate_correctness(1000, plot=True)
 
             
