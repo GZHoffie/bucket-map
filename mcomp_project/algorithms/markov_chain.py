@@ -5,9 +5,9 @@ import pickle
 import math
 
 class DNAMarkovChain:
-    def __init__(self, order=7, region_length=100000, read_length=100, substitution_rate=0.02, prior=0.001) -> None:
+    def __init__(self, order=7, bucket_length=100000, read_length=100, substitution_rate=0.02, prior=0.001) -> None:
         self.order = order
-        self.region_length = region_length
+        self.bucket_length = bucket_length
         self.read_length = read_length
         self.substitution_rate = substitution_rate
         self.prior = prior
@@ -130,10 +130,10 @@ class DNAMarkovChain:
         for fasta in fasta_sequences:
             sequence_length = len(str(fasta.seq))
             print("... processing sequence", fasta.id, "with length", sequence_length)
-            print("Estimated space usage: ", sequence_length / self.region_length * (4 ** self.order) * 4 / (1024 ** 2), "MB")
+            print("Estimated space usage: ", sequence_length / self.bucket_length * (4 ** self.order) * 4 / (1024 ** 2), "MB")
             
             # start counting the frequency the k-mers
-            num_chunks = math.ceil(float(sequence_length) / self.region_length)
+            num_chunks = math.ceil(float(sequence_length) / self.bucket_length)
 
 
             for chunk in range(num_chunks):
@@ -141,17 +141,17 @@ class DNAMarkovChain:
                 pi, A = self._new_markov_chain()
 
                 # First step: store the first read in the chunk to pi and A
-                index = chunk * self.region_length
+                index = chunk * self.bucket_length
                 self._insert_into_pi(fasta.seq[index:index + self.order], pi)
                 for i in range(1, self.read_length + 1):
                     self._insert_into_A(fasta.seq[index + i:index + i + self.order + 1], A)
                 
                 # Repeat until we read all k-mers in the chunk
-                for i in range(1, self.region_length):
+                for i in range(1, self.bucket_length):
                     self._insert_into_pi(fasta.seq[index + i:index + i + self.order], pi)
                     self._insert_into_A(fasta.seq[index + i + self.read_length:index + i + self.read_length + self.order], A)
                 
-                # Complete this region, store the markov chain parameters
+                # Complete this bucket, store the markov chain parameters
                 self._store_markov_chain(pi, A)
 
         #print(self.M)
@@ -200,7 +200,7 @@ class DNAMarkovChain:
 
 
 if __name__ == "__main__":
-    mc = DNAMarkovChain(order=6, region_length=20000)
+    mc = DNAMarkovChain(order=6, bucket_length=20000)
     #mc._insert_into_markov_chain("ACNCN", mc._new_markov_chain())
     #mc.read("/home/zhenhao/data/SRR611076/sequence.fasta")
     #print(mc.query("GCTCTTTCCCCGGAAACCATTGAAATCGGACGGTTTAGTGAAAATGGAGGATCAAGTTGGGTTTGGGTTC"))

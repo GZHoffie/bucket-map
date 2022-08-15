@@ -1,4 +1,7 @@
 __pycache__
+build
+seqan3
+.pytest_cache
 .vscode
 *.fasta
 *.pickle

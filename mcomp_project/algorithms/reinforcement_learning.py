@@ -7,11 +7,11 @@ from stable_baselines3 import DQN
 
 # TODO: add random variance (indel/substitution) to the reference genome
 class ReferenceGenome(Env):
-    def __init__(self, fasta_file_name, region_length=100000, read_length=100, substitution_rate=0.02, prior=0.001):
+    def __init__(self, fasta_file_name, bucket_length=100000, read_length=100, substitution_rate=0.02, prior=0.001):
         super(ReferenceGenome, self).__init__()
 
         # Parameters for genome dividing
-        self.region_length = region_length
+        self.bucket_length = bucket_length
         self.read_length = read_length
         self.substitution_rate = substitution_rate
 
@@ -25,7 +25,7 @@ class ReferenceGenome(Env):
                 self.fasta_sequence += fasta.seq
 
         self.sequence_length = len(self.fasta_sequence)
-        self.num_chunks = math.ceil(float(self.sequence_length) / self.region_length) 
+        self.num_chunks = math.ceil(float(self.sequence_length) / self.bucket_length) 
 
         # Define observation space
         self.observation_space = spaces.MultiDiscrete([4] * self.read_length)
@@ -34,20 +34,20 @@ class ReferenceGenome(Env):
         self.action_space = spaces.Discrete(self.num_chunks)
 
         # Store the answer to the last observation
-        self.last_observation_region = None
+        self.last_observation_bucket = None
     
     def step(self, action):
-        reward = 1 if self.last_observation_region == action else 0
+        reward = 1 if self.last_observation_bucket == action else 0
 
         index = np.random.randint(0, self.sequence_length - self.read_length - 1)
-        self.last_observation_region = index // self.region_length
+        self.last_observation_bucket = index // self.bucket_length
         observation = np.array([char_to_index_map[c] for c in self.fasta_sequence[index:index + self.read_length]])
         
         return observation, reward, True, {}
     
     def reset(self):
         index = np.random.randint(0, self.sequence_length - self.read_length - 1)
-        self.last_observation_region = index // self.region_length
+        self.last_observation_bucket = index // self.bucket_length
         observation = np.array([char_to_index_map[c] for c in self.fasta_sequence[index:index + self.read_length]])
         return observation
 

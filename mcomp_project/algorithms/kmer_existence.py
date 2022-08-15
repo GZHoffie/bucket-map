@@ -31,10 +31,11 @@ class KMerExistence(BucketMapper):
     
     def query(self, sequence):
         tolerate_vectors = [int('1' * (4 ** self.order), 2)] * self.tolerant_num
-        sample_indices = np.linspace(0, len(sequence) - self.order)
+        sample_indices = np.linspace(0, len(sequence) - self.order).astype(int)
         for i in sample_indices:
-            tolerate_vectors[0] = tolerate_vectors[0] | self.compressed_kmer_record[]
+            #tolerate_vectors[0] = tolerate_vectors[0] | self.compressed_kmer_record[]
             for j in range(self.tolerant_num):
+                pass
 
     
     def store(self, pickle_file_name):

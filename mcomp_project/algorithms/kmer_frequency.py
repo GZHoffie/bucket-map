@@ -86,7 +86,7 @@ class KMerFrequency:
         Args:
             frequency_list: an array of markov chain parameters
         """
-        #frequency_list /= np.sum(frequency_list)
+        frequency_list /= np.sum(frequency_list)
         frequency_list = np.log(frequency_list)
         self.M = frequency_list.flatten() if self.M is None else np.vstack([self.M, frequency_list.flatten()])
 
