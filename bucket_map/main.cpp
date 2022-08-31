@@ -1,14 +1,11 @@
-#include <seqan3/core/debug_stream.hpp>
-#include "bucket_map.h"
+#include "q_gram_map.h"
 
+#include <seqan3/search/kmer_index/shape.hpp>
+
+using seqan3::operator""_shape;
 
 int main()
 {
-    bucket_mapper * mapper = new bucket_mapper("test", 10000, 100);
-    mapper->index("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta", "test");
-
-
-
-    seqan3::debug_stream << "Hello World!\n";
-    return 0;
+    q_gram_mapper<700> map(10000, 100, 0b11101001010011_shape);
+    map.read("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta", "/home/zhenhao/mcomp-dissertation/build/test");
 }

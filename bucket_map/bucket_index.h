@@ -12,16 +12,16 @@
 #include <seqan3/io/sequence_file/input.hpp>
 #include <seqan3/search/all.hpp>
 #include <seqan3/search/fm_index/bi_fm_index.hpp>
+#include <seqan3/core/debug_stream.hpp>
  
 #include <cereal/archives/binary.hpp>
 
 
 
-class bucket_mapper {
+class bucket_indexer {
 private:
-    std::string index_id;                                // a string indicating the handle to index files
     std::vector<std::string> bucket_id;                  // vector storing all bucket info
-    std::vector<std::vector<seqan3::dna5>> bucket_seq;   // sequence for each bucket
+    std::vector<std::vector<seqan3::dna4>> bucket_seq;   // sequence for each bucket
     unsigned int bucket_length;                          // maximum length of each bucket
     unsigned int read_length;                            // maximum length of each short read
 
@@ -43,13 +43,13 @@ private:
     }
 
 public:
-    bucket_mapper(std::string id, unsigned int bucket_len, unsigned int read_len) {
-        index_id = id;
+    bucket_indexer(unsigned int bucket_len, unsigned int read_len) {
         bucket_length = bucket_len;
         read_length = read_len;
     }
 
-    unsigned int index(std::filesystem::path const & fasta_file_name, std::filesystem::path const & index_directory) {
+    unsigned int index(std::filesystem::path const & fasta_file_name, 
+                       std::filesystem::path const & index_directory) {
         /**
          * @brief Read the fasta file, index each bucket.
          * @param fasta_file_name the name of the file containing reference genome.
@@ -74,8 +74,6 @@ public:
             }
         }
         seqan3::sequence_file_input reference_genome{fasta_file_name};
-        std::string previous_id = "";
-        int index = 0;
         for (auto && record : reference_genome) {
             // Divide the record into buckets
             float total_length = (float) record.sequence().size();
@@ -83,7 +81,7 @@ public:
             std::cout << record.id() << " with length " << total_length
                       << " divided into " << num_buckets << " buckets." << std::endl;
             
-            // read each buckets
+            // read each bucket
             for (int i = 0; i < num_buckets; i++) {
                 bucket_id.push_back(record.id() + " | " + std::to_string(i));
                 int start = i * bucket_length;
@@ -91,7 +89,7 @@ public:
                 if (end > record.sequence().size()) {
                     end = record.sequence().size();
                 }
-                std::vector<seqan3::dna5> bucket_sequence(&record.sequence()[start], &record.sequence()[end]);
+                std::vector<seqan3::dna4> bucket_sequence(&record.sequence()[start], &record.sequence()[end]);
                 bucket_seq.push_back(bucket_sequence);
             }
 
@@ -100,6 +98,15 @@ public:
         }
         seqan3::debug_stream << "[INFO]\t\t" << "The number of index files created: " 
                              << bucket_id.size() << "." << '\n';
+        
+        // Store the bucket_id in the directory
+        {
+            std::ofstream os{index_directory / "bucket_id", std::ios::binary};
+            cereal::BinaryOutputArchive oarchive{os};
+            oarchive(bucket_id);
+        }
+        seqan3::debug_stream << "[INFO]\t\t" << "The bucket id are stored in: " 
+                             << index_directory / "bucket_id" << "." << '\n';
         return bucket_id.size();
     }
 };
