@@ -165,13 +165,6 @@ public:
         num_samples = samples;
         num_fault_tolerance = fault;
 
-        // initialize q_gram index
-        int total_q_grams = (int) pow(4, q);
-        for (int i = 0; i < total_q_grams; i++) {
-            std::bitset<NUM_BUCKETS> q_gram_bucket;
-            q_grams_index.push_back(q_gram_bucket);
-        }
-
         // initialize filter
         filter = new fault_tolerate_filter<NUM_BUCKETS>(num_fault_tolerance);
     }
@@ -190,6 +183,12 @@ public:
         if (!q_grams_index.empty()) {
             seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram index is not empty. Terminating read.\n";
             return;
+        }
+        // initialize q_gram index
+        int total_q_grams = (int) pow(4, q);
+        for (int i = 0; i < total_q_grams; i++) {
+            std::bitset<NUM_BUCKETS> q_gram_bucket;
+            q_grams_index.push_back(q_gram_bucket);
         }
         // Read the genome
         seqan3::sequence_file_input reference_genome{fasta_file_name};
@@ -270,6 +269,12 @@ public:
             seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram index is not empty. Terminating load.\n";
             return;
         }
+        // initialize q_gram index
+        int total_q_grams = (int) pow(4, q);
+        for (int i = 0; i < total_q_grams; i++) {
+            std::bitset<NUM_BUCKETS> q_gram_bucket;
+            q_grams_index.push_back(q_gram_bucket);
+        }
         // Read the index file
         std::ifstream file(index_directory / "index.qgram");
         std::string line;
@@ -290,6 +295,12 @@ public:
          * @returns a vector of integers indicating the possible regions that the sequence
          *          may belong to.
          */
+        // q_grams_index should not be empty
+        if (q_grams_index.empty()) {
+            seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram index is empty. Cannot accept query.\n";
+            std::vector<int> res;
+            return res;
+        }
         // Reset the filter
         filter->reset();
 
@@ -300,7 +311,7 @@ public:
         return filter->best_results();
     }
 
-    std::vector<int> query(std::vector<seqan3::dna4> sequence) {
+    std::vector<int> query_sequence(std::vector<seqan3::dna4> sequence) {
         /**
          * @brief From `q_grams_index`, determine where the sequence may be coming from.
          * @param sequence A dna4 vector containing the query sequence.
@@ -315,7 +326,7 @@ public:
         std::sample(hash_values.begin(), hash_values.end(), 
                     std::back_inserter(samples), num_samples,
                     std::mt19937{std::random_device{}()});
-        return query(sequence);
+        return query(samples);
     }
 
 
