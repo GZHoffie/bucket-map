@@ -124,6 +124,30 @@ private:
         }
     }
 
+    std::vector<unsigned char> _bitset_to_bytes(const std::bitset<NUM_BUCKETS>& bs){
+        /**
+         * @brief Convert bitset into 8-byte chars.
+         * Adopted from https://stackoverflow.com/a/7463972.
+         */
+        std::vector<unsigned char> result((NUM_BUCKETS + 7) >> 3);
+        for (unsigned int j = 0; j < NUM_BUCKETS; j++)
+            result[j>>3] |= (bs[j] << (j & 7));
+        return result;
+    }
+
+    std::bitset<NUM_BUCKETS> _bitset_from_bytes(const std::vector<unsigned char>& buf) {
+        /**
+         * @brief Convert 8-byte chars to bitset.
+         * Adopted from https://stackoverflow.com/a/7463972.
+         */
+        assert(buf.size() == ((NUM_BUCKETS + 7) >> 3));
+        std::bitset<NUM_BUCKETS> result;
+        for (unsigned int j = 0; j < NUM_BUCKETS; j++)
+            result[j] = ((buf[j>>3] >> (j & 7)) & 1);
+        return result;
+    }
+
+
 
 public:
     q_gram_mapper(unsigned int bucket_len, unsigned int read_len, seqan3::shape shape, 
@@ -156,26 +180,16 @@ public:
         delete filter;
     }
 
-    bool read(std::filesystem::path const & fasta_file_name, 
-              std::filesystem::path const & index_directory) {
+    void read(std::filesystem::path const & fasta_file_name) {
         /**
          * @brief Read the fasta file, store the q_gram of each bucket in `q_grams_index`.
          *        Store the information in the `index_directory`.
          * @param fasta_file_name the name of the file containing reference genome.
-         * @param index_directory the directory to store the q_gram_count_file.
-         * @returns whether the read is successful.
          */
-        // Create directory if directory is not created yet.
-        if (!std::filesystem::create_directories(index_directory)) {
-            seqan3::debug_stream << "[WARNING]\t" << "The specified index directory "
-                                 << index_directory << " is already created." << '\n';
-            for (const auto& entry : std::filesystem::directory_iterator(index_directory)) {
-                if (entry.path().extension() == ".qgram") {
-                    seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram file already exists in the " 
-                                         << "specified directory. Terminating read." << '\n';
-                    return false;
-                }
-            }
+        // q_grams_index should be empty
+        if (!q_grams_index.empty()) {
+            seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram index is not empty. Terminating read.\n";
+            return;
         }
         // Read the genome
         seqan3::sequence_file_input reference_genome{fasta_file_name};
@@ -201,45 +215,108 @@ public:
         }
         seqan3::debug_stream << "[INFO]\t\t" << "Total number of buckets: " 
                              << bucket_num << "." << '\n';
-        
+    }
+
+    void store(std::filesystem::path const & index_directory) {
+        /**
+         * @brief Store the created index inside the index_directory.
+         * @param index_directory the directory to store the q_gram_count_file.
+         */
+        // q_grams_index should not be empty
+        if (q_grams_index.empty()) {
+            seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram index is empty. No file is created.\n";
+            return;
+        }
+        // Create directory if directory is not created yet.
+        // Return if the index files already exist.
+        if (!std::filesystem::create_directories(index_directory)) {
+            seqan3::debug_stream << "[WARNING]\t" << "The specified index directory "
+                                 << index_directory << " is already created." << '\n';
+            for (const auto& entry : std::filesystem::directory_iterator(index_directory)) {
+                if (entry.path().extension() == ".qgram" || entry.path().extension() == ".pattern") {
+                    seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram file " << entry.path() << " already exists" 
+                                         << " in the specified directory. Terminating store." << '\n';
+                    return;
+                }
+            }
+        }
         // Store the q-gram index in the directory
-        // TODO: Implement a more space-efficient way to store and load the q-gram index
-        std::ofstream file(index_directory / "index.qgram");
+        std::ofstream index_file(index_directory / "index.qgram");
         for (const auto &i : q_grams_index) {
-            file << i << "\n";
+            for (const auto &c : _bitset_to_bytes(i)) {
+                index_file << c;
+            }
+            index_file << "\n";
         }
         seqan3::debug_stream << "[INFO]\t\t" << "The bucket q-gram index is stored in: " 
-                             << index_directory / "index.qgram" << "." << '\n';
-        return true;
+                             << index_directory / "index.qgram" << ".\n";
+        
+        // Store the q-gram pattern in the directory
+        std::ofstream pattern_file(index_directory / "index.pattern");
+        pattern_file << q_gram_shape;
+        seqan3::debug_stream << "[INFO]\t\t" << "The q-gram shape is stored in: " 
+                             << index_directory / "index.pattern" << "." << '\n';
     }
 
 
-    std::vector<int> query(std::vector<seqan3::dna5> sequence) {
+    void load(std::filesystem::path const & index_directory) {
+        /**
+         * @brief Look for index and pattern file inside the index_directory,
+         *        read the files and store the values in class attribute.
+         * @param index_directory the directory that stores the q_gram_count_file.
+         */
+        // q_grams_index should be empty
+        if (!q_grams_index.empty()) {
+            seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram index is not empty. Terminating load.\n";
+            return;
+        }
+        // Read the index file
+        std::ifstream file(index_directory / "index.qgram");
+        std::string line;
+        while (std::getline(file, line)) {
+            std::vector<unsigned char> index(line.begin(), line.end());
+            q_grams_index.push_back(_bitset_from_bytes(index));
+        }
+        seqan3::debug_stream << "[INFO]\t\t" << "Successfully loaded " 
+                             << index_directory / "index.qgram" << "." << '\n';
+    }
+
+
+    std::vector<int> query(std::vector<int> q_gram_hash) {
         /**
          * @brief From `q_grams_index`, determine where the sequence may be coming from.
-         * @param sequence the DNA sequence to be mapped.
+         * @param q_gram_hash the vector containing all hash values of q-grams in the
+         *                    query sequence.
          * @returns a vector of integers indicating the possible regions that the sequence
          *          may belong to.
          */
         // Reset the filter
         filter->reset();
 
-        // Extract the k-mers from sequence
-        auto q_gram = seqan3::views::kmer_hash(q_gram_shape);
-
-        // Extract all q_grams from sequence
-        auto hash_values = sequence | q_gram;
-        std::vector<int> samples;
-        std::sample(hash_values.begin(), hash_values.end(), 
-                    std::back_inserter(samples),
-                    5, std::mt19937{std::random_device{}()});
-
         // insert those samples into the filter
-        for (int h : samples) {
+        for (int h : q_gram_hash) {
             filter->read(q_grams_index[h]);
         }
         return filter->best_results();
-
     }
+
+    std::vector<int> query(std::vector<seqan3::dna4> sequence) {
+        /**
+         * @brief From `q_grams_index`, determine where the sequence may be coming from.
+         * @param sequence A dna4 vector containing the query sequence.
+         * @returns a vector of integers indicating the possible regions that the sequence
+         *          may belong to.
+         * TODO: implement query with argument being a file containing short reads, together with quality.
+         */
+        auto q_gram = seqan3::views::kmer_hash(q_gram_shape);
+        auto hash_values = sequence | q_gram;
+        std::vector<int> samples;
+        // Randomly sample `num_samples` q-grams for query.
+        std::sample(hash_values.begin(), hash_values.end(), 
+                    std::back_inserter(samples), num_samples,
+                    std::mt19937{std::random_device{}()});
+        return query(sequence);
+    }
+
 
 };
