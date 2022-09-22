@@ -41,7 +41,7 @@ public:
         }
     }
 
-    std::vector<seqan3::dna4> sample(q_gram_mapper<700> map) {
+    std::pair<std::vector<seqan3::dna4>, int> sample() {
         int bucket = rand() % bucket_sequence.size();
         std::vector<seqan3::dna4> current_bucket = bucket_sequence[bucket];
         int start = rand() % bucket_length;
@@ -51,10 +51,7 @@ public:
         }
         
         std::vector<seqan3::dna4> sample_sequence(current_bucket.begin() + start, current_bucket.begin() + end);
-        seqan3::debug_stream << sample_sequence << "\n";
-        seqan3::debug_stream << map.query_sequence(sample_sequence) << "\n";
-        seqan3::debug_stream << bucket << "\n";
-        return sample_sequence;
+        return std::make_pair(sample_sequence, bucket);
     }
 };
 
@@ -68,5 +65,21 @@ int main() {
 
     short_read_simulator sim(10000, 100);
     sim.read("/home/zhenhao/mcomp-dissertation/sequence_sample.fasta");
-    sim.sample(map);
+    int correct = 0;
+    int total_size = 0;
+    for (int i = 0; i < 100000; i++) {
+        auto sample = sim.sample();
+        int bucket = std::get<1>(sample);
+        std::vector<seqan3::dna4> sequence = std::get<0>(sample);
+        std::vector<int> buckets = map.query_sequence(sequence);
+
+        if (std::find(buckets.begin(), buckets.end(), bucket) != buckets.end()) {
+            correct++;
+        }
+        total_size += buckets.size();
+
+    }
+    std::cout << correct << std::endl;
+    std::cout << ((float) total_size) / 100000 << std::endl;
+
 }
