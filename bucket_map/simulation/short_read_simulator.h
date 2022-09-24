@@ -51,9 +51,9 @@ public:
         read_length = read_len;
         
         // Set the error rates
-        substitution_dist = new std::poisson_distribution<int>(substitution_rate);
-        insertion_dist = new std::poisson_distribution<int>(insertion_rate);
-        deletion_dist = new std::poisson_distribution<int>(deletion_rate);
+        substitution_dist = new std::poisson_distribution<int>(substitution_rate * read_length);
+        insertion_dist = new std::poisson_distribution<int>(insertion_rate * read_length);
+        deletion_dist = new std::poisson_distribution<int>(deletion_rate * read_length);
     }
 
     ~short_read_simulator() {
