@@ -122,7 +122,11 @@ public:
          */
         int bucket = rand() % bucket_sequence.size();
         std::vector<seqan3::dna4> current_bucket = bucket_sequence[bucket];
-        int start = rand() % (current_bucket.size() - read_length);
+        int size = current_bucket.size();
+        int start = 0;
+        if (current_bucket.size() > read_length + 1) {
+            start = rand() % (current_bucket.size() - read_length - 1);
+        }
         int end = start + read_length;
         if (end > current_bucket.size()) {
             end = current_bucket.size();
