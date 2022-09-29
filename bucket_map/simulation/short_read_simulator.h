@@ -130,15 +130,50 @@ public:
     }
 
     void generate_fastq_file(std::filesystem::path output_path, std::string indicator, unsigned int size,  
-                             bool generate_answer_file = true, bool simulate_error = true) {
+                             bool simulate_error = true) {
         /**
          * @brief Generate a fastq file containing short reads.
          * @param output_path the directory where we output the fastq file and the answer file.
          * @param indicator a string that indicate the name of output fastq/answer file.
          * @param size the number of short reads to be simulated.
-         * @param generate_answer_file whether we generate an answer file containing the bucket number and
-         *                             the 
          */
+        // Create directory if directory is not created yet.
+        // Return if the index files already exist.
+        if (!std::filesystem::create_directories(output_path)) {
+            seqan3::debug_stream << "[WARNING]\t" << "The specified output directory "
+                                 << output_path << " is already created." << '\n';
+            for (const auto& entry : std::filesystem::directory_iterator(output_path)) {
+                if (entry.path() == indicator + ".fastq" || entry.path() == indicator + ".ground_truth") {
+                    seqan3::debug_stream << "[ERROR]\t\t" << "The fastq file or ground truth file " << entry.path() << " already exists" 
+                                         << " in the specified directory. Terminating generation." << '\n';
+                    return;
+                }
+            }
+        }
+
+        std::ofstream fastq_file(output_path / (indicator + ".fastq"));
+        std::ofstream gt_file(output_path / (indicator + ".ground_truth"));
+        for (unsigned int i = 0; i < size; i++) {
+            fastq_file << "@seq" << i + 1 << "\n";
+            // generate sequence
+            auto res = sample(simulate_error);
+            std::vector<seqan3::dna4> sequence = std::get<0>(res);
+            int bucket = std::get<1>(res);
+            int exact_location = std::get<2>(res);
+            for (auto nt : sequence) {
+                fastq_file << nt.to_char();
+            }
+            // insert a quality string.
+            fastq_file << "\n+\n" << std::string(sequence.size(), 'E') << "\n";
+            // record the ground truth.
+            gt_file << bucket << " " << exact_location << "\n";
+        }
+
+        seqan3::debug_stream << "[INFO]\t\t" << "The generated fastq file is stored in: " 
+                             << output_path / (indicator + ".fastq") << ".\n";
+        seqan3::debug_stream << "[INFO]\t\t" << "The ground truth file is stored in: " 
+                             << output_path / (indicator + ".ground_truth") << ".\n";
+
     }
 
 };

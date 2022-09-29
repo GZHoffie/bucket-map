@@ -6,12 +6,14 @@
 int main() {
     std::filesystem::path genome_file = "/mnt/c/data/Egu.v3.genome_f.fasta";
 
-    q_gram_mapper<34570> map(50000, 100, 0b1110100101001101_shape, 20, 10);
-    map.read(genome_file);
+    //q_gram_mapper<34570> map(50000, 100, 0b1110100101001101_shape, 20, 10);
+    //map.read(genome_file);
     //map.store("/home/zhenhao/mcomp-dissertation/build/sequence_sample");
 
     short_read_simulator sim(50000, 100, 0.002, 0.00025, 0.00025);
     sim.read(genome_file);
+    sim.generate_fastq_file("/mnt/c/data/test", "sim", 1000000);
+    /*
     int correct = 0;
     int total_size = 0;
 
@@ -36,5 +38,6 @@ int main() {
     //for (const auto &[size, count] : sizes) {
     //    std::cout << size << "\t" << count << "\n";
     //}
+    */
 
 }

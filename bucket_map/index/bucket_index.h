@@ -39,15 +39,6 @@ public:
          * @brief Create index files for the buckets and output to the index_directory. 
          * @remark needs to be run after we fill `bucket_id` and `bucket_seq`.
          */
-        for (int i = 0; i < bucket_id.size(); i++) {
-            seqan3::bi_fm_index index{bucket_seq[i]};
-            // store the index in a file
-            {
-                std::ofstream os{index_directory / (std::to_string(i) + ".index"), std::ios::binary};
-                cereal::BinaryOutputArchive oarchive{os};
-                oarchive(index);
-            }
-        }
     }
 
     unsigned int index(std::filesystem::path const & fasta_file_name, 
