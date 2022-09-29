@@ -1,4 +1,5 @@
 #include "../index/bucket_index.h"
+#include "../utils.h"
 
 #include <string>
 #include <vector>
@@ -189,27 +190,12 @@ public:
             q_grams_index.push_back(q_gram_bucket);
         }
         // Read the genome
-        seqan3::sequence_file_input reference_genome{fasta_file_name};
         unsigned int bucket_num = 0;
-        for (auto && record : reference_genome) {
-            // Divide the record into buckets
-            float total_length = (float) record.sequence().size();
-            int num_buckets = (int) ceil(total_length / bucket_length);
-            seqan3::debug_stream << "[INFO]\t\t" << record.id() << " with length " << (int) total_length
-                                 << " divided into " << num_buckets << " buckets.\n";
-            
-            // read each bucket
-            for (int i = 0; i < num_buckets; i++) {
-                int start = i * bucket_length;
-                int end = start + bucket_length + read_length;
-                if (end > record.sequence().size()) {
-                    end = record.sequence().size();
-                }
-                std::vector<seqan3::dna4> bucket_sequence(&record.sequence()[start], &record.sequence()[end]);
-                _insert_into_bucket(bucket_sequence, bucket_num);
-                bucket_num++;
-            }
-        }
+        auto operation = [&](std::vector<seqan3::dna4> seq) {
+            _insert_into_bucket(seq, bucket_num);
+            bucket_num++;
+        };
+        iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
         seqan3::debug_stream << "[INFO]\t\t" << "Total number of buckets: " 
                              << bucket_num << "." << '\n';
     }

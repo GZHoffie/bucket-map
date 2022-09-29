@@ -4,6 +4,9 @@
 #include <cstdlib>
 #include <ctime>
 #include <random>
+#include <tuple>
+
+#include "../utils.h"
 
 using seqan3::operator""_dna4;
 
@@ -95,30 +98,18 @@ public:
          *        genome is then used for short read generation.
          * @param fasta_file_name the name of the sequence file to be read.
          */
-        seqan3::sequence_file_input reference_genome{fasta_file_name};
-        for (auto && record : reference_genome) {
-            // Divide the record into buckets
-            float total_length = (float) record.sequence().size();
-            int num_buckets = (int) ceil(total_length / bucket_length);
-            
-            // read each bucket
-            for (int i = 0; i < num_buckets; i++) {
-                int start = i * bucket_length;
-                int end = start + bucket_length + read_length;
-                if (end > record.sequence().size()) {
-                    end = record.sequence().size();
-                }
-                std::vector<seqan3::dna4> seq(&record.sequence()[start], &record.sequence()[end]);
-                bucket_sequence.push_back(seq);
-            }
-        }
+        auto operation = [&](std::vector<seqan3::dna4> seq) {
+            bucket_sequence.push_back(seq);
+        };
+        iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
     }
 
-    std::pair<std::vector<seqan3::dna4>, int> sample(bool simulate_error = true) {
+    std::tuple<std::vector<seqan3::dna4>, int, int> sample(bool simulate_error = true) {
         /**
          * @brief Take a sample short read from the reference genome and add errors to it.
          * @param simulate_error whether we add random error to the sequence or not.
-         * @return a pair storing <the generated short read, the bucket id it actually belongs to>.
+         * @return a tuple storing 3 values: <the generated short read, the bucket id it actually belongs to,
+         *         the starting point of the short read>.
          */
         int bucket = rand() % bucket_sequence.size();
         std::vector<seqan3::dna4> current_bucket = bucket_sequence[bucket];
@@ -135,6 +126,19 @@ public:
         if (simulate_error) {
             simulate_errors(sample_sequence);
         }
-        return std::make_pair(sample_sequence, bucket);
+        return std::make_tuple(sample_sequence, bucket, start);
     }
+
+    void generate_fastq_file(std::filesystem::path output_path, std::string indicator, unsigned int size,  
+                             bool generate_answer_file = true, bool simulate_error = true) {
+        /**
+         * @brief Generate a fastq file containing short reads.
+         * @param output_path the directory where we output the fastq file and the answer file.
+         * @param indicator a string that indicate the name of output fastq/answer file.
+         * @param size the number of short reads to be simulated.
+         * @param generate_answer_file whether we generate an answer file containing the bucket number and
+         *                             the 
+         */
+    }
+
 };

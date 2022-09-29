@@ -16,6 +16,7 @@
  
 #include <cereal/archives/binary.hpp>
 
+#include "../utils.h"
 
 
 class bucket_indexer {
@@ -25,9 +26,17 @@ private:
     unsigned int bucket_length;                          // maximum length of each bucket
     unsigned int read_length;                            // maximum length of each short read
 
-    void _create_index(std::filesystem::path const & index_directory) {
+public:
+    bucket_indexer(unsigned int bucket_len, unsigned int read_len) {
+        bucket_length = bucket_len;
+        read_length = read_len;
+    }
+
+    virtual ~bucket_indexer() {}
+
+    virtual void _create_index(std::filesystem::path const & index_directory) {
         /**
-         * @brief Create index files for the buckets. 
+         * @brief Create index files for the buckets and output to the index_directory. 
          * @remark needs to be run after we fill `bucket_id` and `bucket_seq`.
          */
         for (int i = 0; i < bucket_id.size(); i++) {
@@ -38,14 +47,7 @@ private:
                 cereal::BinaryOutputArchive oarchive{os};
                 oarchive(index);
             }
-        
         }
-    }
-
-public:
-    bucket_indexer(unsigned int bucket_len, unsigned int read_len) {
-        bucket_length = bucket_len;
-        read_length = read_len;
     }
 
     unsigned int index(std::filesystem::path const & fasta_file_name, 
@@ -73,29 +75,11 @@ public:
                 return count;
             }
         }
-        seqan3::sequence_file_input reference_genome{fasta_file_name};
-        for (auto && record : reference_genome) {
-            // Divide the record into buckets
-            float total_length = (float) record.sequence().size();
-            int num_buckets = (int) ceil(total_length / bucket_length);
-            std::cout << record.id() << " with length " << total_length
-                      << " divided into " << num_buckets << " buckets." << std::endl;
-            
-            // read each bucket
-            for (int i = 0; i < num_buckets; i++) {
-                bucket_id.push_back(record.id() + " | " + std::to_string(i));
-                int start = i * bucket_length;
-                int end = start + bucket_length + read_length;
-                if (end > record.sequence().size()) {
-                    end = record.sequence().size();
-                }
-                std::vector<seqan3::dna4> bucket_sequence(&record.sequence()[start], &record.sequence()[end]);
-                bucket_seq.push_back(bucket_sequence);
-            }
-
-            // create index and store in the index_directory
-            _create_index(index_directory);
-        }
+        auto operation = [&](std::vector<seqan3::dna4> seq) {
+            bucket_seq.push_back(seq);
+        };
+        iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
+        _create_index(index_directory);
         seqan3::debug_stream << "[INFO]\t\t" << "The number of index files created: " 
                              << bucket_id.size() << "." << '\n';
         

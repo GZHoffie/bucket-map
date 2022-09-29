@@ -4,17 +4,19 @@
 #include <map>
 
 int main() {
+    std::filesystem::path genome_file = "/mnt/c/data/Egu.v3.genome_f.fasta";
+
     q_gram_mapper<34570> map(50000, 100, 0b1110100101001101_shape, 20, 10);
-    map.read("/mnt/d/genome/Egu.v3.genome_f.fasta");
+    map.read(genome_file);
     //map.store("/home/zhenhao/mcomp-dissertation/build/sequence_sample");
 
     short_read_simulator sim(50000, 100, 0.002, 0.00025, 0.00025);
-    sim.read("/mnt/d/genome/Egu.v3.genome_f.fasta");
+    sim.read(genome_file);
     int correct = 0;
     int total_size = 0;
 
     // Recording the distribution of size
-    std::map<int, int> sizes;
+    //std::map<int, int> sizes;
 
     for (int i = 0; i < 100000; i++) {
         auto sample = sim.sample();
@@ -26,13 +28,13 @@ int main() {
             correct++;
         }
         total_size += buckets.size();
-        ++sizes[buckets.size()];
+        //++sizes[buckets.size()];
 
     }
     std::cout << correct << std::endl;
     std::cout << ((float) total_size) / 100000 << std::endl;
-     for (const auto &[size, count] : sizes) {
-        std::cout << size << "\t" << count << "\n";
-    }
+    //for (const auto &[size, count] : sizes) {
+    //    std::cout << size << "\t" << count << "\n";
+    //}
 
 }
