@@ -6,6 +6,7 @@
 #include <bitset>
 #include <cmath>
 #include <chrono>
+#include <fstream>
 
 #include <seqan3/search/views/kmer_hash.hpp>
 #include <seqan3/search/kmer_index/shape.hpp>
@@ -147,6 +148,16 @@ private:
         return result;
     }
 
+    struct _dna4_traits : seqan3::sequence_file_input_default_traits_dna {
+        /**
+         * @brief Syntax for reading the query file.
+         * 
+         */
+        using sequence_alphabet = seqan3::dna4; // instead of dna5
+ 
+        template <typename alph>
+        using sequence_container = std::vector<alph>; // must be defined as a template!
+    };
 
 
 public:
@@ -272,7 +283,7 @@ public:
     }
 
 
-    std::vector<int> query(std::vector<int> q_gram_hash) {
+    std::vector<int> query(const std::vector<int>& q_gram_hash) {
         /**
          * @brief From `q_grams_index`, determine where the sequence may be coming from.
          * @param q_gram_hash the vector containing all hash values of q-grams in the
@@ -296,7 +307,7 @@ public:
         return filter->best_results();
     }
 
-    std::vector<int> query_sequence(std::vector<seqan3::dna4> sequence) {
+    std::vector<int> query_sequence(const std::vector<seqan3::dna4>& sequence) {
         /**
          * @brief From `q_grams_index`, determine where the sequence may be coming from.
          * @param sequence A dna4 vector containing the query sequence.
@@ -314,12 +325,76 @@ public:
         return query(samples);
     }
 
-    std::vector<std::vector<int>> query_file(std::filesystem::path sequence_file) {
+    std::vector<std::vector<int>> _query_file(std::filesystem::path sequence_file) {
         /**
          * * This function is just for benchmarking.
-         * @brief Read a query fastq file and output the 
+         * @brief Read a query fastq file and output the bucket ids each query belongs to.
+         * TODO: include the quality information for fastq.
          */
-        auto start = std::chrono::steady_clock::now();
+        std::vector<std::vector<int>> res;
+        seqan3::sequence_file_input<_dna4_traits> fin{sequence_file};
+        Timer clock;
+        clock.tick();
+ 
+        for (auto & rec : fin) {
+            std::vector<int> buckets = query_sequence(rec.sequence());
+            res.push_back(buckets);
+        }
+        clock.tock();
+        float time = ((float) clock.duration().count()) / 1000;
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for bucket query: " 
+                             << time << " s (" << time * 1000 * 1000 / res.size() << " μs/seq).\n";
+        return res;
+    }
+
+    void _check_ground_truth(const std::vector<std::vector<int>>& query_results, std::filesystem::path ground_truth_file) {
+        /**
+         * * This function is just for benchmarking.
+         * @brief Check the performance of query results against the ground truth.
+         *        Output necessary information.
+         * @note The ground truth file must be the one generated together with sequence
+         *       fastq file.
+         * TODO: also check the exact location.
+         */
+        std::ifstream is(ground_truth_file);
+        int bucket, exact_location;
+
+        // Test statistics
+        int correct_map = 0;
+        int total_bucket_numbers = 0;
+        std::map<int, int> bucket_number_map;
+
+        for (int i = 0; i < query_results.size(); i++) {
+            is >> bucket >> exact_location;
+            std::vector<int> buckets = query_results[i];
+
+            if (std::find(buckets.begin(), buckets.end(), bucket) != buckets.end()) {
+                correct_map++;
+            }
+            total_bucket_numbers += buckets.size();
+            ++bucket_number_map[buckets.size()];
+        }
+
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of sequences: " 
+                             << query_results.size() << ".\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Correct bucket predictions: " 
+                             << correct_map << " (" << ((float) correct_map) / query_results.size() * 100 << "%).\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Average number of buckets returned: " 
+                             << ((float) total_bucket_numbers) / query_results.size() << ".\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Number of uniquely mapped sequences: " 
+                             << bucket_number_map[1] << " (" << ((float) bucket_number_map[1]) / query_results.size() * 100 << "%).\n";
+        int small_bucket_numbers = 0;
+        for (int i = 1; i <= 5; i++) {
+            small_bucket_numbers += bucket_number_map[i];
+        }
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Number of sequences mapped to <= 5 buckets: " 
+                             << small_bucket_numbers << " (" << ((float) small_bucket_numbers) / query_results.size() * 100 << "%).\n";
+        for (int i = 6; i <= 10; i++) {
+            small_bucket_numbers += bucket_number_map[i];
+        }
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Number of sequences mapped to <= 10 buckets: " 
+                             << small_bucket_numbers << " (" << ((float) small_bucket_numbers) / query_results.size() * 100 << "%).\n";
+
 
 
     }

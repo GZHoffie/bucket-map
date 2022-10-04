@@ -6,7 +6,7 @@
 #include <chrono>
 
 int main() {
-    std::filesystem::path genome_file = "/mnt/c/data/Egu.v3.genome_f.fasta";
+    std::filesystem::path genome_file = "/mnt/d/genome/Egu.v3.genome_f.fasta";
 
     int bucket_length = 50000;
     int read_length = 150;
@@ -15,39 +15,13 @@ int main() {
     map.read(genome_file);
     //map.store("/home/zhenhao/mcomp-dissertation/build/sequence_sample");
 
-    short_read_simulator sim(bucket_length, read_length, 0.002, 0.00025, 0.00025);
-    sim.read(genome_file);
-    //sim.generate_fastq_file("/mnt/c/data/test", "sim", 1000000);
+    //short_read_simulator sim(bucket_length, read_length, 0.002, 0.00025, 0.00025);
+    //sim.read(genome_file);
+    //sim.generate_fastq_file("/mnt/d/data/test", "sim", 1000000);
 
-    int correct = 0;
-    int total_size = 0;
-
-    // Recording the distribution of size
-    //std::map<int, int> sizes;
-
-    Timer clock;
-    clock.tick();
-
-    for (int i = 0; i < 1000000; i++) {
-        auto sample = sim.sample();
-        int bucket = std::get<1>(sample);
-        std::vector<seqan3::dna4> sequence = std::get<0>(sample);
-        std::vector<int> buckets = map.query_sequence(sequence);
-
-        if (std::find(buckets.begin(), buckets.end(), bucket) != buckets.end()) {
-            correct++;
-        }
-        total_size += buckets.size();
-        //++sizes[buckets.size()];
-
-    }
-    clock.tock();
-    std::cout << "Elapsed time (s): " << ((float) clock.duration().count()) / 1000 << std::endl;
-    std::cout << correct << std::endl;
-    std::cout << ((float) total_size) / 1000000 << std::endl;
-    //for (const auto &[size, count] : sizes) {
-    //    std::cout << size << "\t" << count << "\n";
-    //}
+    auto res = map._query_file("/mnt/d/data/test/sim.fastq");
+    map._check_ground_truth(res, "/mnt/d/data/test/sim.ground_truth");
+    
     
 
 }

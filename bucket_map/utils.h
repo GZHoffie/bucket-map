@@ -4,6 +4,7 @@
 #include <seqan3/search/views/kmer_hash.hpp>
 #include <seqan3/search/kmer_index/shape.hpp>
 #include <seqan3/alphabet/all.hpp>
+#include <seqan3/io/sequence_file/all.hpp>
 
 #include <chrono>
 #include <thread>
@@ -19,6 +20,10 @@ template <class DT = std::chrono::milliseconds,
           class ClockT = std::chrono::steady_clock>
 class Timer
 {
+    /**
+     * @brief Class for benchmark of runtime.
+     *        Adopted from https://coliru.stacked-crooked.com/a/508ec779dea5a28d.
+     */
     using timep_t = decltype(ClockT::now());
     
     timep_t _start = ClockT::now();
@@ -43,16 +48,18 @@ public:
 };
 
 void iterate_through_buckets(std::filesystem::path const & fasta_file_name, int bucket_length, int read_length, 
-                             std::function<void(std::vector<seqan3::dna4>)> op) {
+                             std::function<void(std::vector<seqan3::dna4>)> op, bool print_info = false) {
     // Read the genome
     seqan3::sequence_file_input reference_genome{fasta_file_name};
-    unsigned int bucket_num = 0;
+    unsigned int _bucket_num = 0;
     for (auto && record : reference_genome) {
         // Divide the record into buckets
         float total_length = (float) record.sequence().size();
         int num_buckets = (int) ceil(total_length / bucket_length);
-        seqan3::debug_stream << "[INFO]\t\t" << record.id() << " with length " << (int) total_length
-                             << " divided into " << num_buckets << " buckets.\n";
+        if (print_info) {
+            seqan3::debug_stream << "[INFO]\t\t" << record.id() << " with length " << (int) total_length
+                                 << " divided into " << num_buckets << " buckets.\n";
+        }
             
         // read each bucket
         for (int i = 0; i < num_buckets; i++) {
@@ -67,10 +74,13 @@ void iterate_through_buckets(std::filesystem::path const & fasta_file_name, int 
 
             std::vector<seqan3::dna4> bucket_sequence(&record.sequence()[start], &record.sequence()[end]);
             op(bucket_sequence);
+            ++_bucket_num;
         }
     }
-    seqan3::debug_stream << "[INFO]\t\t" << "Total number of buckets: " 
-                         << bucket_num << "." << '\n';
+    if (print_info) {
+        seqan3::debug_stream << "[INFO]\t\t" << "Total number of buckets: " 
+                             << _bucket_num << "." << '\n';
+    }
 }
 
 #endif
