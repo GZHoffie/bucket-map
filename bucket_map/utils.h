@@ -5,11 +5,42 @@
 #include <seqan3/search/kmer_index/shape.hpp>
 #include <seqan3/alphabet/all.hpp>
 
+#include <chrono>
+#include <thread>
+#include <assert.h>
+
 typedef struct config {
     unsigned int bucket_length;
     unsigned int read_length;
 } config_t;
 
+
+template <class DT = std::chrono::milliseconds,
+          class ClockT = std::chrono::steady_clock>
+class Timer
+{
+    using timep_t = decltype(ClockT::now());
+    
+    timep_t _start = ClockT::now();
+    timep_t _end = {};
+
+public:
+    void tick() { 
+        _end = timep_t{};
+        _start = ClockT::now(); 
+    }
+    
+    void tock() {
+        _end = ClockT::now(); 
+    }
+    
+    template <class duration_t = DT>
+    auto duration() const { 
+        // Use gsl_Expects if your project supports it.
+        assert(_end != timep_t{} && "Timer must toc before reading the time"); 
+        return std::chrono::duration_cast<duration_t>(_end - _start); 
+    }
+};
 
 void iterate_through_buckets(std::filesystem::path const & fasta_file_name, int bucket_length, int read_length, 
                              std::function<void(std::vector<seqan3::dna4>)> op) {

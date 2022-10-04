@@ -5,6 +5,7 @@
 #include <vector>
 #include <bitset>
 #include <cmath>
+#include <chrono>
 
 #include <seqan3/search/views/kmer_hash.hpp>
 #include <seqan3/search/kmer_index/shape.hpp>
@@ -311,6 +312,16 @@ public:
                     std::back_inserter(samples), num_samples,
                     std::mt19937{std::random_device{}()});
         return query(samples);
+    }
+
+    std::vector<std::vector<int>> query_file(std::filesystem::path sequence_file) {
+        /**
+         * * This function is just for benchmarking.
+         * @brief Read a query fastq file and output the 
+         */
+        auto start = std::chrono::steady_clock::now();
+
+
     }
 
 
