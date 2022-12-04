@@ -144,7 +144,7 @@ private:
         assert(buf.size() == ((NUM_BUCKETS + 7) >> 3));
         std::bitset<NUM_BUCKETS> result;
         for (unsigned int j = 0; j < NUM_BUCKETS; j++)
-            result[j] = ((buf[j>>3] >> (j & 7)) & 1);
+            result[j] = ((buf.at(j>>3) >> (j & 7)) & 1);
         return result;
     }
 
@@ -195,6 +195,8 @@ public:
             seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram index is not empty. Terminating read.\n";
             return;
         }
+        Timer clock;
+        clock.tick();
         // initialize q_gram index
         int total_q_grams = (int) pow(4, q);
         for (int i = 0; i < total_q_grams; i++) {
@@ -208,6 +210,10 @@ public:
             bucket_num++;
         };
         iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
+        
+        clock.tock();
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for reading: " 
+                             << clock.elapsed_seconds() << " s." << '\n';
         seqan3::debug_stream << "[INFO]\t\t" << "Total number of buckets: " 
                              << bucket_num << "." << '\n';
     }
@@ -236,13 +242,16 @@ public:
             }
         }
         // Store the q-gram index in the directory
+        Timer clock;
+        clock.tick();
         std::ofstream index_file(index_directory / "index.qgram");
         for (const auto &i : q_grams_index) {
-            for (const auto &c : _bitset_to_bytes(i)) {
-                index_file << c;
-            }
-            index_file << "\n";
+            std::vector<unsigned char> bytes =  _bitset_to_bytes(i);
+            index_file.write((char *)&bytes[0], bytes.size());
         }
+        clock.tock();
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for storing index files: " 
+                             << clock.elapsed_seconds() << " s." << '\n';
         seqan3::debug_stream << "[INFO]\t\t" << "The bucket q-gram index is stored in: " 
                              << index_directory / "index.qgram" << ".\n";
         
@@ -267,19 +276,38 @@ public:
         }
         // initialize q_gram index
         int total_q_grams = (int) pow(4, q);
-        for (int i = 0; i < total_q_grams; i++) {
-            std::bitset<NUM_BUCKETS> q_gram_bucket;
-            q_grams_index.push_back(q_gram_bucket);
-        }
+        int num_chars_per_q_gram = (NUM_BUCKETS + 7) >> 3;
+
         // Read the index file
         std::ifstream file(index_directory / "index.qgram");
-        std::string line;
-        while (std::getline(file, line)) {
-            std::vector<unsigned char> index(line.begin(), line.end());
-            q_grams_index.push_back(_bitset_from_bytes(index));
+        if (file) {
+            Timer clock;
+            clock.tick();
+            // get length fo file
+            file.seekg(0, file.end);
+            int length = file.tellg();
+            file.seekg(0, file.beg);
+            
+            // read the file into buffer
+            char * buffer = new char[length];
+            file.read(buffer, length);
+            
+            // load buffer into q_grams_index
+            for (unsigned int i = 0; i < total_q_grams; i++) {
+                unsigned int start_index = i * num_chars_per_q_gram;
+                unsigned int end_index = (i+1) * num_chars_per_q_gram;
+                auto data = new std::vector<unsigned char>(buffer + start_index, buffer + end_index);
+                q_grams_index.push_back(_bitset_from_bytes(*data));
+                delete data;
+            }
+            delete[] buffer;
+            // Complete the read
+            clock.tock();
+            seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for loading index files: " 
+                                 << clock.elapsed_seconds() << " s." << '\n';
+            seqan3::debug_stream << "[INFO]\t\t" << "Successfully loaded " 
+                                 << index_directory / "index.qgram" << "." << '\n';
         }
-        seqan3::debug_stream << "[INFO]\t\t" << "Successfully loaded " 
-                             << index_directory / "index.qgram" << "." << '\n';
     }
 
 
@@ -341,7 +369,7 @@ public:
             res.push_back(buckets);
         }
         clock.tock();
-        float time = ((float) clock.duration().count()) / 1000;
+        float time = clock.elapsed_seconds();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for bucket query: " 
                              << time << " s (" << time * 1000 * 1000 / res.size() << " μs/seq).\n";
         return res;

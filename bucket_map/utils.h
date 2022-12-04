@@ -45,6 +45,10 @@ public:
         assert(_end != timep_t{} && "Timer must toc before reading the time"); 
         return std::chrono::duration_cast<duration_t>(_end - _start); 
     }
+
+    float elapsed_seconds() const {
+        return ((float) this->duration().count()) / 1000;
+    }
 };
 
 void iterate_through_buckets(std::filesystem::path const & fasta_file_name, int bucket_length, int read_length, 
