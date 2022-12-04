@@ -1,3 +1,7 @@
+#ifndef FM_INDEX_MAP_H
+#define FM_INDEX_MAP_H
+
+
 #include <fstream>
 #include <span>
  
@@ -68,3 +72,5 @@ public:
 
 };
  
+
+#endif

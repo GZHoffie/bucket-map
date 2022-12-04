@@ -1,3 +1,6 @@
+#ifndef FM_INDEX_H
+#define FM_INDEX_H
+
 #include <fstream>
  
 #include <seqan3/argument_parser/all.hpp>
@@ -78,3 +81,5 @@ public:
         return true;
     }
 };
+
+#endif

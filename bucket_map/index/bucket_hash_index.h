@@ -1,5 +1,5 @@
-#ifndef BUCKET_MAP_H
-#define BUCKET_MAP_H
+#ifndef BUCKET_HASH_INDEX_H
+#define BUCKET_HASH_INDEX_H
 
 #include <string>
 #include <vector>

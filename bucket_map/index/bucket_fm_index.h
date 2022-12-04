@@ -1,24 +1,7 @@
-#ifndef BUCKET_MAP_H
-#define BUCKET_MAP_H
+#ifndef BUCKET_FM_INDEX_H
+#define BUCKET_FM_INDEX_H
 
-#include <string>
-#include <vector>
-#include <cmath>
-
-#include <seqan3/alignment/configuration/all.hpp>
-#include <seqan3/alignment/pairwise/align_pairwise.hpp>
-#include <seqan3/argument_parser/all.hpp>
-#include <seqan3/io/sam_file/output.hpp>
-#include <seqan3/io/sequence_file/input.hpp>
-#include <seqan3/search/all.hpp>
-#include <seqan3/search/fm_index/bi_fm_index.hpp>
-#include <seqan3/core/debug_stream.hpp>
- 
-#include <cereal/archives/binary.hpp>
-
-#include "./bucket_index.h"
-
-
+#include "./bucket_hash_index.h"
 
 class bucket_fm_indexer : public bucket_indexer {
 private:

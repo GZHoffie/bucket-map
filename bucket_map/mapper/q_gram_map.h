@@ -1,4 +1,8 @@
-#include "../index/bucket_index.h"
+#ifndef Q_GRAM_MAP_H
+#define Q_GRAM_MAP_H
+
+
+#include "../index/bucket_hash_index.h"
 #include "../utils.h"
 
 #include <string>
@@ -429,3 +433,6 @@ public:
 
 
 };
+
+
+#endif
