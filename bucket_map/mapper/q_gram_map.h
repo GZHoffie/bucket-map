@@ -20,6 +20,11 @@ using seqan3::operator""_shape;
 
 template<unsigned int NUM_BUCKETS>
 class fault_tolerate_filter {
+    /**
+     * @brief Novel data structure for fast bit-parallel pop-count of multiple BitSet objects.
+     *        Eliminating those BitSets with more than `num_fault_tolerance` zeros.
+     *        This can help filter out the correct buckets fast.
+     */
 private:
     unsigned int num_fault_tolerance;
     std::vector<std::bitset<NUM_BUCKETS>> filters;
@@ -86,9 +91,45 @@ public:
         }
         return res;
     }
-
 };
 
+template<unsigned int NUM_BUCKETS>
+class distinguishability_filter {
+    /**
+     * @brief A filter that filter out Q-grams that appear in most of the buckets.
+     */
+private:
+    unsigned int threshold;
+    std::vector<unsigned int> zeros;
+
+public:
+    distinguishability_filter(float distinguishability) {
+        /**
+         * @brief Initializer of the filter.
+         * @param distinguishability the percentage of zeros in the bitset for each Q-gram.
+         */
+        threshold = (unsigned int) (distinguishability * NUM_BUCKETS);
+    }
+
+    void read(const std::vector<std::bitset<NUM_BUCKETS>>& q_grams_index) {
+        int valid_q_grams = 0;
+        for (auto &i: q_grams_index) {
+            unsigned int ones = i.count();
+            if (NUM_BUCKETS - ones > threshold) {
+                valid_q_grams++;
+            }
+            zeros.push_back(NUM_BUCKETS - ones);
+        }
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Number of Q-grams with distinguishability >= " << ((float) threshold) / NUM_BUCKETS << ": " 
+                             << valid_q_grams << " (" << ((float) valid_q_grams) / q_grams_index.size() * 100 << "%).\n";
+    }
+
+    std::function<bool(unsigned int)> get_filter() {
+        return [&](unsigned int kmer_hash) {
+            return zeros[kmer_hash] >= threshold;
+        };
+    }
+};
 
 
 
@@ -112,6 +153,11 @@ private:
 
     // filter that filter out the most possible bucket
     fault_tolerate_filter<NUM_BUCKETS>* filter;
+
+    // Q-gram filters for map efficiency
+    distinguishability_filter<NUM_BUCKETS>* dist_filter;
+    std::function<bool(unsigned int)> dist_view;
+    //TODO: also consider quality
 
 
     void _insert_into_bucket(std::vector<seqan3::dna4> sequence, unsigned int bucket_num) {
@@ -166,7 +212,7 @@ private:
 
 public:
     q_gram_mapper(unsigned int bucket_len, unsigned int read_len, seqan3::shape shape, 
-                  unsigned int samples, unsigned int fault) {
+                  unsigned int samples, unsigned int fault, float distinguishability) {
         // initialize private variables
         bucket_length = bucket_len;
         read_length = read_len;
@@ -182,10 +228,12 @@ public:
 
         // initialize filter
         filter = new fault_tolerate_filter<NUM_BUCKETS>(num_fault_tolerance);
+        dist_filter = new distinguishability_filter<NUM_BUCKETS>(distinguishability);
     }
 
     ~q_gram_mapper() {
         delete filter;
+        delete dist_filter;
     }
 
     void read(std::filesystem::path const & fasta_file_name) {
@@ -214,7 +262,8 @@ public:
             bucket_num++;
         };
         iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
-        
+        dist_filter->read(q_grams_index);
+        dist_view = dist_filter->get_filter();
         clock.tock();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for reading: " 
                              << clock.elapsed_seconds() << " s." << '\n';
@@ -305,6 +354,8 @@ public:
                 delete data;
             }
             delete[] buffer;
+            dist_filter->read(q_grams_index);
+            dist_view = dist_filter->get_filter();
             // Complete the read
             clock.tock();
             seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for loading index files: " 
@@ -348,7 +399,7 @@ public:
          * TODO: implement query with argument being a file containing short reads, together with quality.
          */
         auto q_gram = seqan3::views::kmer_hash(q_gram_shape);
-        auto hash_values = sequence | q_gram;
+        auto hash_values = sequence | q_gram | std::views::filter(dist_view);
         std::vector<int> samples;
         // Randomly sample `num_samples` q-grams for query.
         std::sample(hash_values.begin(), hash_values.end(), 
@@ -407,6 +458,7 @@ public:
             ++bucket_number_map[buckets.size()];
         }
 
+        // output information
         seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of sequences: " 
                              << query_results.size() << ".\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Correct bucket predictions: " 
@@ -426,12 +478,7 @@ public:
         }
         seqan3::debug_stream << "[BENCHMARK]\t" << "Number of sequences mapped to <= 10 buckets: " 
                              << small_bucket_numbers << " (" << ((float) small_bucket_numbers) / query_results.size() * 100 << "%).\n";
-
-
-
     }
-
-
 };
 
 

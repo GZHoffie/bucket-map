@@ -53,6 +53,13 @@ public:
 
 void iterate_through_buckets(std::filesystem::path const & fasta_file_name, int bucket_length, int read_length, 
                              std::function<void(std::vector<seqan3::dna4>)> op, bool print_info = false) {
+    /**
+     * @brief Util function that is used to iterate through all buckets in the reference genome, end execute
+     *        some operation on each of the bucket.
+     * @param fasta_file_name the path to the reference genome file.
+     * @param op an std::function object that takes in a bucket (std::vector<seqan3::dna4>) and returns nothing.
+     * @param print_info whether we verbosely print out the bucket information.
+     */
     // Read the genome
     seqan3::sequence_file_input reference_genome{fasta_file_name};
     unsigned int _bucket_num = 0;
@@ -86,5 +93,8 @@ void iterate_through_buckets(std::filesystem::path const & fasta_file_name, int 
                              << _bucket_num << "." << '\n';
     }
 }
+
+
+
 
 #endif

@@ -13,4 +13,4 @@ def read(fasta_file_name, bucket_length=10000):
     print("total number of buckets", total_buckets)
 
 if __name__ == "__main__":
-    read("/mnt/c/data/Egu.v3.genome_f.fasta")
+    read("/mnt/d/genome/Egu.v3.genome_f.fasta")
