@@ -6,13 +6,13 @@
 #include <chrono>
 
 int main() {
-    std::filesystem::path data_path = "/mnt/d/genome";
+    std::filesystem::path data_path = "/mnt/c/data";
     std::filesystem::path genome_file = data_path / "Egu.v3.genome_f.fasta";
 
     int bucket_length = 50000;
     int read_length = 150;
 
-    q_gram_mapper<34570> map(bucket_length, read_length, 0b1110100101001101_shape, 20, 10, 0.7);
+    q_gram_mapper<34570> map(bucket_length, read_length, 0b1110100101001101_shape, 20, 5, 0.7);
     //map.read(genome_file);
     //map.store(data_path / "index");
     map.load(data_path / "index");

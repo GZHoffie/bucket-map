@@ -399,12 +399,33 @@ public:
          * TODO: implement query with argument being a file containing short reads, together with quality.
          */
         auto q_gram = seqan3::views::kmer_hash(q_gram_shape);
-        auto hash_values = sequence | q_gram | std::views::filter(dist_view);
+        auto values = sequence | q_gram | std::views::filter(dist_view);
+        std::vector<unsigned int> hash_values(values.begin(), values.end());
+
+        // if not enough q-grams ramained to determine the exact location, simply ignore this query sequence.
+        if (hash_values.size() < 0.5 * num_samples){
+            std::vector<int> res;
+            return res;
+        }
+
         std::vector<int> samples;
+        /*
         // Randomly sample `num_samples` q-grams for query.
         std::sample(hash_values.begin(), hash_values.end(), 
                     std::back_inserter(samples), num_samples,
                     std::mt19937{std::random_device{}()});
+        */
+        // Deterministically sample from the hash values.
+        float delta;
+        if (num_samples == 1) {
+            delta = 0;
+        } else {
+            delta = static_cast<float>(hash_values.size()-1) / (num_samples-1);
+        }
+        //std::cout << hash_values.size() << " " << delta << std::endl;
+        for (int i = 0; i < num_samples; i++) {
+            samples.push_back(hash_values[floor(i*delta)]);
+        }
         return query(samples);
     }
 
