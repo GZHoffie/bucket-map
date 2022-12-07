@@ -2,7 +2,7 @@
 #define Q_GRAM_MAP_H
 
 
-#include "../index/bucket_fm_index.h"
+#include "../indexer/bucket_fm_index.h"
 #include "../utils.h"
 
 #include <string>
@@ -216,9 +216,9 @@ private:
     using record_type = seqan3::sequence_file_input<>::record_type;
     std::vector<record_type> reads;
 
-    void _load_reads(std::filesystem::path const & fasta_file_name) {
+    void _load_reads(std::filesystem::path const & fastq_file_name) {
         /**
-         * @brief load the fasta file into the vector `reads`.
+         * @brief load the fastq file into the vector `reads`.
          *        if `reads` is not empty, do nothing and return.
          */
         if (!reads.empty()) {
@@ -284,9 +284,6 @@ public:
         dist_filter->read(q_grams_index);
         dist_view = dist_filter->get_filter();
 
-        // load the fasta file to `reads`.
-        _load_reads(fasta_file_name);
-
         clock.tock();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for reading: " 
                              << clock.elapsed_seconds() << " s." << '\n';
@@ -339,7 +336,7 @@ public:
     }
 
 
-    void load(std::filesystem::path const & index_directory, std::filesystem::path const & fasta_file_name) {
+    void load(std::filesystem::path const & index_directory) {
         /**
          * @brief Look for index and pattern file inside the index_directory,
          *        read the files and store the values in class attribute.
@@ -379,9 +376,6 @@ public:
             delete[] buffer;
             dist_filter->read(q_grams_index);
             dist_view = dist_filter->get_filter();
-
-            // load the fasta file to `reads`.
-            _load_reads(fasta_file_name);
 
             // Complete the read
             clock.tock();
@@ -457,11 +451,10 @@ public:
     }
 
 
-    std::vector<std::vector<int>> map_file(std::filesystem::path sequence_file) {
+    std::vector<std::vector<int>> map_file_to_buckets(std::filesystem::path sequence_file) {
         /**
          * @brief Read a query fastq file and output the ids of the sequence that are mapped 
          *        to each file.
-         * TODO: include the quality information for fastq.
          */
         std::vector<std::vector<int>> res;
         seqan3::sequence_file_input<_dna4_traits> fin{sequence_file};
@@ -476,6 +469,7 @@ public:
 
         unsigned int index = 0;
         for (auto & rec : fin) {
+            reads.push_back(std::move(rec));
             for (auto & bucket : query_sequence(rec.sequence())) {
                 res[bucket].push_back(index);
             }

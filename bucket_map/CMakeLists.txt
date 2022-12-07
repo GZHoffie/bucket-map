@@ -12,9 +12,9 @@ find_package(seqan3 3.0 REQUIRED)
 # set common header files
 set(SHARED_FILES
     utils.h 
-    index/bucket_fm_index.h 
-    index/bucket_hash_index.h
-    index/fm_index.h
+    indexer/bucket_fm_index.h 
+    indexer/bucket_hash_index.h
+    indexer/fm_index.h
     mapper/q_gram_map.h 
     mapper/q_gram_bf_map.h 
     mapper/fm_index_map.h
