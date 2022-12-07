@@ -34,7 +34,7 @@ public:
 
     virtual ~bucket_indexer() {}
 
-    virtual void _create_index(std::filesystem::path const & index_directory) {
+    virtual void create_index(std::filesystem::path const & index_directory) {
         /**
          * @brief Create index files for the buckets and output to the index_directory. 
          * @remark needs to be run after we fill `bucket_id` and `bucket_seq`.
@@ -70,7 +70,7 @@ public:
             bucket_seq.push_back(seq);
         };
         iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
-        _create_index(index_directory);
+        create_index(index_directory);
         seqan3::debug_stream << "[INFO]\t\t" << "The number of index files created: " 
                              << bucket_id.size() << "." << '\n';
         

@@ -2,7 +2,7 @@
 #define Q_GRAM_MAP_H
 
 
-#include "../index/bucket_hash_index.h"
+#include "../index/bucket_fm_index.h"
 #include "../utils.h"
 
 #include <string>
@@ -160,6 +160,7 @@ private:
     //TODO: also consider quality
 
 
+
     void _insert_into_bucket(std::vector<seqan3::dna4> sequence, unsigned int bucket_num) {
         /**
          * @brief Read the sequence, extract all the q-grams and store in `q_grams_index`.
@@ -174,6 +175,7 @@ private:
             q_grams_index[value].set(bucket_num);
         }
     }
+
 
     std::vector<unsigned char> _bitset_to_bytes(const std::bitset<NUM_BUCKETS>& bs){
         /**
@@ -208,6 +210,23 @@ private:
         template <typename alph>
         using sequence_container = std::vector<alph>; // must be defined as a template!
     };
+
+    // Vector storing all reads in a fastq file
+    //using field_ids = seqan3::fields<seqan3::field::seq, seqan3::field::id, seqan3::field::qual>;
+    using record_type = seqan3::sequence_file_input<>::record_type;
+    std::vector<record_type> reads;
+
+    void _load_reads(std::filesystem::path const & fasta_file_name) {
+        /**
+         * @brief load the fasta file into the vector `reads`.
+         *        if `reads` is not empty, do nothing and return.
+         */
+        if (!reads.empty()) {
+            seqan3::sequence_file_input fin{fasta_file_name};
+            std::ranges::copy(fin, std::back_inserter(reads));
+            return;
+        }
+    }
 
 
 public:
@@ -264,6 +283,10 @@ public:
         iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
         dist_filter->read(q_grams_index);
         dist_view = dist_filter->get_filter();
+
+        // load the fasta file to `reads`.
+        _load_reads(fasta_file_name);
+
         clock.tock();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for reading: " 
                              << clock.elapsed_seconds() << " s." << '\n';
@@ -316,7 +339,7 @@ public:
     }
 
 
-    void load(std::filesystem::path const & index_directory) {
+    void load(std::filesystem::path const & index_directory, std::filesystem::path const & fasta_file_name) {
         /**
          * @brief Look for index and pattern file inside the index_directory,
          *        read the files and store the values in class attribute.
@@ -356,6 +379,10 @@ public:
             delete[] buffer;
             dist_filter->read(q_grams_index);
             dist_view = dist_filter->get_filter();
+
+            // load the fasta file to `reads`.
+            _load_reads(fasta_file_name);
+
             // Complete the read
             clock.tock();
             seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for loading index files: " 
@@ -427,6 +454,38 @@ public:
             samples.push_back(hash_values[floor(i*delta)]);
         }
         return query(samples);
+    }
+
+
+    std::vector<std::vector<int>> map_file(std::filesystem::path sequence_file) {
+        /**
+         * @brief Read a query fastq file and output the ids of the sequence that are mapped 
+         *        to each file.
+         * TODO: include the quality information for fastq.
+         */
+        std::vector<std::vector<int>> res;
+        seqan3::sequence_file_input<_dna4_traits> fin{sequence_file};
+        // initialize returning result
+        for (int i = 0; i < NUM_BUCKETS; i++) {
+            std::vector<int> sequence_ids;
+            res.push_back(sequence_ids);
+        }
+
+        Timer clock;
+        clock.tick();
+
+        unsigned int index = 0;
+        for (auto & rec : fin) {
+            for (auto & bucket : query_sequence(rec.sequence())) {
+                res[bucket].push_back(index);
+            }
+            ++index;
+        }
+        clock.tock();
+        float time = clock.elapsed_seconds();
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for bucket mapping: " 
+                             << time << " s (" << time * 1000 * 1000 / res.size() << " μs/seq).\n";
+        return res;
     }
 
     std::vector<std::vector<int>> _query_file(std::filesystem::path sequence_file) {

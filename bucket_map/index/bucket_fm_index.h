@@ -15,7 +15,7 @@ private:
 public:
     bucket_fm_indexer(unsigned int bucket_len, unsigned int read_len) : bucket_indexer(bucket_len, read_len) {}
 
-    void _create_index(std::filesystem::path const & index_directory) {
+    void create_index(std::filesystem::path const & index_directory) {
         /**
          * @brief Create index files for the buckets. 
          * @remark needs to be run after we fill `bucket_id` and `bucket_seq`.
