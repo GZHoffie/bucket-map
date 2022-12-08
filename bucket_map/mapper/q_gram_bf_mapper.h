@@ -1,7 +1,7 @@
-#ifndef Q_GRAM_BF_MAP_H
-#define Q_GRAM_BF_MAP_H
+#ifndef BUCKET_MAP_Q_GRAM_BF_MAP_H
+#define BUCKET_MAP_Q_GRAM_BF_MAP_H
 
-#include "./q_gram_map.h"
+#include "./q_gram_mapper.h"
 
 class q_gram_bloom_filter_mapper : public q_gram_mapper {
 private:

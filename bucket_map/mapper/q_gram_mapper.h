@@ -1,9 +1,10 @@
-#ifndef Q_GRAM_MAP_H
-#define Q_GRAM_MAP_H
+#ifndef BUCKET_MAP_Q_GRAM_MAP_H
+#define BUCKET_MAP_Q_GRAM_MAP_H
 
 
-#include "../indexer/bucket_fm_index.h"
+#include "../indexer/bucket_fm_indexer.h"
 #include "../utils.h"
+#include "./mapper.h"
 
 #include <string>
 #include <vector>
@@ -135,7 +136,7 @@ public:
 
 
 template<unsigned int NUM_BUCKETS>
-class q_gram_mapper {
+class q_gram_mapper : public mapper {
 private:
     // q-gram index related information
     seqan3::shape q_gram_shape;
@@ -231,7 +232,7 @@ private:
 
 public:
     q_gram_mapper(unsigned int bucket_len, unsigned int read_len, seqan3::shape shape, 
-                  unsigned int samples, unsigned int fault, float distinguishability) {
+                  unsigned int samples, unsigned int fault, float distinguishability) : mapper() {
         // initialize private variables
         bucket_length = bucket_len;
         read_length = read_len;
@@ -303,16 +304,8 @@ public:
         }
         // Create directory if directory is not created yet.
         // Return if the index files already exist.
-        if (!std::filesystem::create_directories(index_directory)) {
-            seqan3::debug_stream << "[WARNING]\t" << "The specified index directory "
-                                 << index_directory << " is already created." << '\n';
-            for (const auto& entry : std::filesystem::directory_iterator(index_directory)) {
-                if (entry.path().extension() == ".qgram" || entry.path().extension() == ".pattern") {
-                    seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram file " << entry.path() << " already exists" 
-                                         << " in the specified directory. Terminating store." << '\n';
-                    return;
-                }
-            }
+        if (!check_extension_in(index_directory, ".qgram")) {
+            return;
         }
         // Store the q-gram index in the directory
         Timer clock;
@@ -366,9 +359,10 @@ public:
             file.read(buffer, length);
             
             // load buffer into q_grams_index
+            unsigned int start_index, end_index;
             for (unsigned int i = 0; i < total_q_grams; i++) {
-                unsigned int start_index = i * num_chars_per_q_gram;
-                unsigned int end_index = (i+1) * num_chars_per_q_gram;
+                start_index = i * num_chars_per_q_gram;
+                end_index = (i+1) * num_chars_per_q_gram;
                 auto data = new std::vector<unsigned char>(buffer + start_index, buffer + end_index);
                 q_grams_index.push_back(_bitset_from_bytes(*data));
                 delete data;
@@ -451,7 +445,7 @@ public:
     }
 
 
-    std::vector<std::vector<int>> map_file_to_buckets(std::filesystem::path sequence_file) {
+    std::vector<std::vector<int>> map(std::filesystem::path sequence_file) {
         /**
          * @brief Read a query fastq file and output the ids of the sequence that are mapped 
          *        to each file.

@@ -1,5 +1,5 @@
-#ifndef BUCKET_HASH_INDEX_H
-#define BUCKET_HASH_INDEX_H
+#ifndef BUCKET_MAP_BUCKET_INDEX_H
+#define BUCKET_MAP_BUCKET_INDEX_H
 
 #include <string>
 #include <vector>
@@ -16,18 +16,23 @@
  
 #include <cereal/archives/binary.hpp>
 
-#include "../utils.h"
+#include "./indexer.h"
 
 
-class bucket_indexer {
+class bucket_indexer : public indexer {
+    /**
+     * @brief A virtual class of indexer for bucket-map.
+     *        General idea: create a separate index file for each bucket.
+     */
 private:
     std::vector<std::string> bucket_id;                  // vector storing all bucket info
     std::vector<std::vector<seqan3::dna4>> bucket_seq;   // sequence for each bucket
     unsigned int bucket_length;                          // maximum length of each bucket
     unsigned int read_length;                            // maximum length of each short read
+    std::string EXTENSION;                               // file name extension for the perticular indexer
 
 public:
-    bucket_indexer(unsigned int bucket_len, unsigned int read_len) {
+    bucket_indexer(unsigned int bucket_len, unsigned int read_len) : indexer() {
         bucket_length = bucket_len;
         read_length = read_len;
     }
@@ -51,20 +56,8 @@ public:
          * @returns the total number of buckets.
          */
         // Create directory if directory is not created yet.
-        if (!std::filesystem::create_directories(index_directory)) {
-            seqan3::debug_stream << "[WARNING]\t" << "The specified index directory "
-                                 << index_directory << " is already created." << '\n';
-            // count the number 
-            unsigned int count = 0;
-            for (const auto& entry : std::filesystem::directory_iterator(index_directory)) {
-                if (entry.path().extension() == ".index")
-                    ++count;
-            }
-            if (count > 0) {
-                seqan3::debug_stream << "[INFO]\t\t" << "The number of index files in directory: " 
-                                     << count << "." << '\n';
-                return count;
-            }
+        if (!check_extension_in(index_directory, EXTENSION)) {
+            return 0;
         }
         auto operation = [&](std::vector<seqan3::dna4> seq) {
             bucket_seq.push_back(seq);

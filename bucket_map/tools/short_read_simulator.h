@@ -1,3 +1,6 @@
+#ifndef BUCKET_MAP_SHORT_READ_SIMULATOR_H
+#define BUCKET_MAP_SHORT_READ_SIMULATOR_H
+
 #include <seqan3/search/kmer_index/shape.hpp>
 #include <seqan3/alphabet/all.hpp>
 
@@ -177,3 +180,5 @@ public:
     }
 
 };
+
+#endif

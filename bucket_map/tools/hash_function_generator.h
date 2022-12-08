@@ -1,5 +1,5 @@
-#ifndef HASH_FUNCTION_GENERATOR_H
-#define HASH_FUNCTION_GENERATOR_H
+#ifndef BUCKET_MAP_HASH_FUNCTION_GENERATOR_H
+#define BUCKET_MAP_HASH_FUNCTION_GENERATOR_H
 
 #include <utility>
 #include <functional>

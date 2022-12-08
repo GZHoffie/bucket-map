@@ -5,6 +5,7 @@
 #include <seqan3/search/kmer_index/shape.hpp>
 #include <seqan3/alphabet/all.hpp>
 #include <seqan3/io/sequence_file/all.hpp>
+#include <seqan3/core/debug_stream.hpp>
 
 #include <chrono>
 #include <thread>
@@ -92,6 +93,52 @@ void iterate_through_buckets(std::filesystem::path const & fasta_file_name, int 
         seqan3::debug_stream << "[INFO]\t\t" << "Total number of buckets: " 
                              << _bucket_num << "." << '\n';
     }
+}
+
+bool check_extention_in(std::filesystem::path const & index_directory,
+                            std::string ext) {
+    /**
+     * @brief Check if the specified directory exists. If it does, check if files with certain
+     *        file extension name exist. If not, create the directory.
+     * @param index_directory a path to a directory to be checked.
+     * @param ext a string starting with a ".", indicating file extension name.
+     * @returns true if the directory doesn't exist or no such file extension found. False otherwise.
+     */
+    if (!std::filesystem::create_directories(index_directory)) {
+        seqan3::debug_stream << "[WARNING]\t" << "The specified index directory "
+                             << index_directory << " is already created." << '\n';
+        for (const auto& entry : std::filesystem::directory_iterator(index_directory)) {
+            if (entry.path().extension() == ext) {
+                seqan3::debug_stream << "[ERROR]\t\t" << "The file with extension " << ext <<" already exists in directory: " 
+                                     << entry.path() << "." << '\n';
+                return false;
+            }
+        }    
+    }
+    return true;    
+}
+
+bool check_filename_in(std::filesystem::path const & index_directory,
+                       std::string filename) {
+    /**
+     * @brief Check if the specified directory exists. If it does, check if files with certain
+     *        name exist. If not, create the directory.
+     * @param index_directory a path to a directory to be checked.
+     * @param filename a string, including the extension name.
+     * @returns true if the directory doesn't exist or no such file found. False otherwise.
+     */
+    if (!std::filesystem::create_directories(index_directory)) {
+        seqan3::debug_stream << "[WARNING]\t" << "The specified index directory "
+                             << index_directory << " is already created." << '\n';
+        for (const auto& entry : std::filesystem::directory_iterator(index_directory)) {
+            if (entry.path() == index_directory / filename) {
+                seqan3::debug_stream << "[ERROR]\t\t" << "The specified file already exists in directory: " 
+                                     << index_directory / filename << "." << '\n';
+                return false;
+            }
+        }    
+    }
+    return true;    
 }
 
 

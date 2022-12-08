@@ -1,5 +1,5 @@
-#ifndef FM_INDEX_MAP_H
-#define FM_INDEX_MAP_H
+#ifndef BUCKET_MAP_FM_INDEX_MAP_H
+#define BUCKET_MAP_FM_INDEX_MAP_H
 
 
 #include <fstream>

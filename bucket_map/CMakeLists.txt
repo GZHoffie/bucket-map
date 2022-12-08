@@ -10,15 +10,33 @@ list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/seqan3/build_system")
 find_package(seqan3 3.0 REQUIRED)
  
 # set common header files
+set(INDEXER_FILES
+    indexer/indexer.h
+    indexer/bucket_fm_indexer.h 
+    indexer/bucket_indexer.h
+    indexer/fm_indexer.h)
+
+set(LOCATOR_FILES
+    locator/locator.h
+    locator/bucket_locator.h
+    locator/fm_index_locator.h)
+
+set(MAPPER_FILES
+    mapper/mapper.h
+    mapper/q_gram_mapper.h 
+    mapper/q_gram_bf_mapper.h 
+    mapper/fm_index_mapper.h)
+
+set(UTIL_FILES
+    utils.h
+    tools/short_read_simulator.h
+    tools/hash_function_generator.h)
+
 set(SHARED_FILES
-    utils.h 
-    indexer/bucket_fm_index.h 
-    indexer/bucket_hash_index.h
-    indexer/fm_index.h
-    mapper/q_gram_map.h 
-    mapper/q_gram_bf_map.h 
-    mapper/fm_index_map.h
-    simulation/short_read_simulator.h)
+    ${UTIL_FILES}
+    ${INDEXER_FILES}
+    ${MAPPER_FILES}
+    ${LOCATOR_FILES})
 
 # build app with seqan3
 add_executable(bucket_map main.cpp ${SHARED_FILES})

@@ -1,5 +1,5 @@
-#include "mapper/q_gram_map.h"
-#include "simulation/short_read_simulator.h"
+#include "mapper/q_gram_mapper.h"
+#include "tools/short_read_simulator.h"
 #include "./utils.h"
 
 #include <map>

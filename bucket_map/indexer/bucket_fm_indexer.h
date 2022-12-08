@@ -1,19 +1,13 @@
-#ifndef BUCKET_FM_INDEX_H
-#define BUCKET_FM_INDEX_H
+#ifndef BUCKET_MAP_BUCKET_FM_INDEX_H
+#define BUCKET_MAP_BUCKET_FM_INDEX_H
 
-#include "./bucket_hash_index.h"
+#include "./bucket_indexer.h"
 
 class bucket_fm_indexer : public bucket_indexer {
-private:
-    std::vector<std::string> bucket_id;                  // vector storing all bucket info
-    std::vector<std::vector<seqan3::dna4>> bucket_seq;   // sequence for each bucket
-    unsigned int bucket_length;                          // maximum length of each bucket
-    unsigned int read_length;                            // maximum length of each short read
-
-
-
 public:
-    bucket_fm_indexer(unsigned int bucket_len, unsigned int read_len) : bucket_indexer(bucket_len, read_len) {}
+    bucket_fm_indexer(unsigned int bucket_len, unsigned int read_len) : bucket_indexer(bucket_len, read_len) {
+        EXTENSION = ".bfmi";
+    }
 
     void create_index(std::filesystem::path const & index_directory) {
         /**
