@@ -101,7 +101,7 @@ public:
          *        genome is then used for short read generation.
          * @param fasta_file_name the name of the sequence file to be read.
          */
-        auto operation = [&](std::vector<seqan3::dna4> seq) {
+        auto operation = [&](std::vector<seqan3::dna4> seq, std::string id) {
             bucket_sequence.push_back(seq);
         };
         iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);

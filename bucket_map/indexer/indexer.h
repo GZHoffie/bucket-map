@@ -13,18 +13,19 @@ class indexer {
 public:
     indexer() {}
 
+    /**
+     * @brief Read the fasta file, and create index file in the index directory.
+     * @param fasta_file_name the name of the file containing reference genome.
+     * @param index_directory the name of the directory to store the index. It has to be
+     *                        either empty directory or not created yet.
+     * @param indicator a string indicating the name of output index file.
+     * @returns how many index files we are generating.
+     */
     virtual unsigned int index(std::filesystem::path const & fasta_file_name, 
                                std::filesystem::path const & index_directory,
-                               std::string const & indicator) {
-        /**
-         * @brief Read the fasta file, and create index file in the index directory.
-         * @param fasta_file_name the name of the file containing reference genome.
-         * @param index_directory the name of the directory to store the index. It has to be
-         *                        either empty directory or not created yet.
-         * @param indicator a string indicating the name of output index file.
-         * @returns how many index files we are generating.
-         */
-    }
+                               std::string const & indicator) = 0;
+        
+    
 };
 
 #endif

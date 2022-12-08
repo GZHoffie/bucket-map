@@ -18,9 +18,9 @@ public:
         _i = ind;
     }
 
-    unsigned int index(std::filesystem::path const & fasta_file_name, 
-                       std::filesystem::path const & index_directory,
-                       std::string const & indicator) {
+    unsigned int initialize(std::filesystem::path const & fasta_file_name, 
+                            std::filesystem::path const & index_directory,
+                            std::string const & indicator) {
         /**
          * @brief Read the fasta file, and create index file in the index directory.
          * @param fasta_file_name the name of the file containing reference genome.

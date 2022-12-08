@@ -9,12 +9,11 @@ class mapper {
 public:
     mapper() {}
 
-    virtual std::vector<std::vector<int>> map(std::filesystem::path sequence_file) {
-        /**
-         * @brief Read a query fastq file and output the ids of the sequence that are mapped 
-         *        to each bucket.
-         */
-    }
+    /**
+     * @brief Read a query fastq file and output the ids of the sequence that are mapped 
+     *        to each bucket.
+     */
+    virtual std::vector<std::vector<int>> map(std::filesystem::path sequence_file) = 0;
 };
 
 #endif

@@ -53,7 +53,7 @@ public:
 };
 
 void iterate_through_buckets(std::filesystem::path const & fasta_file_name, int bucket_length, int read_length, 
-                             std::function<void(std::vector<seqan3::dna4>)> op, bool print_info = false) {
+                             std::function<void(std::vector<seqan3::dna4>, std::string)> op, bool print_info = false) {
     /**
      * @brief Util function that is used to iterate through all buckets in the reference genome, end execute
      *        some operation on each of the bucket.
@@ -85,7 +85,7 @@ void iterate_through_buckets(std::filesystem::path const & fasta_file_name, int 
             }
 
             std::vector<seqan3::dna4> bucket_sequence(&record.sequence()[start], &record.sequence()[end]);
-            op(bucket_sequence);
+            op(bucket_sequence, record.id());
             ++_bucket_num;
         }
     }
@@ -95,7 +95,7 @@ void iterate_through_buckets(std::filesystem::path const & fasta_file_name, int 
     }
 }
 
-bool check_extention_in(std::filesystem::path const & index_directory,
+bool check_extension_in(std::filesystem::path const & index_directory,
                             std::string ext) {
     /**
      * @brief Check if the specified directory exists. If it does, check if files with certain
@@ -105,8 +105,6 @@ bool check_extention_in(std::filesystem::path const & index_directory,
      * @returns true if the directory doesn't exist or no such file extension found. False otherwise.
      */
     if (!std::filesystem::create_directories(index_directory)) {
-        seqan3::debug_stream << "[WARNING]\t" << "The specified index directory "
-                             << index_directory << " is already created." << '\n';
         for (const auto& entry : std::filesystem::directory_iterator(index_directory)) {
             if (entry.path().extension() == ext) {
                 seqan3::debug_stream << "[ERROR]\t\t" << "The file with extension " << ext <<" already exists in directory: " 
@@ -128,8 +126,6 @@ bool check_filename_in(std::filesystem::path const & index_directory,
      * @returns true if the directory doesn't exist or no such file found. False otherwise.
      */
     if (!std::filesystem::create_directories(index_directory)) {
-        seqan3::debug_stream << "[WARNING]\t" << "The specified index directory "
-                             << index_directory << " is already created." << '\n';
         for (const auto& entry : std::filesystem::directory_iterator(index_directory)) {
             if (entry.path() == index_directory / filename) {
                 seqan3::debug_stream << "[ERROR]\t\t" << "The specified file already exists in directory: " 

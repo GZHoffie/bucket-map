@@ -161,34 +161,6 @@ private:
     //TODO: also consider quality
 
 
-
-    void _insert_into_bucket(std::vector<seqan3::dna4> sequence, unsigned int bucket_num) {
-        /**
-         * @brief Read the sequence, extract all the q-grams and store in `q_grams_index`.
-         * @param sequence the corresponding sequence for the bucket.
-         * @param bucket_num an integer indicating the position of the bucket. Should be
-         *                   between 0 and NUM_BUCKETS - 1.
-         */
-        auto q_gram = seqan3::views::kmer_hash(q_gram_shape);
-
-        // Extract all q_grams from sequence
-        for (auto && value : sequence | q_gram) {
-            q_grams_index[value].set(bucket_num);
-        }
-    }
-
-
-    std::vector<unsigned char> _bitset_to_bytes(const std::bitset<NUM_BUCKETS>& bs){
-        /**
-         * @brief Convert bitset into 8-byte chars.
-         * Adopted from https://stackoverflow.com/a/7463972.
-         */
-        std::vector<unsigned char> result((NUM_BUCKETS + 7) >> 3);
-        for (unsigned int j = 0; j < NUM_BUCKETS; j++)
-            result[j>>3] |= (bs[j] << (j & 7));
-        return result;
-    }
-
     std::bitset<NUM_BUCKETS> _bitset_from_bytes(const std::vector<unsigned char>& buf) {
         /**
          * @brief Convert 8-byte chars to bitset.
@@ -212,23 +184,6 @@ private:
         using sequence_container = std::vector<alph>; // must be defined as a template!
     };
 
-    // Vector storing all reads in a fastq file
-    //using field_ids = seqan3::fields<seqan3::field::seq, seqan3::field::id, seqan3::field::qual>;
-    using record_type = seqan3::sequence_file_input<>::record_type;
-    std::vector<record_type> reads;
-
-    void _load_reads(std::filesystem::path const & fastq_file_name) {
-        /**
-         * @brief load the fastq file into the vector `reads`.
-         *        if `reads` is not empty, do nothing and return.
-         */
-        if (!reads.empty()) {
-            seqan3::sequence_file_input fin{fasta_file_name};
-            std::ranges::copy(fin, std::back_inserter(reads));
-            return;
-        }
-    }
-
 
 public:
     q_gram_mapper(unsigned int bucket_len, unsigned int read_len, seqan3::shape shape, 
@@ -240,8 +195,6 @@ public:
         q_gram_shape = shape;
         size = std::ranges::size(shape);
         q = shape.count();
-        seqan3::debug_stream << "[INFO]\t\t" << "Set q-gram shape to be: " 
-                             << shape << " with number of effective characters: " << q << '\n';
         
         num_samples = samples;
         num_fault_tolerance = fault;
@@ -254,78 +207,6 @@ public:
     ~q_gram_mapper() {
         delete filter;
         delete dist_filter;
-    }
-
-    void read(std::filesystem::path const & fasta_file_name) {
-        /**
-         * @brief Read the fasta file, store the q_gram of each bucket in `q_grams_index`.
-         *        Store the information in the `index_directory`.
-         * @param fasta_file_name the name of the file containing reference genome.
-         */
-        // q_grams_index should be empty
-        if (!q_grams_index.empty()) {
-            seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram index is not empty. Terminating read.\n";
-            return;
-        }
-        Timer clock;
-        clock.tick();
-        // initialize q_gram index
-        int total_q_grams = (int) pow(4, q);
-        for (int i = 0; i < total_q_grams; i++) {
-            std::bitset<NUM_BUCKETS> q_gram_bucket;
-            q_grams_index.push_back(q_gram_bucket);
-        }
-        // Read the genome
-        unsigned int bucket_num = 0;
-        auto operation = [&](std::vector<seqan3::dna4> seq) {
-            _insert_into_bucket(seq, bucket_num);
-            bucket_num++;
-        };
-        iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
-        dist_filter->read(q_grams_index);
-        dist_view = dist_filter->get_filter();
-
-        clock.tock();
-        seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for reading: " 
-                             << clock.elapsed_seconds() << " s." << '\n';
-        seqan3::debug_stream << "[INFO]\t\t" << "Total number of buckets: " 
-                             << bucket_num << "." << '\n';
-    }
-
-    void store(std::filesystem::path const & index_directory) {
-        /**
-         * @brief Store the created index inside the index_directory.
-         * @param index_directory the directory to store the q_gram_count_file.
-         */
-        // q_grams_index should not be empty
-        if (q_grams_index.empty()) {
-            seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram index is empty. No file is created.\n";
-            return;
-        }
-        // Create directory if directory is not created yet.
-        // Return if the index files already exist.
-        if (!check_extension_in(index_directory, ".qgram")) {
-            return;
-        }
-        // Store the q-gram index in the directory
-        Timer clock;
-        clock.tick();
-        std::ofstream index_file(index_directory / "index.qgram");
-        for (const auto &i : q_grams_index) {
-            std::vector<unsigned char> bytes =  _bitset_to_bytes(i);
-            index_file.write((char *)&bytes[0], bytes.size());
-        }
-        clock.tock();
-        seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for storing index files: " 
-                             << clock.elapsed_seconds() << " s." << '\n';
-        seqan3::debug_stream << "[INFO]\t\t" << "The bucket q-gram index is stored in: " 
-                             << index_directory / "index.qgram" << ".\n";
-        
-        // Store the q-gram pattern in the directory
-        std::ofstream pattern_file(index_directory / "index.pattern");
-        pattern_file << q_gram_shape;
-        seqan3::debug_stream << "[INFO]\t\t" << "The q-gram shape is stored in: " 
-                             << index_directory / "index.pattern" << "." << '\n';
     }
 
 
@@ -463,7 +344,6 @@ public:
 
         unsigned int index = 0;
         for (auto & rec : fin) {
-            reads.push_back(std::move(rec));
             for (auto & bucket : query_sequence(rec.sequence())) {
                 res[bucket].push_back(index);
             }

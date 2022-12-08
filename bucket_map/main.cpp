@@ -1,3 +1,4 @@
+#include "indexer/bucket_fm_indexer.h"
 #include "mapper/q_gram_mapper.h"
 #include "tools/short_read_simulator.h"
 #include "./utils.h"
@@ -6,16 +7,20 @@
 #include <chrono>
 
 int main() {
-    std::filesystem::path data_path = "/mnt/c/data";
+    std::filesystem::path data_path = "/mnt/d/genome";
     std::filesystem::path genome_file = data_path / "Egu.v3.genome_f.fasta";
+    seqan3::shape shape(0b1110100101001101_shape);
 
     int bucket_length = 65536;
     int read_length = 150;
 
-    q_gram_mapper<26507> map(bucket_length, read_length, 0b1110100101001101_shape, 20, 5, 0.7);
+    bucket_fm_indexer<26507> ind(bucket_length, read_length, shape);
+    q_gram_mapper<26507> map(bucket_length, read_length, shape, 20, 5, 0.7);
+
+    ind.index(genome_file, data_path / "index_fm");
     //map.read(genome_file);
     //map.store(data_path / "index");
-    map.load(data_path / "index", genome_file);
+    map.load(data_path / "index_fm");
 
     //short_read_simulator sim(bucket_length, read_length, 0.002, 0.00025, 0.00025);
     //sim.read(genome_file);
