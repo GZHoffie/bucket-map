@@ -12,8 +12,8 @@ find_package(seqan3 3.0 REQUIRED)
 # set common header files
 set(INDEXER_FILES
     indexer/indexer.h
-    indexer/bucket_fm_indexer.h 
     indexer/bucket_indexer.h
+    indexer/bucket_fm_indexer.h
     indexer/fm_indexer.h)
 
 set(LOCATOR_FILES

@@ -15,14 +15,11 @@ public:
          * @brief Create index files for the buckets. 
          * @remark needs to be run after we fill `bucket_id` and `bucket_seq`.
          */
+        std::ofstream os{index_directory / ("index" + this->EXTENSION), std::ios::binary};
+        cereal::BinaryOutputArchive oarchive{os};
         for (int i = 0; i < this->bucket_id.size(); i++) {
             seqan3::bi_fm_index index{this->bucket_seq[i]};
-            // store the index in a file
-            {
-                std::ofstream os{index_directory / (std::to_string(i) + this->EXTENSION), std::ios::binary};
-                cereal::BinaryOutputArchive oarchive{os};
-                oarchive(index);
-            }
+            oarchive(index);
         }
     }
 };

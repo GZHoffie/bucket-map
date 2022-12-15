@@ -326,7 +326,7 @@ public:
     }
 
 
-    std::vector<std::vector<int>> map(std::filesystem::path sequence_file) {
+    std::vector<std::vector<int>> map(std::filesystem::path const & sequence_file) {
         /**
          * @brief Read a query fastq file and output the ids of the sequence that are mapped 
          *        to each file.

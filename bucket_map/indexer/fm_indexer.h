@@ -45,11 +45,11 @@ private:
          * @brief Create the index file `index_path` from the `storage` variable.
          * @note must be called after `_read_reference` function.
          */
-        seqan3::bi_fm_index index{storage->seqs};
+        seqan3::bi_fm_index ind{storage->seqs};
         {
             std::ofstream os{index_path, std::ios::binary};
             cereal::BinaryOutputArchive oarchive{os};
-            oarchive(index);
+            oarchive(ind);
         }
         seqan3::debug_stream << "[INFO]\t\t" << "The FM-index file is stored in: " 
                              << index_path << "." << '\n';

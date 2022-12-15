@@ -3,6 +3,7 @@
 
 #include "../indexer/indexer.h"
 #include "../mapper/mapper.h"
+#include "../utils.h"
 
 
 class locator {
