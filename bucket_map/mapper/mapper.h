@@ -9,6 +9,8 @@ class mapper {
 public:
     mapper() {}
 
+    std::vector<std::vector<seqan3::dna4>> records; // TODO: also include the quality information
+
     /**
      * @brief Load the q-gram index file to the mapper.
      */
@@ -18,7 +20,7 @@ public:
      * @brief Read a query fastq file and output the ids of the sequence that are mapped 
      *        to each bucket.
      */
-    virtual std::vector<std::vector<int>> map(std::filesystem::path const & sequence_file) = 0;
+    virtual std::vector<std::vector<unsigned int>> map(std::filesystem::path const & sequence_file) = 0;
 };
 
 #endif

@@ -2,6 +2,7 @@
 #define BUCKET_MAP_BUCKET_LOCATOR_H
 
 #include "./locator.h"
+#include <cstdlib>
 
 #include <seqan3/search/fm_index/bi_fm_index.hpp>
 
@@ -28,10 +29,11 @@ private:
          * @param fasta_file_name the path to the fasta file containing reference genome.
          */
         auto operation = [&](std::vector<seqan3::dna4> seq, std::string id) {
+            seqan3::debug_stream << "initializing k-mer index for bucket " << id << ".\n";
             unsigned int offset = 0;
             auto values = seq | seqan3::views::kmer_hash(q_gram_shape);
             std::unordered_map<unsigned int, int> bucket_index;
-            for (auto && hash : values) {
+            for (auto hash : values) {
                 // Only record the last appearance of the k-mer
                 bucket_index[hash] = offset;
                 offset++;
@@ -55,7 +57,7 @@ private:
          * @param sequence_id the index of sequence in the query file.
          */
         auto record = _m->records[sequence_id];
-        auto kmers_positions = record.sequence() | seqan3::views::kmer_hash(q_gram_shape) | std::views::transform([&](int i) {
+        auto kmers_positions = record | seqan3::views::kmer_hash(q_gram_shape) | std::views::transform([&](int i) {
             if (bucket_kmer_index->contains(i)) {
                 return bucket_kmer_index->at(i);
             }
@@ -63,8 +65,8 @@ private:
         });
 
         // max errors allowed
-        int allowed_mismatch = ceil(allowed_substitution_rate * record.sequence().size());
-        int allowed_indel = ceil(allowed_indel_rate * record.sequence().size());
+        int allowed_mismatch = ceil(allowed_substitution_rate * record.size());
+        int allowed_indel = ceil(allowed_indel_rate * record.size());
 
         // record the possible starting positions
         // TODO: try with sampling k-mers instead of using all k-mers.
@@ -72,6 +74,7 @@ private:
         std::vector<int> starting_pos(kmers_positions.begin(), kmers_positions.end());
         for (int i = 0; i < starting_pos.size(); i++) {
             int pos = starting_pos[i] - i;
+            if (pos < 0) continue;
             for (int indel = -allowed_indel; indel <= allowed_indel; indel++) {
                 count[pos + indel]++;
             }
@@ -81,7 +84,7 @@ private:
         // We choose the smallest offset that contains a specific number of k-mers
         int offset = INT_MAX;
         for (auto & candidate : count) {
-            if (candidate.second >= record.sequence().size() - allowed_mismatch && candidate.first < offset) {
+            if (candidate.second >= record.size() - allowed_mismatch && candidate.first < offset && candidate.first >= 0) {
                 offset = candidate.first;
             }
         }
@@ -130,31 +133,36 @@ public:
         // initialize result
         std::vector<std::vector<std::pair<unsigned int, unsigned int>>> res;
         for (int i = 0; i < _m->records.size(); i++) {
-            std::vector<std::pair<unsigned int, unsigned int>> bucket
+            std::vector<std::pair<unsigned int, unsigned int>> bucket;
+            res.push_back(bucket);
         }
-
-        std::vector<std::vector<int>> sequence_ids = _m->map(sequence_file);
+        // map reads to buckets
+        std::vector<std::vector<unsigned int>> sequence_ids = _m->map(sequence_file);
         unsigned int bucket_index = 0;
         for (auto bucket_sequence : sequence_ids) {
+            // for each bucket, get the corresponding kmer index
             std::unordered_map<unsigned int, int>* bucket_kmer_index = &index[bucket_index];
-            for (auto & bucket : sequence_ids) {
-                for (auto & id : bucket) {
-                    int offset = _find_offset(bucket_kmer_index, id);
+            // go through all sequences mapped to this bucket and check the offset.
+            for (auto & id : bucket_sequence) {
+                int offset = _find_offset(bucket_kmer_index, id);
+                if (offset > 0) {
+                    // the sequence is mapped to an exact location in the bucket
+                    res[id].push_back(std::make_pair(bucket_index, offset));
                 }
             }
             bucket_index++;
         }
-        
+        return res;
     }
 
-     void _check_ground_truth(const std::vector<std::vector<int>>& query_results, std::filesystem::path ground_truth_file) {
+     void _check_ground_truth(const std::vector<std::vector<std::pair<unsigned int, unsigned int>>>& query_results, 
+                              std::filesystem::path ground_truth_file) {
         /**
          * * This function is just for benchmarking.
          * @brief Check the performance of query results against the ground truth.
          *        Output necessary information.
          * @note The ground truth file must be the one generated together with sequence
          *       fastq file.
-         * TODO: also check the exact location.
          */
         std::ifstream is(ground_truth_file);
         int bucket, exact_location;
@@ -164,15 +172,23 @@ public:
         int total_bucket_numbers = 0;
         std::map<int, int> bucket_number_map;
 
-        int correct_offset = 0;
         int total_offset_error = 0;
 
         for (int i = 0; i < query_results.size(); i++) {
             is >> bucket >> exact_location;
-            std::vector<int> buckets = query_results[i];
+            std::vector<std::pair<unsigned int, unsigned int>> buckets = query_results[i];
 
-            if (std::find(buckets.begin(), buckets.end(), bucket) != buckets.end()) {
-                correct_map++;
+            for (auto & pair : buckets) {
+                // check the bucket id
+                if (bucket == std::get<0>(pair)) {
+                    correct_map++;
+                    int error = std::get<1>(pair) - exact_location;
+                    if (error > 0) {
+                        total_offset_error += error;
+                    } else {
+                        total_offset_error -= error;
+                    }
+                }
             }
             total_bucket_numbers += buckets.size();
             ++bucket_number_map[buckets.size()];
@@ -183,6 +199,8 @@ public:
                              << query_results.size() << ".\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Correct bucket predictions: " 
                              << correct_map << " (" << ((float) correct_map) / query_results.size() * 100 << "%).\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "MAE of offset: " 
+                             << ((float) total_offset_error) / query_results.size() << ".\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Average number of buckets returned: " 
                              << ((float) total_bucket_numbers) / query_results.size() << ".\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Number of uniquely mapped sequences: " 

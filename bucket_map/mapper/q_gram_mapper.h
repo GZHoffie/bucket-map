@@ -326,16 +326,18 @@ public:
     }
 
 
-    std::vector<std::vector<int>> map(std::filesystem::path const & sequence_file) {
+
+    std::vector<std::vector<unsigned int>> map(std::filesystem::path const & sequence_file) {
         /**
          * @brief Read a query fastq file and output the ids of the sequence that are mapped 
          *        to each file.
          */
-        std::vector<std::vector<int>> res;
+
+        std::vector<std::vector<unsigned int>> res;
         seqan3::sequence_file_input<_dna4_traits> fin{sequence_file};
         // initialize returning result
         for (int i = 0; i < NUM_BUCKETS; i++) {
-            std::vector<int> sequence_ids;
+            std::vector<unsigned int> sequence_ids;
             res.push_back(sequence_ids);
         }
 
@@ -344,6 +346,8 @@ public:
 
         unsigned int index = 0;
         for (auto & rec : fin) {
+            seqan3::debug_stream << index << ": " << rec << "\n";
+            records.push_back(rec.sequence());
             for (auto & bucket : query_sequence(rec.sequence())) {
                 res[bucket].push_back(index);
             }
