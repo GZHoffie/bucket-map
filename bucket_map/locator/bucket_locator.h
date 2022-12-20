@@ -19,8 +19,15 @@ private:
     seqan3::shape q_gram_shape;
 
     // Parameters for verification
-    float allowed_substitution_rate;
-    float allowed_indel_rate;
+    int allowed_mismatch;
+    int allowed_indel;
+
+    // number of samples drawn
+    int num_samples;
+
+    // counter to calculate the possible starting positions
+    std::vector<unsigned int> counter;
+    std::vector<unsigned int> sampled_kmer_index;
 
 
     void _initialize_kmer_index(std::filesystem::path const & fasta_file_name) {
@@ -63,51 +70,61 @@ private:
         auto record = _m->records[sequence_id];
         auto kmer_hash = record | seqan3::views::kmer_hash(q_gram_shape);
 
-        // calculate max errors allowed
-        int allowed_mismatch = ceil(allowed_substitution_rate * record.size());
-        int allowed_indel = ceil(allowed_indel_rate * record.size());
-
-        // record the possible starting positions
-        // TODO: try with sampling k-mers instead of using all k-mers.
-        std::unordered_map<int, unsigned int> count;
-        int kmer_pos = 0;
-        for (auto hash : kmer_hash) {
-            // find the positions of the k-mer
-            auto range = bucket_kmer_index.equal_range(hash);
-            for (auto it = range.first; it != range.second; ++it) {
-                auto position = it->second - kmer_pos;
-                if (position < 0) continue;
-                for (int indel = -allowed_indel; indel <= allowed_indel; indel++) {
-                    count[position + indel]++;
-                }
-            }    
-            kmer_pos++;
+        // sample k-mers
+        sampled_kmer_index.clear();
+        for (int i = 0; i < num_samples; i++) {
+            sampled_kmer_index.push_back(rand() % kmer_hash.size());
         }
 
-        seqan3::debug_stream << count << "\n";
+        // reset counter
+        std::fill(counter.begin(), counter.end(), 0);
+
+        // record the possible starting positions
+        for (auto i : sampled_kmer_index) {
+            // find the positions of the k-mer
+            auto range = bucket_kmer_index.equal_range(kmer_hash[i]);
+            for (auto it = range.first; it != range.second; ++it) {
+                auto position = it->second - i;
+                if (position < allowed_indel || position >= bucket_length - allowed_indel) continue;
+                for (int indel = -allowed_indel; indel <= allowed_indel; indel++) {
+                    counter[position + indel]++;
+                }
+            }
+        }
 
         // find potential good offset
         // We choose the smallest offset that contains a specific number of k-mers
-        int offset = INT_MAX;
-        for (auto & candidate : count) {
-            if (candidate.second >= kmer_hash.size() - allowed_mismatch && candidate.first < offset && candidate.first >= 0) {
-                offset = candidate.first;
-            }
+        std::vector<unsigned int>::iterator res;
+        res = std::max_element(counter.begin(), counter.end());
+        if (*res >= num_samples - allowed_mismatch) {
+            return std::distance(counter.begin(), res);
         }
-        return offset == INT_MAX? -1 : offset;
+        return -1;
     }
 
 
 public:
     bucket_locator(indexer* ind, mapper* map, unsigned int bucket_len, 
-                   unsigned int read_len, seqan3::shape shape, float mismatch_rate, float indel_rate) : locator(ind) {
+                   unsigned int read_len, seqan3::shape shape, 
+                   float mismatch_rate, float indel_rate, 
+                   unsigned int sample_size) : locator(ind) {
         _m = map;
         bucket_length = bucket_len;
         read_length = read_len;
         q_gram_shape = shape;
 
-        allowed_substitution_rate = mismatch_rate;
-        allowed_indel_rate = indel_rate;
+        allowed_mismatch = ceil(mismatch_rate * sample_size);
+        allowed_indel = ceil(indel_rate * sample_size);
+
+        // random number generator
+        num_samples = sample_size;
+        srand(time(NULL));
+
+        // initialize counter
+        for (int i = 0; i < bucket_len; i++) {
+            counter.push_back(0);
+        }
+        sampled_kmer_index.reserve(sample_size);
     }
 
     unsigned int initialize(std::filesystem::path const & fasta_file_name, 
@@ -136,6 +153,10 @@ public:
          * * This function is just for benchmarking
          * @brief Locate the exact locations for the reads in the fastq file.
          */
+        // initialize benchmark timers
+        Timer index_timer;
+        Timer query_timer;
+
         // map reads to buckets
         std::vector<std::vector<unsigned int>> sequence_ids = _m->map(sequence_file);
         unsigned int bucket_index = 0;
@@ -146,7 +167,6 @@ public:
             std::vector<std::pair<unsigned int, unsigned int>> bucket{};
             res.push_back(bucket);
         }
-        seqan3::debug_stream << "size: " << res.size() << " " << _m->records.size() << "\n";
 
         // create k-mer index
         std::unordered_multimap<unsigned int, int> bucket_kmer_index;
@@ -160,21 +180,29 @@ public:
             }
             
             // for each bucket, create the corresponding kmer index
+            index_timer.tick();
             _create_kmer_index(bucket_kmer_index, bucket_seq[i]);
+            index_timer.tock();
             
             // go through all sequences mapped to this bucket and check the offset.
-            seqan3::debug_stream << "============== " << i << " ==============\n";
+            query_timer.tick();
             for (auto & id : bucket_sequence) {
-                seqan3::debug_stream << "sequence " << id << ": ";
                 int offset = _find_offset(bucket_kmer_index, id);
-                seqan3::debug_stream << "Mapped to location " << offset << "!\n";
                 // the sequence is mapped to an exact location in the bucket
                 if (offset > 0) {
                     res[id].push_back(std::make_pair(i, offset));
                 }
-                
             }
+            query_timer.tock();
         }
+
+        // print benchmark information
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Total time used for building k-mer index for each bucket: " 
+                             << index_timer.elapsed_seconds() << " s.\n";
+        float time = query_timer.elapsed_seconds();
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Total time used for finding exact location of the sequences: " 
+                             << time << " s (" << time * 1000 / _m->records.size() << " ms/seq).\n";
+
         return res;
     }
 

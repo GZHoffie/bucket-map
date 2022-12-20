@@ -355,7 +355,7 @@ public:
         clock.tock();
         float time = clock.elapsed_seconds();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for bucket mapping: " 
-                             << time << " s (" << time * 1000 * 1000 / res.size() << " μs/seq).\n";
+                             << time << " s (" << time * 1000 * 1000 / records.size() << " μs/seq).\n";
         return res;
     }
 

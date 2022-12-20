@@ -10,14 +10,15 @@
 int main() {
     std::filesystem::path data_path = "/mnt/d/genome";
     std::filesystem::path genome_file = data_path / "Egu.v3.genome_f.fasta";
-    seqan3::shape shape(0b1110100101001101_shape);
+    seqan3::shape bucket_shape(0b1110100101001101_shape);
+    seqan3::shape locate_shape(0b11101100001100101011_shape);
 
     int bucket_length = 65536;
     int read_length = 150;
 
-    bucket_fm_indexer<26507> ind(bucket_length, read_length, shape);
-    q_gram_mapper<26507> map(bucket_length, read_length, shape, 20, 5, 0.7);
-    bucket_locator loc(&ind, &map, bucket_length, read_length, shape, 0.002 * 9, 0.00025 * 16);
+    bucket_fm_indexer<26507> ind(bucket_length, read_length, bucket_shape);
+    q_gram_mapper<26507> map(bucket_length, read_length, bucket_shape, 20, 5, 0.7);
+    bucket_locator loc(&ind, &map, bucket_length, read_length, locate_shape, 0.01 * 11, 0.00075 * 20, 20);
 
     //ind.index(genome_file, data_path / "index_fm");
     //map.read(genome_file);
@@ -32,8 +33,8 @@ int main() {
     //map._check_ground_truth(res, data_path / "test" / "sim.ground_truth");
 
     loc.initialize(genome_file, data_path / "index_fm", "test");
-    auto res = loc._locate(data_path / "test" / "sample.fastq");
-    loc._check_ground_truth(res, data_path / "test" / "sample.ground_truth");
+    auto res = loc._locate(data_path / "test" / "sim.fastq");
+    loc._check_ground_truth(res, data_path / "test" / "sim.ground_truth");
     
     
 
