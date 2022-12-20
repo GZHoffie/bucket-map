@@ -18,7 +18,7 @@ int main() {
 
     bucket_fm_indexer<26507> ind(bucket_length, read_length, bucket_shape);
     q_gram_mapper<26507> map(bucket_length, read_length, bucket_shape, 20, 5, 0.7);
-    bucket_locator loc(&ind, &map, bucket_length, read_length, locate_shape, 0.01 * 11, 0.00075 * 20, 20);
+    bucket_locator loc(&ind, &map, bucket_length, read_length, locate_shape, 0.01 * locate_shape.count(), 0.00075 * 20, 20);
 
     //ind.index(genome_file, data_path / "index_fm");
     //map.read(genome_file);

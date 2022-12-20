@@ -26,7 +26,7 @@ private:
     int num_samples;
 
     // counter to calculate the possible starting positions
-    std::vector<unsigned int> counter;
+    std::unordered_map<unsigned int, unsigned int> counter;
     std::vector<unsigned int> sampled_kmer_index;
 
 
@@ -77,7 +77,7 @@ private:
         }
 
         // reset counter
-        std::fill(counter.begin(), counter.end(), 0);
+        counter.clear();
 
         // record the possible starting positions
         for (auto i : sampled_kmer_index) {
@@ -85,7 +85,6 @@ private:
             auto range = bucket_kmer_index.equal_range(kmer_hash[i]);
             for (auto it = range.first; it != range.second; ++it) {
                 auto position = it->second - i;
-                if (position < allowed_indel || position >= bucket_length - allowed_indel) continue;
                 for (int indel = -allowed_indel; indel <= allowed_indel; indel++) {
                     counter[position + indel]++;
                 }
@@ -94,11 +93,15 @@ private:
 
         // find potential good offset
         // We choose the smallest offset that contains a specific number of k-mers
-        std::vector<unsigned int>::iterator res;
-        res = std::max_element(counter.begin(), counter.end());
-        if (*res >= num_samples - allowed_mismatch) {
-            return std::distance(counter.begin(), res);
+        if (!counter.empty()) {
+            auto res = std::max_element(counter.begin(), counter.end(), [](const auto &x, const auto &y) {
+                                            return x.second < y.second;
+                                        });
+            if (res->second >= num_samples - allowed_mismatch && res->first >= 0) {
+                return res->first;
+            }
         }
+        
         return -1;
     }
 
@@ -121,9 +124,7 @@ public:
         srand(time(NULL));
 
         // initialize counter
-        for (int i = 0; i < bucket_len; i++) {
-            counter.push_back(0);
-        }
+        counter.reserve(sample_size * allowed_indel);
         sampled_kmer_index.reserve(sample_size);
     }
 
