@@ -22,12 +22,13 @@ int main() {
     //map.store(data_path / "index");
     map.load(data_path / "index_fm");
 
-    short_read_simulator sim(bucket_length, read_length, 0.002, 0.00025, 0.00025);
-    sim.read(genome_file);
-    sim.generate_fastq_file(data_path / "test", "sim", 1000000);
+    //short_read_simulator sim(bucket_length, read_length, 0.002, 0.00025, 0.00025);
+    //sim.read(genome_file);
+    //sim.generate_fastq_file(data_path / "test", "sim", 1000000);
 
-    auto res = map._query_file(data_path / "test" / "sim.fastq");
-    map._check_ground_truth(res, data_path / "test" / "sim.ground_truth");
+    auto res = map._query_file(data_path / "test" / "sample.fastq");
+    seqan3::debug_stream << res << "\n";
+    map._check_ground_truth(res, data_path / "test" / "sample.ground_truth");
     
     
 

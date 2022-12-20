@@ -27,28 +27,32 @@ class Timer
      */
     using timep_t = decltype(ClockT::now());
     
+    // variable storing start and end time.
     timep_t _start = ClockT::now();
     timep_t _end = {};
 
+    // total duration between each (_start, _end) pair
+    DT _elapsed = DT::zero();
+
 public:
+    auto duration() const { 
+        // Use gsl_Expects if your project supports it.
+        assert(_end != timep_t{} && "Timer must toc before reading the time"); 
+        return _elapsed; 
+    }
+
     void tick() { 
         _end = timep_t{};
         _start = ClockT::now(); 
     }
     
     void tock() {
-        _end = ClockT::now(); 
+        _end = ClockT::now();
+        _elapsed += std::chrono::duration_cast<DT>(_end - _start);
     }
     
-    template <class duration_t = DT>
-    auto duration() const { 
-        // Use gsl_Expects if your project supports it.
-        assert(_end != timep_t{} && "Timer must toc before reading the time"); 
-        return std::chrono::duration_cast<duration_t>(_end - _start); 
-    }
-
     float elapsed_seconds() const {
-        return ((float) this->duration().count()) / 1000;
+        return ((float) _elapsed.count()) / 1000;
     }
 };
 

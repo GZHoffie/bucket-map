@@ -346,7 +346,6 @@ public:
 
         unsigned int index = 0;
         for (auto & rec : fin) {
-            seqan3::debug_stream << index << ": " << rec << "\n";
             records.push_back(rec.sequence());
             for (auto & bucket : query_sequence(rec.sequence())) {
                 res[bucket].push_back(index);
