@@ -25,9 +25,11 @@ private:
     // number of samples drawn
     int num_samples;
 
+    // sampler of k-mers
+    Sampler* sampler;
+
     // counter to calculate the possible starting positions
     std::unordered_map<unsigned int, unsigned int> counter;
-    std::vector<unsigned int> sampled_kmer_index;
 
 
     void _initialize_kmer_index(std::filesystem::path const & fasta_file_name) {
@@ -71,16 +73,13 @@ private:
         auto kmer_hash = record | seqan3::views::kmer_hash(q_gram_shape);
 
         // sample k-mers
-        sampled_kmer_index.clear();
-        for (int i = 0; i < num_samples; i++) {
-            sampled_kmer_index.push_back(rand() % kmer_hash.size());
-        }
+        sampler->sample_deterministically(kmer_hash.size()-1);
 
         // reset counter
         counter.clear();
 
         // record the possible starting positions
-        for (auto i : sampled_kmer_index) {
+        for (auto i : sampler->samples) {
             // find the positions of the k-mer
             auto range = bucket_kmer_index.equal_range(kmer_hash[i]);
             for (auto it = range.first; it != range.second; ++it) {
@@ -95,7 +94,7 @@ private:
         // We choose the smallest offset that contains a specific number of k-mers
         if (!counter.empty()) {
             auto res = std::max_element(counter.begin(), counter.end(), [](const auto &x, const auto &y) {
-                                            return x.second < y.second;
+                                            return (x.second < y.second) || (x.second == y.second && x.first > y.first);
                                         });
             if (res->second >= num_samples - allowed_mismatch && res->first >= 0) {
                 return res->first;
@@ -125,7 +124,13 @@ public:
 
         // initialize counter
         counter.reserve(sample_size * allowed_indel);
-        sampled_kmer_index.reserve(sample_size);
+
+        // initialize sampler
+        sampler = new Sampler(num_samples);
+    }
+
+    ~bucket_locator() {
+        delete sampler;
     }
 
     unsigned int initialize(std::filesystem::path const & fasta_file_name, 
@@ -202,7 +207,7 @@ public:
                              << index_timer.elapsed_seconds() << " s.\n";
         float time = query_timer.elapsed_seconds();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Total time used for finding exact location of the sequences: " 
-                             << time << " s (" << time * 1000 / _m->records.size() << " ms/seq).\n";
+                             << time << " s (" << time * 1000 * 1000 / _m->records.size() << " μs/seq).\n";
 
         return res;
     }
@@ -224,7 +229,8 @@ public:
         int total_bucket_numbers = 0;
         std::map<int, int> bucket_number_map;
 
-        int total_offset_error = 0;
+        double total_offset_error = 0;
+        int almost_correct_offset = 0;
 
         for (int i = 0; i < query_results.size(); i++) {
             is >> bucket >> exact_location;
@@ -234,11 +240,10 @@ public:
                 // check the bucket id
                 if (bucket == std::get<0>(pair)) {
                     correct_map++;
-                    int error = std::get<1>(pair) - exact_location;
-                    if (error > 0) {
-                        total_offset_error += error;
-                    } else {
-                        total_offset_error -= error;
+                    auto error = std::abs((double) std::get<1>(pair) - exact_location);
+                    total_offset_error += error;
+                    if (error <= allowed_indel) {
+                        almost_correct_offset++;
                     }
                 }
             }
@@ -252,7 +257,9 @@ public:
         seqan3::debug_stream << "[BENCHMARK]\t" << "Correct bucket predictions: " 
                              << correct_map << " (" << ((float) correct_map) / query_results.size() * 100 << "%).\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "MAE of offset: " 
-                             << ((float) total_offset_error) / query_results.size() << ".\n";
+                             << total_offset_error / correct_map << ".\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "(Almost) correct offset calculations: " 
+                             << almost_correct_offset << " (" << ((float) almost_correct_offset) / query_results.size() * 100 << "%).\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Average number of buckets returned: " 
                              << ((float) total_bucket_numbers) / query_results.size() << ".\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Number of uniquely mapped sequences: " 

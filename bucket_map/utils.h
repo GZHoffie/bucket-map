@@ -141,6 +141,44 @@ bool check_filename_in(std::filesystem::path const & index_directory,
     return true;    
 }
 
+class Sampler {
+private:
+    // stored values for sample efficiency
+    unsigned int last_upper_bound;
+    unsigned int n;
+
+public:
+    std::vector<unsigned int> samples;
+
+    Sampler(unsigned int num_samples) {
+        last_upper_bound = 0;
+        n = num_samples;
+    }
+
+    void sample_deterministically(unsigned int upper_bound) {
+        /**
+         * @brief Sample n numbers deterministically and uniformly between [0, upper_bound].
+         * @param upper_bound the maximum number that can be sampled.
+         */
+        if (last_upper_bound == upper_bound) return;
+        // do a resampling
+        samples.clear();
+        double delta; // difference between two samples
+        if (n == 1) {
+            delta = 0;
+        } else {
+            delta = static_cast<double>(upper_bound+1) / (n-1);
+        }
+        for (int i = 0; i < n-1; i++) {
+            samples.push_back(floor(i*delta));
+        }
+        samples.push_back(upper_bound);
+    }
+
+
+
+};
+
 
 
 

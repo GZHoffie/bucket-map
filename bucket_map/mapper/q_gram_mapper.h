@@ -160,6 +160,8 @@ private:
     std::function<bool(unsigned int)> dist_view;
     //TODO: also consider quality
 
+    // sampling k-mers
+    Sampler* sampler;
 
     std::bitset<NUM_BUCKETS> _bitset_from_bytes(const std::vector<unsigned char>& buf) {
         /**
@@ -202,11 +204,15 @@ public:
         // initialize filter
         filter = new fault_tolerate_filter<NUM_BUCKETS>(num_fault_tolerance);
         dist_filter = new distinguishability_filter<NUM_BUCKETS>(distinguishability);
+
+        // Initialize sampler
+        sampler = new Sampler(num_samples);
     }
 
     ~q_gram_mapper() {
         delete filter;
         delete dist_filter;
+        delete sampler;
     }
 
 
@@ -312,15 +318,9 @@ public:
                     std::mt19937{std::random_device{}()});
         */
         // Deterministically sample from the hash values.
-        float delta;
-        if (num_samples == 1) {
-            delta = 0;
-        } else {
-            delta = static_cast<float>(hash_values.size()-1) / (num_samples-1);
-        }
-        //std::cout << hash_values.size() << " " << delta << std::endl;
-        for (int i = 0; i < num_samples; i++) {
-            samples.push_back(hash_values[floor(i*delta)]);
+        sampler->sample_deterministically(hash_values.size()-1);
+        for (auto sample : sampler->samples) {
+            samples.push_back(hash_values[sample]);
         }
         return query(samples);
     }
