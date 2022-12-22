@@ -262,6 +262,8 @@ public:
                              << almost_correct_offset << " (" << ((float) almost_correct_offset) / query_results.size() * 100 << "%).\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Average number of buckets returned: " 
                              << ((float) total_bucket_numbers) / query_results.size() << ".\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Number of sequences that have no candidate bucket: " 
+                             << bucket_number_map[0] << " (" << ((float) bucket_number_map[0]) / query_results.size() * 100 << "%).\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Number of uniquely mapped sequences: " 
                              << bucket_number_map[1] << " (" << ((float) bucket_number_map[1]) / query_results.size() * 100 << "%).\n";
         int small_bucket_numbers = 0;

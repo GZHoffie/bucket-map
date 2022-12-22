@@ -28,6 +28,7 @@ class fault_tolerate_filter {
      */
 private:
     unsigned int num_fault_tolerance;
+    unsigned int allowed_max_candidate_buckets;
     std::vector<std::bitset<NUM_BUCKETS>> filters;
 
     std::vector<int> _set_bits(int index) {
@@ -36,7 +37,7 @@ private:
          * @param index indicates which filter we want to check.
          */
         std::vector<int> res;
-        if (index >= num_fault_tolerance) {
+        if (index >= num_fault_tolerance || index < 0) {
             seqan3::debug_stream << "[ERROR]\t\t" << "The input index "
                                  << index << " exceeds the fault tolerance level." << '\n';
             return res;
@@ -50,12 +51,13 @@ private:
     }
 
 public:
-    fault_tolerate_filter(unsigned int fault) {
+    fault_tolerate_filter(unsigned int fault, unsigned int num_buckets) {
         num_fault_tolerance = fault;
         for (int i = 0; i < num_fault_tolerance; i++) {
             std::bitset<NUM_BUCKETS> filter;
             filters.push_back(filter.set());
         }
+        allowed_max_candidate_buckets = num_buckets;
     }
 
     void reset() {
@@ -92,6 +94,20 @@ public:
         }
         return res;
     }
+
+    std::vector<int> ok_results() {
+        /**
+         * @brief Return the best `allowed_max_candidate_buckets` buckets.
+         */
+        std::vector<int> res;
+        for (int i = num_fault_tolerance-1; i >= 0; i--) {
+            if (i == 0 || filters[i-1].count() > allowed_max_candidate_buckets) {
+                res = _set_bits(i);
+                return res;
+            }
+        }
+        return res;
+    }
 };
 
 template<unsigned int NUM_BUCKETS>
@@ -101,9 +117,10 @@ class distinguishability_filter {
      */
 private:
     unsigned int threshold;
-    std::vector<unsigned int> zeros;
 
 public:
+    std::vector<unsigned int> zeros;
+
     distinguishability_filter(float distinguishability) {
         /**
          * @brief Initializer of the filter.
@@ -119,7 +136,12 @@ public:
             if (NUM_BUCKETS - ones > threshold) {
                 valid_q_grams++;
             }
-            zeros.push_back(NUM_BUCKETS - ones);
+            if (ones == 0) {
+                // the q-gram doesn't appear at all
+                zeros.push_back(NUM_BUCKETS);
+            } else {
+                zeros.push_back(NUM_BUCKETS - ones);
+            }
         }
         seqan3::debug_stream << "[BENCHMARK]\t" << "Number of Q-grams with distinguishability >= " << ((float) threshold) / NUM_BUCKETS << ": " 
                              << valid_q_grams << " (" << ((float) valid_q_grams) / q_grams_index.size() * 100 << "%).\n";
@@ -151,6 +173,7 @@ private:
     // mapper related information
     unsigned int num_samples;
     unsigned int num_fault_tolerance;
+    unsigned int allowed_max_candidate_buckets;
 
     // filter that filter out the most possible bucket
     fault_tolerate_filter<NUM_BUCKETS>* filter;
@@ -189,7 +212,8 @@ private:
 
 public:
     q_gram_mapper(unsigned int bucket_len, unsigned int read_len, seqan3::shape shape, 
-                  unsigned int samples, unsigned int fault, float distinguishability) : mapper() {
+                  unsigned int samples, unsigned int fault, float distinguishability, 
+                  unsigned int num_candidate_buckets = 10) : mapper() {
         // initialize private variables
         bucket_length = bucket_len;
         read_length = read_len;
@@ -200,9 +224,10 @@ public:
         
         num_samples = samples;
         num_fault_tolerance = fault;
+        allowed_max_candidate_buckets = num_candidate_buckets;
 
         // initialize filter
-        filter = new fault_tolerate_filter<NUM_BUCKETS>(num_fault_tolerance);
+        filter = new fault_tolerate_filter<NUM_BUCKETS>(num_fault_tolerance, num_candidate_buckets);
         dist_filter = new distinguishability_filter<NUM_BUCKETS>(distinguishability);
 
         // Initialize sampler
@@ -290,6 +315,7 @@ public:
             filter->read(q_grams_index[h]);
         }
         return filter->best_results();
+        //return filter->ok_results();
     }
 
     std::vector<int> query_sequence(const std::vector<seqan3::dna4>& sequence) {
@@ -416,6 +442,8 @@ public:
                              << correct_map << " (" << ((float) correct_map) / query_results.size() * 100 << "%).\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Average number of buckets returned: " 
                              << ((float) total_bucket_numbers) / query_results.size() << ".\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Number of sequences that have no candidate bucket: " 
+                             << bucket_number_map[0] << " (" << ((float) bucket_number_map[0]) / query_results.size() * 100 << "%).\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Number of uniquely mapped sequences: " 
                              << bucket_number_map[1] << " (" << ((float) bucket_number_map[1]) / query_results.size() * 100 << "%).\n";
         int small_bucket_numbers = 0;
