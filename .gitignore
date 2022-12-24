@@ -6,3 +6,6 @@ build
 *.fasta
 *.pickle
 *.zip
+
+bucket_map/benchmark/index
+bucket_map/benchmark/output
