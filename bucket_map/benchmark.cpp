@@ -17,8 +17,8 @@ int main() {
     int read_length = 150;
 
     bucket_fm_indexer<26507> ind(bucket_length, read_length, bucket_shape);
-    q_gram_mapper<26507> map(bucket_length, read_length, bucket_shape, 20, 4, 0.7, 10);
-    bucket_locator loc(&ind, &map, bucket_length, read_length, locate_shape, 0.01 * locate_shape.count(), 0.00075 * std::ranges::size(locate_shape), 20);
+    q_gram_mapper<26507> map(bucket_length, read_length, bucket_shape, 20, 4, 0.7, 10, 500);
+    bucket_locator loc(&ind, &map, bucket_length, read_length, locate_shape, 0.01 * locate_shape.count(), 0.00075 * std::ranges::size(locate_shape), 20, 500);
 
     //ind.index(genome_file, data_path / "index_fm");
     //map.read(genome_file);

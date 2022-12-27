@@ -174,12 +174,17 @@ public:
         }
         samples.push_back(upper_bound);
     }
-
-
-
 };
 
-
+struct _dna4_traits : seqan3::sequence_file_input_default_traits_dna {
+    /**
+     * @brief Syntax for reading the query file.
+     */
+    using sequence_alphabet = seqan3::dna4; // instead of dna5
+ 
+    template <typename alph>
+    using sequence_container = std::vector<alph>; // must be defined as a template!
+};
 
 
 #endif

@@ -7,4 +7,4 @@ INDEX_NAME=$2
 cd ./index
 
 # run the indexing method of bowtie2
-/usr/bin/time -o ../log/bowtie2_index.time -v bowtie2-build ${FASTA_PATH} ${INDEX_NAME} > ../log/bowtie2_index.log
+/usr/bin/time -v bowtie2-build ${FASTA_PATH} ${INDEX_NAME} > ../log/bowtie2_index.log
