@@ -43,3 +43,7 @@ add_executable(bucket_map main.cpp ${SHARED_FILES})
 target_link_libraries(bucket_map seqan3::seqan3)
 add_executable(bucket_map_benchmark benchmark.cpp ${SHARED_FILES})
 target_link_libraries(bucket_map_benchmark seqan3::seqan3)
+
+# benchmark executables
+add_executable(sam_benchmark benchmark/sam_file_analyzer.cpp)
+target_link_libraries(sam_benchmark seqan3::seqan3)

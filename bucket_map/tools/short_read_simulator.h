@@ -22,6 +22,7 @@ class short_read_simulator {
 private:
     // variables storing the sequence information
     std::vector<std::vector<seqan3::dna4>> bucket_sequence;
+    std::vector<std::pair<int, int>> bucket_ids;
     int bucket_length, read_length;
 
     // Error generation
@@ -101,8 +102,18 @@ public:
          *        genome is then used for short read generation.
          * @param fasta_file_name the name of the sequence file to be read.
          */
+        int index = 0;
+        int reference_id = -1;
+        std::string last_id = "";
         auto operation = [&](std::vector<seqan3::dna4> seq, std::string id) {
             bucket_sequence.push_back(seq);
+            if (id != last_id) {
+                index = 0;
+                last_id = id;
+                reference_id++;
+            } 
+            bucket_ids.push_back(std::make_pair(reference_id, index));
+            index++;
         };
         iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
     }
@@ -155,28 +166,33 @@ public:
         }
 
         std::ofstream fastq_file(output_path / (indicator + ".fastq"));
-        std::ofstream gt_file(output_path / (indicator + ".ground_truth"));
+        std::ofstream bucket_gt_file(output_path / (indicator + ".bucket_ground_truth"));
+        std::ofstream pos_gt_file(output_path / (indicator + ".position_ground_truth"));
         for (unsigned int i = 0; i < size; i++) {
-            fastq_file << "@seq" << i + 1 << "\n";
+            fastq_file << "@" << i << "\n";
             // generate sequence
             auto res = sample(simulate_error);
             std::vector<seqan3::dna4> sequence = std::get<0>(res);
             int bucket = std::get<1>(res);
-            int exact_location = std::get<2>(res);
+            int offset = std::get<2>(res);
             for (auto nt : sequence) {
                 fastq_file << nt.to_char();
             }
             // insert a quality string.
             fastq_file << "\n+\n" << std::string(sequence.size(), 'E') << "\n";
             // record the ground truth.
-            gt_file << bucket << " " << exact_location << "\n";
+            bucket_gt_file << bucket << " " << offset << "\n";
+            // record the true locations
+            auto true_position = bucket_ids[bucket];
+            pos_gt_file << std::get<0>(true_position) << " " << std::get<1>(true_position) * bucket_length + offset << "\n";
         }
 
         seqan3::debug_stream << "[INFO]\t\t" << "The generated fastq file is stored in: " 
                              << output_path / (indicator + ".fastq") << ".\n";
-        seqan3::debug_stream << "[INFO]\t\t" << "The ground truth file is stored in: " 
-                             << output_path / (indicator + ".ground_truth") << ".\n";
-
+        seqan3::debug_stream << "[INFO]\t\t" << "The ground truth for buckets and offsets is stored in: " 
+                             << output_path / (indicator + ".bucket_ground_truth") << ".\n";
+        seqan3::debug_stream << "[INFO]\t\t" << "The ground truth for exact locations is stored in: " 
+                             << output_path / (indicator + ".position_ground_truth") << ".\n";
     }
 
 };

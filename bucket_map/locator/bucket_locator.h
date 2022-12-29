@@ -31,9 +31,6 @@ private:
     // counter to calculate the possible starting positions
     std::unordered_map<unsigned int, unsigned int> counter;
 
-    // number of buckets we process each time
-    unsigned int batch_size;
-
 
     void _initialize_kmer_index(std::filesystem::path const & fasta_file_name) {
         /**
@@ -46,36 +43,34 @@ private:
         iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
     }
 
-    void _create_kmer_index(std::vector<std::unordered_multimap<unsigned short, unsigned int>>& index, unsigned int batch_id) {
+    void _create_kmer_index(std::unordered_multimap<unsigned int, int>& index, const std::vector<seqan3::dna4>& seq) {
         /**
          * @brief Create the k-mer index given the sequence in bucket.
-         * @param index the k-mer index storing the positions of each k-mer, initially empty.
-         * @param batch_id the batch we are processing
+         * @param index the k-mer index storing the positions of each k-mer.
+         * @param seq the sequence of the bucket.
          */
-        for (unsigned int batch = batch_id * batch_size; batch < (batch_id + 1) * batch_size && batch < bucket_seq.size(); batch++) {
-            std::unordered_multimap<unsigned short, unsigned int> kmer_index;
-            auto kmer_hash = bucket_seq[batch] | seqan3::views::kmer_hash(q_gram_shape);
-            unsigned int offset = 0;
-            for (auto hash : kmer_hash) {
-                kmer_index.emplace(hash, offset);
-                offset++;
-            }
-            index.push_back(kmer_index);
+        index.clear();
+        // insert the k-mers.
+        auto values = seq | seqan3::views::kmer_hash(q_gram_shape);
+        int offset = 0;
+        for (auto hash : values) {
+            // Only record the last appearance of the k-mer
+            index.emplace(hash, offset);
+            offset++;
         }
     }
 
 
-    int _find_offset(const std::vector<std::unordered_multimap<unsigned short, unsigned int>>& bucket_kmer_index, 
-                     unsigned short bucket_id, const std::vector<seqan3::dna4>& sequence) {
+    int _find_offset(const std::unordered_multimap<unsigned int, int>& bucket_kmer_index, int sequence_id) {
         /**
          * @brief Return the most probable offset of the given sequence in the bucket.
          *        return -1 if the sequence is considered not in the bucket.
          * @param bucket_kmer_index a pointer to the k-mer index for the target bucket.
-         * @param sequence the sequence to be found in the query file.
+         * @param sequence_id the index of sequence in the query file.
          */
         // load the sequence and pick up the k-mers
-        auto & index = bucket_kmer_index[bucket_id];
-        auto kmer_hash = sequence | seqan3::views::kmer_hash(q_gram_shape);
+        auto record = _m->records[sequence_id];
+        auto kmer_hash = record | seqan3::views::kmer_hash(q_gram_shape);
 
         // sample k-mers
         sampler->sample_deterministically(kmer_hash.size()-1);
@@ -86,7 +81,7 @@ private:
         // record the possible starting positions
         for (auto i : sampler->samples) {
             // find the positions of the k-mer
-            auto range = index.equal_range(kmer_hash[i]);
+            auto range = bucket_kmer_index.equal_range(kmer_hash[i]);
             for (auto it = range.first; it != range.second; ++it) {
                 auto position = it->second - i;
                 for (int indel = -allowed_indel; indel <= allowed_indel; indel++) {
@@ -114,7 +109,7 @@ public:
     bucket_locator(indexer* ind, mapper* map, unsigned int bucket_len, 
                    unsigned int read_len, seqan3::shape shape, 
                    float mismatch_rate, float indel_rate, 
-                   unsigned int sample_size, unsigned int buckets_per_batch = 1000) : locator(ind) {
+                   unsigned int sample_size) : locator(ind) {
         _m = map;
         bucket_length = bucket_len;
         read_length = read_len;
@@ -132,8 +127,6 @@ public:
 
         // initialize sampler
         sampler = new Sampler(num_samples);
-
-        batch_size = buckets_per_batch;
     }
 
     ~bucket_locator() {
@@ -161,7 +154,7 @@ public:
     }
 
 
-    std::vector<std::vector<std::pair<unsigned short, unsigned int>>> _locate(std::filesystem::path const & sequence_file) {
+    std::vector<std::vector<std::pair<unsigned int, unsigned int>>> _locate(std::filesystem::path const & sequence_file) {
         /**
          * * This function is just for benchmarking
          * @brief Locate the exact locations for the reads in the fastq file.
@@ -171,49 +164,40 @@ public:
         Timer query_timer;
 
         // map reads to buckets
-        auto map_buckets = _m->map(sequence_file);
+        std::vector<std::vector<unsigned int>> sequence_ids = _m->map(sequence_file);
         unsigned int bucket_index = 0;
 
         // initialize result
-        std::vector<std::vector<std::pair<unsigned short, unsigned int>>> res;
-        for (int i = 0; i < _m->num_reads; i++) {
-            std::vector<std::pair<unsigned short, unsigned int>> bucket{};
+        std::vector<std::vector<std::pair<unsigned int, unsigned int>>> res;
+        for (int i = 0; i < _m->records.size(); i++) {
+            std::vector<std::pair<unsigned int, unsigned int>> bucket{};
             res.push_back(bucket);
         }
 
+        // create k-mer index
+        std::unordered_multimap<unsigned int, int> bucket_kmer_index;
 
-        for (unsigned int batch_id = 0; batch_id < map_buckets.size(); batch_id++) {
+        for (int i = 0; i < sequence_ids.size(); i++) {
+            auto & bucket_sequence = sequence_ids[i];
 
-            // get the mapped sequences for each batch
-            auto & batch_sequence = map_buckets[batch_id];
-            // skip if no read is mapped to this batch of buckets
-            if (batch_sequence.empty()) continue;
-            // create k-mer index
-            std::vector<std::unordered_multimap<unsigned short, unsigned int>> batch_kmer_index;
+            // skip if no read is mapped to this bucket
+            if (bucket_sequence.empty()) {
+                continue;
+            }
             
             // for each bucket, create the corresponding kmer index
             index_timer.tick();
-            _create_kmer_index(batch_kmer_index, batch_id);
+            _create_kmer_index(bucket_kmer_index, bucket_seq[i]);
             index_timer.tock();
             
             // go through all sequences mapped to this bucket and check the offset.
             query_timer.tick();
-            // read the query file
-            seqan3::sequence_file_input<_dna4_traits> fin{sequence_file};
-            unsigned int read_index = 0;
-            for (auto & rec : fin) {
-                if (batch_sequence[read_index].empty()) {
-                    read_index++;
-                    continue;
+            for (auto & id : bucket_sequence) {
+                int offset = _find_offset(bucket_kmer_index, id);
+                // the sequence is mapped to an exact location in the bucket
+                if (offset > 0) {
+                    res[id].push_back(std::make_pair(i, offset));
                 }
-                // if the read is mapped to at least one bucket
-                for (auto bucket_id : batch_sequence[read_index]) {
-                    int offset = _find_offset(batch_kmer_index, bucket_id, rec.sequence());
-                    if (offset > 0) {
-                        res[read_index].push_back(std::make_pair(batch_id * batch_size + bucket_id, offset));
-                    }
-                }
-                read_index++;
             }
             query_timer.tock();
         }
@@ -223,12 +207,12 @@ public:
                              << index_timer.elapsed_seconds() << " s.\n";
         float time = query_timer.elapsed_seconds();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Total time used for finding exact location of the sequences: " 
-                             << time << " s (" << time * 1000 * 1000 / _m->num_reads << " μs/seq).\n";
+                             << time << " s (" << time * 1000 * 1000 / _m->records.size() << " μs/seq).\n";
 
         return res;
     }
 
-     void _check_ground_truth(const std::vector<std::vector<std::pair<unsigned short, unsigned int>>>& query_results, 
+     void _check_ground_truth(const std::vector<std::vector<std::pair<unsigned int, unsigned int>>>& query_results, 
                               std::filesystem::path ground_truth_file) {
         /**
          * * This function is just for benchmarking.
@@ -238,8 +222,7 @@ public:
          *       fastq file.
          */
         std::ifstream is(ground_truth_file);
-        unsigned short bucket; 
-        unsigned int exact_location;
+        int bucket, exact_location;
 
         // Test statistics
         int correct_map = 0;
@@ -251,7 +234,7 @@ public:
 
         for (int i = 0; i < query_results.size(); i++) {
             is >> bucket >> exact_location;
-            auto buckets = query_results[i];
+            std::vector<std::pair<unsigned int, unsigned int>> buckets = query_results[i];
 
             for (auto & pair : buckets) {
                 // check the bucket id

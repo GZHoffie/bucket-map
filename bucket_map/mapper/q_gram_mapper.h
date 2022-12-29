@@ -31,12 +31,12 @@ private:
     unsigned int allowed_max_candidate_buckets;
     std::vector<std::bitset<NUM_BUCKETS>> filters;
 
-    std::vector<unsigned short> _set_bits(int index) {
+    std::vector<int> _set_bits(int index) {
         /**
          * @brief Find all set bits in filters[index]
          * @param index indicates which filter we want to check.
          */
-        std::vector<unsigned short> res;
+        std::vector<int> res;
         if (index >= num_fault_tolerance || index < 0) {
             seqan3::debug_stream << "[ERROR]\t\t" << "The input index "
                                  << index << " exceeds the fault tolerance level." << '\n';
@@ -44,8 +44,7 @@ private:
         } else if (filters[index].none()) {
             return res;
         }
-        for (unsigned short i = (unsigned short) filters[index]._Find_first(); i < NUM_BUCKETS; 
-             i = (unsigned short) filters[index]._Find_next(i)) {
+        for (int i = filters[index]._Find_first(); i < NUM_BUCKETS; i = filters[index]._Find_next(i)) {
             res.push_back(i);
         }
         return res;
@@ -82,11 +81,11 @@ public:
         filters[num_fault_tolerance - 1] &= input;
     }
 
-    std::vector<unsigned short> best_results() {
+    std::vector<int> best_results() {
         /**
          * @brief Return the buckets that contains the most number of k-mers.
          */
-        std::vector<unsigned short> res;
+        std::vector<int> res;
         for (int i = num_fault_tolerance-1; i >= 0; i--) {
             res = _set_bits(i);
             if (!res.empty()) {
@@ -96,11 +95,11 @@ public:
         return res;
     }
 
-    std::vector<unsigned short> ok_results() {
+    std::vector<int> ok_results() {
         /**
          * @brief Return the best `allowed_max_candidate_buckets` buckets.
          */
-        std::vector<unsigned short> res;
+        std::vector<int> res;
         for (int i = num_fault_tolerance-1; i >= 0; i--) {
             if (i == 0 || filters[i-1].count() > allowed_max_candidate_buckets) {
                 res = _set_bits(i);
@@ -187,9 +186,6 @@ private:
     // sampling k-mers
     Sampler* sampler;
 
-    // number of buckets for each batch
-    unsigned int batch_size;
-
     std::bitset<NUM_BUCKETS> _bitset_from_bytes(const std::vector<unsigned char>& buf) {
         /**
          * @brief Convert 8-byte chars to bitset.
@@ -202,11 +198,22 @@ private:
         return result;
     }
 
+    struct _dna4_traits : seqan3::sequence_file_input_default_traits_dna {
+        /**
+         * @brief Syntax for reading the query file.
+         * 
+         */
+        using sequence_alphabet = seqan3::dna4; // instead of dna5
+ 
+        template <typename alph>
+        using sequence_container = std::vector<alph>; // must be defined as a template!
+    };
+
 
 public:
     q_gram_mapper(unsigned int bucket_len, unsigned int read_len, seqan3::shape shape, 
                   unsigned int samples, unsigned int fault, float distinguishability, 
-                  unsigned int num_candidate_buckets = 10, unsigned int buckets_per_batch = 1000) : mapper() {
+                  unsigned int num_candidate_buckets = 10) : mapper() {
         // initialize private variables
         bucket_length = bucket_len;
         read_length = read_len;
@@ -225,9 +232,6 @@ public:
 
         // Initialize sampler
         sampler = new Sampler(num_samples);
-
-        // Parameters for batch
-        batch_size = buckets_per_batch;
     }
 
     ~q_gram_mapper() {
@@ -289,7 +293,7 @@ public:
     }
 
 
-    std::vector<unsigned short> query(const std::vector<int>& q_gram_hash) {
+    std::vector<int> query(const std::vector<int>& q_gram_hash) {
         /**
          * @brief From `q_grams_index`, determine where the sequence may be coming from.
          * @param q_gram_hash the vector containing all hash values of q-grams in the
@@ -300,7 +304,7 @@ public:
         // q_grams_index should not be empty
         if (q_grams_index.empty()) {
             seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram index is empty. Cannot accept query.\n";
-            std::vector<unsigned short> res;
+            std::vector<int> res;
             return res;
         }
         // Reset the filter
@@ -314,7 +318,7 @@ public:
         //return filter->ok_results();
     }
 
-    std::vector<unsigned short> query_sequence(const std::vector<seqan3::dna4>& sequence) {
+    std::vector<int> query_sequence(const std::vector<seqan3::dna4>& sequence) {
         /**
          * @brief From `q_grams_index`, determine where the sequence may be coming from.
          * @param sequence A dna4 vector containing the query sequence.
@@ -328,7 +332,7 @@ public:
 
         // if not enough q-grams ramained to determine the exact location, simply ignore this query sequence.
         if (hash_values.size() < 0.5 * num_samples){
-            std::vector<unsigned short> res;
+            std::vector<int> res;
             return res;
         }
 
@@ -349,51 +353,35 @@ public:
 
 
 
-    std::vector<std::vector<std::vector<unsigned short>>> map(std::filesystem::path const & sequence_file) {
+    std::vector<std::vector<unsigned int>> map(std::filesystem::path const & sequence_file) {
         /**
          * @brief Read a query fastq file and output the ids of the sequence that are mapped 
          *        to each file.
          */
 
-        std::vector<std::vector<std::vector<unsigned short>>> res;
-
-        // preprocess and get the number of reads
+        std::vector<std::vector<unsigned int>> res;
         seqan3::sequence_file_input<_dna4_traits> fin{sequence_file};
-        for (auto & rec : fin) {
-            ++num_reads;
-        }
-        seqan3::debug_stream << "[INFO]\t\t" << "Mapping file " << sequence_file 
-                             << " with " << num_reads << " sequences.\n";
-        
         // initialize returning result
-        for (int batch = 0; batch < NUM_BUCKETS / batch_size + 1; batch++) {
-            std::vector<std::vector<unsigned short>> batch_list;
-            res.push_back(batch_list);
+        for (int i = 0; i < NUM_BUCKETS; i++) {
+            std::vector<unsigned int> sequence_ids;
+            res.push_back(sequence_ids);
         }
 
         Timer clock;
         clock.tick();
-        seqan3::sequence_file_input<_dna4_traits> fin_map{sequence_file};
 
-        unsigned int read_index = 0;
-        for (auto & rec : fin_map) {
-            for (auto bucket : query_sequence(rec.sequence())) {
-                unsigned short batch_id = bucket / batch_size;
-                if (res[batch_id].empty()) {
-                    // initialize the bucket
-                    for (int read = 0; read < num_reads; read++) {
-                        std::vector<unsigned short> bucket_ids;
-                        res[batch_id].push_back(bucket_ids);
-                    }
-                }
-                res[batch_id][read_index].push_back(bucket % batch_size);
+        unsigned int index = 0;
+        for (auto & rec : fin) {
+            records.push_back(rec.sequence());
+            for (auto & bucket : query_sequence(rec.sequence())) {
+                res[bucket].push_back(index);
             }
-            read_index++;
+            ++index;
         }
         clock.tock();
         float time = clock.elapsed_seconds();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for bucket mapping: " 
-                             << time << " s (" << time * 1000 * 1000 / num_reads << " μs/seq).\n";
+                             << time << " s (" << time * 1000 * 1000 / records.size() << " μs/seq).\n";
         return res;
     }
 

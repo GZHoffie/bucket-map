@@ -3,7 +3,7 @@
 To find time and space usage, we can use the following command.
 
 ```shell
-/usr/bin/time -v build/bucket_map_benchmark
+./benchmark_map.sh /mnt/d/genome/test/sim.fastq egu
 ```
 
 ## To-dos
