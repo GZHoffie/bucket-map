@@ -55,7 +55,8 @@ public:
         num_fault_tolerance = fault;
         for (int i = 0; i < num_fault_tolerance; i++) {
             std::bitset<NUM_BUCKETS> filter;
-            filters.push_back(filter.set());
+            filter.set();
+            filters.push_back(filter);
         }
         allowed_max_candidate_buckets = num_buckets;
     }
@@ -101,12 +102,31 @@ public:
          */
         std::vector<int> res;
         for (int i = num_fault_tolerance-1; i >= 0; i--) {
-            if (i == 0 || filters[i-1].count() > allowed_max_candidate_buckets) {
+            if (i == 0 || (filters[i-1].count() > allowed_max_candidate_buckets && filters[i].count() != 0)) {
                 res = _set_bits(i);
                 return res;
             }
         }
         return res;
+    }
+
+    std::vector<int> all_results() {
+        /**
+         * @brief Return all the acceptable buckets.
+         */
+        return _set_bits(0);
+    }
+
+    int _check_bucket(unsigned int bucket_id) {
+        /**
+         * @brief Check how many errors actually present in the true bucket.
+         */
+        for (int i = num_fault_tolerance-1; i >= 0; i--) {
+            if (filters[i][bucket_id]) {
+                return i;
+            }
+        }
+        return 0;
     }
 };
 
@@ -314,7 +334,7 @@ public:
         for (int h : q_gram_hash) {
             filter->read(q_grams_index[h]);
         }
-        return filter->best_results();
+        return filter->all_results();
         //return filter->ok_results();
     }
 
@@ -331,7 +351,7 @@ public:
         std::vector<unsigned int> hash_values(values.begin(), values.end());
 
         // if not enough q-grams ramained to determine the exact location, simply ignore this query sequence.
-        if (hash_values.size() < 0.5 * num_samples){
+        if (hash_values.size() < 0.2 * num_samples){
             std::vector<int> res;
             return res;
         }
@@ -348,7 +368,9 @@ public:
         for (auto sample : sampler->samples) {
             samples.push_back(hash_values[sample]);
         }
+        
         return query(samples);
+        
     }
 
 
@@ -397,6 +419,7 @@ public:
         clock.tick();
  
         for (auto & rec : fin) {
+            records.push_back(rec.sequence());
             std::vector<int> buckets = query_sequence(rec.sequence());
             res.push_back(buckets);
         }
@@ -418,6 +441,7 @@ public:
          */
         std::ifstream is(ground_truth_file);
         int bucket, exact_location;
+        std::string cigar;
 
         // Test statistics
         int correct_map = 0;
@@ -425,11 +449,22 @@ public:
         std::map<int, int> bucket_number_map;
 
         for (int i = 0; i < query_results.size(); i++) {
-            is >> bucket >> exact_location;
+            is >> bucket >> exact_location >> cigar;
             std::vector<int> buckets = query_results[i];
 
             if (std::find(buckets.begin(), buckets.end(), bucket) != buckets.end()) {
                 correct_map++;
+            } else {
+                seqan3::debug_stream << "ID: " << i << ", correct bucket: " << bucket << ", predicted buckets: " << buckets << ".";
+                query_sequence(records[i]);
+                if (!buckets.empty()) {
+                    
+                    int present_kmers_in_gt = filter->_check_bucket(bucket);
+
+                    int present_kmers_in_best = filter->_check_bucket(buckets[0]);
+                    seqan3::debug_stream << "Correct bucket k-mers: " << present_kmers_in_gt << ", Predicted bucket k-mers: " << present_kmers_in_best << ".";
+                }
+                seqan3::debug_stream << " CIGAR: " << cigar << "\n";
             }
             total_bucket_numbers += buckets.size();
             ++bucket_number_map[buckets.size()];

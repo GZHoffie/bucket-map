@@ -38,17 +38,15 @@ protected:
     unsigned int size;
 
 
-    void _insert_into_bucket(std::vector<seqan3::dna4> sequence, unsigned int bucket_num) {
+    void _insert_into_bucket(const std::vector<seqan3::dna4>& sequence, unsigned int bucket_num) {
         /**
          * @brief Read the sequence, extract all the q-grams and store in `q_grams_index`.
          * @param sequence the corresponding sequence for the bucket.
          * @param bucket_num an integer indicating the position of the bucket. Should be
          *                   between 0 and NUM_BUCKETS - 1.
          */
-        auto q_gram = seqan3::views::kmer_hash(q_gram_shape);
-
         // Extract all q_grams from sequence
-        for (auto && value : sequence | q_gram) {
+        for (auto && value : sequence | seqan3::views::kmer_hash(q_gram_shape)) {
             q_grams_index[value].set(bucket_num);
         }
     }
@@ -161,12 +159,12 @@ public:
             bucket_num++;
         };
         iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
-        create_index(index_directory);
+        //create_index(index_directory);
 
         // create q-gram index files
         _store_q_gram_index(index_directory);
 
-        seqan3::debug_stream << "[INFO]\t\t" << "The number of index files created: " 
+        seqan3::debug_stream << "[INFO]\t\t" << "The number of buckets: " 
                              << bucket_id.size() << "." << '\n';
         // Store the bucket_id in the directory
         _store_bucket_ids(index_directory);

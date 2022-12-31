@@ -6,6 +6,7 @@
 #include <seqan3/alphabet/all.hpp>
 #include <seqan3/io/sequence_file/all.hpp>
 #include <seqan3/core/debug_stream.hpp>
+#include <seqan3/alphabet/cigar/all.hpp>
 
 #include <chrono>
 #include <thread>
@@ -184,6 +185,83 @@ struct _dna4_traits : seqan3::sequence_file_input_default_traits_dna {
  
     template <typename alph>
     using sequence_container = std::vector<alph>; // must be defined as a template!
+};
+
+
+class CIGAR {
+    /**
+     * @brief Util class for the cigar string, with support of inserting cigar operation.
+     */
+private:
+    std::vector<seqan3::cigar> CIGAR_vector;
+
+public:
+    CIGAR() {}
+
+    CIGAR(std::vector<seqan3::cigar> CIGAR_init) {
+        /**
+         * @brief Initialize the class with a vector of seqan3::cigar objects.
+         * 
+         */
+        CIGAR_vector = CIGAR_init;
+    }
+
+    CIGAR(unsigned int size, seqan3::cigar::operation op) {
+        /**
+         * @brief Initialize the class with `size` number of `op`s.
+         * 
+         */
+        for (int i = 0; i < size; i++) {
+            seqan3::cigar operation{1, op};
+            CIGAR_vector.push_back(operation);
+        }
+    }
+
+    void insert(unsigned int index, seqan3::cigar::operation op) {
+        /**
+         * @brief Insert a cigar operation at a certain index.
+         * 
+         */
+        seqan3::cigar operation{1, op};
+        CIGAR_vector.insert(CIGAR_vector.begin() + index, operation);
+    }
+
+    void replace(unsigned int index, seqan3::cigar::operation op) {
+        /**
+         * @brief Replace the operation at `index` to `op`.
+         * 
+         */
+        seqan3::cigar operation{1, op};
+        CIGAR_vector[index] = operation;
+    }
+
+    std::string to_string() {
+        /**
+         * @brief Convert the vector to a CIGAR string for output.
+         * 
+         */
+        std::string res;
+        unsigned int size = 0;
+        seqan3::cigar::operation last_op, curr_op;
+        if (!CIGAR_vector.empty()) {
+            last_op = get<1>(CIGAR_vector[0]);
+            for (auto cigar : CIGAR_vector) {
+                curr_op = get<1>(cigar);
+                unsigned int curr_size = get<0>(cigar);
+                if (last_op == curr_op) {
+                    size += curr_size;
+                } else if (size != 0) {
+                    res += std::to_string(size) + last_op.to_char();
+                    size = curr_size;
+                    last_op = curr_op;
+                }
+            }
+            if (size != 0) {
+                res += std::to_string(size) + last_op.to_char();
+            }
+        }
+        return res;
+    }
 };
 
 

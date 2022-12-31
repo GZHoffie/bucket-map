@@ -12,6 +12,7 @@
 #include "../utils.h"
 
 using seqan3::operator""_dna4;
+using seqan3::operator""_cigar_operation;
 
 class short_read_simulator {
     /**
@@ -35,16 +36,27 @@ private:
     std::mt19937* gen;
 
     // Error generating functions
-    void _add_substitution(std::vector<seqan3::dna4>& sequence) {
-        sequence[rand() % sequence.size()] = neucleotides[rand() % 4];
+    void _add_substitution(std::vector<seqan3::dna4>& sequence, CIGAR& cigar) {
+        unsigned int index = rand() % sequence.size();
+        seqan3::dna4 orig_nt = sequence[index];
+        seqan3::dna4 new_nt = neucleotides[rand() % 4];
+        while (new_nt == orig_nt) {
+            new_nt = neucleotides[rand() % 4];
+        }
+        sequence[index] = new_nt;
+        cigar.replace(index, 'X'_cigar_operation);
     }
 
-    void _add_insertion(std::vector<seqan3::dna4>& sequence) {
-        sequence.insert(sequence.begin() + rand() % sequence.size(), neucleotides[rand() % 4]);
+    void _add_insertion(std::vector<seqan3::dna4>& sequence, CIGAR& cigar) {
+        unsigned int index = rand() % sequence.size();
+        sequence.insert(sequence.begin() + index, neucleotides[rand() % 4]);
+        cigar.insert(index, 'I'_cigar_operation);
     }
 
-    void _add_deletion(std::vector<seqan3::dna4>& sequence) {
-        sequence.erase(sequence.begin() + rand() % sequence.size());
+    void _add_deletion(std::vector<seqan3::dna4>& sequence, CIGAR& cigar) {
+        unsigned int index = rand() % sequence.size();
+        sequence.erase(sequence.begin() + index);
+        cigar.insert(index, 'D'_cigar_operation);
     }
 
 public:
@@ -67,20 +79,22 @@ public:
         delete substitution_dist, insertion_dist, deletion_dist;
     }
 
-    void add_errors(std::vector<seqan3::dna4>& sequence, int substitutions, int deletions, int insertions) {
+    void add_errors(std::vector<seqan3::dna4>& sequence, CIGAR& cigar, 
+                    int substitutions, int deletions, int insertions) {
         /**
          * @brief Add errors to a short read sequence.
          * @param sequence the short read sequence to be modified.
+         * @param cigar the ground truth cigar string.
          * @param substitutions number of substitutions to make.
          * @param deletions number of deletions to make.
          * @param insertions number of insertions to make.
          */
-        for (int i = 0; i < deletions; i++) _add_deletion(sequence);
-        for (int i = 0; i < insertions; i++) _add_insertion(sequence);
-        for (int i = 0; i < substitutions; i++) _add_substitution(sequence);
+        for (int i = 0; i < deletions; i++) _add_deletion(sequence, cigar);
+        for (int i = 0; i < insertions; i++) _add_insertion(sequence, cigar);
+        for (int i = 0; i < substitutions; i++) _add_substitution(sequence, cigar);
     }
 
-    void simulate_errors(std::vector<seqan3::dna4>& sequence) {
+    void simulate_errors(std::vector<seqan3::dna4>& sequence, CIGAR& cigar) {
         /**
          * @brief Do simulation and generate the number of substitution, deletion and insertion randomly
          *        from poisson distributions with lamda = substitution_rate, deletion_rate and 
@@ -90,7 +104,7 @@ public:
          */
         std::random_device rd;
         std::mt19937 gen(rd());
-        add_errors(sequence,
+        add_errors(sequence, cigar,
                    (*substitution_dist)(gen),
                    (*deletion_dist)(gen),
                    (*insertion_dist)(gen));
@@ -118,7 +132,7 @@ public:
         iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
     }
 
-    std::tuple<std::vector<seqan3::dna4>, int, int> sample(bool simulate_error = true) {
+    std::tuple<std::vector<seqan3::dna4>, int, int, CIGAR> sample(bool simulate_error = true) {
         /**
          * @brief Take a sample short read from the reference genome and add errors to it.
          * @param simulate_error whether we add random error to the sequence or not.
@@ -137,10 +151,14 @@ public:
             end = current_bucket.size();
         }
         std::vector<seqan3::dna4> sample_sequence(current_bucket.begin() + start, current_bucket.begin() + end);
+        // assign the original cigar sequence
+        CIGAR cigar(sample_sequence.size(), '='_cigar_operation);
+
+        // insert errors
         if (simulate_error) {
-            simulate_errors(sample_sequence);
+            simulate_errors(sample_sequence, cigar);
         }
-        return std::make_tuple(sample_sequence, bucket, start);
+        return std::make_tuple(sample_sequence, bucket, start, cigar);
     }
 
     void generate_fastq_file(std::filesystem::path output_path, std::string indicator, unsigned int size,  
@@ -175,16 +193,17 @@ public:
             std::vector<seqan3::dna4> sequence = std::get<0>(res);
             int bucket = std::get<1>(res);
             int offset = std::get<2>(res);
+            CIGAR cigar = std::get<3>(res);
             for (auto nt : sequence) {
                 fastq_file << nt.to_char();
             }
             // insert a quality string.
             fastq_file << "\n+\n" << std::string(sequence.size(), 'E') << "\n";
             // record the ground truth.
-            bucket_gt_file << bucket << " " << offset << "\n";
+            bucket_gt_file << bucket << " " << offset << " " << cigar.to_string() << "\n";
             // record the true locations
             auto true_position = bucket_ids[bucket];
-            pos_gt_file << std::get<0>(true_position) << " " << std::get<1>(true_position) * bucket_length + offset << "\n";
+            pos_gt_file << std::get<0>(true_position) << " " << std::get<1>(true_position) * bucket_length + offset << " " << cigar.to_string() << "\n";
         }
 
         seqan3::debug_stream << "[INFO]\t\t" << "The generated fastq file is stored in: " 
