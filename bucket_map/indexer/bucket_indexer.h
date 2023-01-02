@@ -1,5 +1,5 @@
-#ifndef BUCKET_MAP_BUCKET_INDEX_H
-#define BUCKET_MAP_BUCKET_INDEX_H
+#ifndef BUCKET_MAP_BUCKET_INDEXER_H
+#define BUCKET_MAP_BUCKET_INDEXER_H
 
 #include <string>
 #include <vector>
@@ -159,7 +159,7 @@ public:
             bucket_num++;
         };
         iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
-        //create_index(index_directory);
+        create_index(index_directory);
 
         // create q-gram index files
         _store_q_gram_index(index_directory);

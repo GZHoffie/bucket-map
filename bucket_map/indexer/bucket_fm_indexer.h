@@ -1,5 +1,5 @@
-#ifndef BUCKET_MAP_BUCKET_FM_INDEX_H
-#define BUCKET_MAP_BUCKET_FM_INDEX_H
+#ifndef BUCKET_MAP_BUCKET_FM_INDEXER_H
+#define BUCKET_MAP_BUCKET_FM_INDEXER_H
 
 #include "./bucket_indexer.h"
 

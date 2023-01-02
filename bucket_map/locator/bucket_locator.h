@@ -5,6 +5,7 @@
 #include <cstdlib>
 
 #include <seqan3/search/fm_index/bi_fm_index.hpp>
+#include <dlib/serialize.h>
 
 class bucket_locator : public locator {
 private:
@@ -30,35 +31,6 @@ private:
 
     // counter to calculate the possible starting positions
     std::unordered_map<unsigned int, unsigned int> counter;
-
-
-    void _initialize_kmer_index(std::filesystem::path const & fasta_file_name) {
-        /**
-         * @brief Insert the sequence into `bucket_seq` variable.
-         * @param fasta_file_name the path to the fasta file containing reference genome.
-         */
-        auto operation = [&](std::vector<seqan3::dna4> seq, std::string id) {
-            bucket_seq.push_back(seq);
-        };
-        iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
-    }
-
-    void _create_kmer_index(std::unordered_multimap<unsigned int, int>& index, const std::vector<seqan3::dna4>& seq) {
-        /**
-         * @brief Create the k-mer index given the sequence in bucket.
-         * @param index the k-mer index storing the positions of each k-mer.
-         * @param seq the sequence of the bucket.
-         */
-        index.clear();
-        // insert the k-mers.
-        auto values = seq | seqan3::views::kmer_hash(q_gram_shape);
-        int offset = 0;
-        for (auto hash : values) {
-            // Only record the last appearance of the k-mer
-            index.emplace(hash, offset);
-            offset++;
-        }
-    }
 
 
     int _find_offset(const std::unordered_multimap<unsigned int, int>& bucket_kmer_index, int sequence_id) {
@@ -140,9 +112,6 @@ public:
         // load q-gram index to the mapper
         _m->load(index_directory);
 
-        // load all index files
-        _initialize_kmer_index(fasta_file_name);
-
         // create index files
         return locator::initialize(fasta_file_name, index_directory, indicator);
     }
@@ -154,7 +123,8 @@ public:
     }
 
 
-    std::vector<std::vector<std::pair<unsigned int, unsigned int>>> _locate(std::filesystem::path const & sequence_file) {
+    std::vector<std::vector<std::pair<unsigned int, unsigned int>>> _locate(std::filesystem::path const & sequence_file, 
+                                                                            std::filesystem::path const & index_path) {
         /**
          * * This function is just for benchmarking
          * @brief Locate the exact locations for the reads in the fastq file.
@@ -187,7 +157,9 @@ public:
             
             // for each bucket, create the corresponding kmer index
             index_timer.tick();
-            _create_kmer_index(bucket_kmer_index, bucket_seq[i]);
+            std::ifstream index_file(index_path / (std::to_string(i) + ".bhi"));
+
+            dlib::deserialize(bucket_kmer_index, index_file);
             index_timer.tock();
             
             // go through all sequences mapped to this bucket and check the offset.
@@ -223,6 +195,7 @@ public:
          */
         std::ifstream is(ground_truth_file);
         int bucket, exact_location;
+        std::string cigar;
 
         // Test statistics
         int correct_map = 0;
@@ -233,7 +206,7 @@ public:
         int almost_correct_offset = 0;
 
         for (int i = 0; i < query_results.size(); i++) {
-            is >> bucket >> exact_location;
+            is >> bucket >> exact_location >> cigar;
             std::vector<std::pair<unsigned int, unsigned int>> buckets = query_results[i];
 
             for (auto & pair : buckets) {
