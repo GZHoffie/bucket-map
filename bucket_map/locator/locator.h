@@ -34,7 +34,7 @@ public:
     }
     
     virtual void locate(std::filesystem::path const & sequence_file, 
-                        std::filesystem::path const & index_file,
+                        std::filesystem::path const & index_path,
                         std::filesystem::path const & sam_file) {
         /**
          * @brief Find the exact location of reads in a fastq file, and output

@@ -5,7 +5,6 @@
 #include <cstdlib>
 
 #include <seqan3/search/fm_index/bi_fm_index.hpp>
-#include <dlib/serialize.h>
 
 class bucket_locator : public locator {
 private:
@@ -30,15 +29,46 @@ private:
     Sampler* sampler;
 
     // counter to calculate the possible starting positions
-    std::unordered_map<unsigned int, unsigned int> counter;
+    std::unordered_map<unsigned int, unsigned int> fuzzy_counter;
+    std::unordered_map<unsigned int, unsigned int> exact_counter;
 
 
-    int _find_offset(const std::unordered_multimap<unsigned int, int>& bucket_kmer_index, int sequence_id) {
+    void _initialize_kmer_index(std::filesystem::path const & fasta_file_name) {
+        /**
+         * @brief Insert the sequence into `bucket_seq` variable.
+         * @param fasta_file_name the path to the fasta file containing reference genome.
+         */
+        auto operation = [&](std::vector<seqan3::dna4> seq, std::string id) {
+            bucket_seq.push_back(seq);
+        };
+        iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
+    }
+
+    void _create_kmer_index(std::unordered_multimap<unsigned int, int>& index, const std::vector<seqan3::dna4>& seq) {
+        /**
+         * @brief Create the k-mer index given the sequence in bucket.
+         * @param index the k-mer index storing the positions of each k-mer.
+         * @param seq the sequence of the bucket.
+         */
+        index.clear();
+        // insert the k-mers.
+        auto values = seq | seqan3::views::kmer_hash(q_gram_shape);
+        int offset = 0;
+        for (auto hash : values) {
+            // Only record the last appearance of the k-mer
+            index.emplace(hash, offset);
+            offset++;
+        }
+    }
+
+
+    std::vector<std::pair<unsigned int, unsigned int>> 
+    _find_offset(const std::unordered_multimap<unsigned int, int>& bucket_kmer_index, int sequence_id) {
         /**
          * @brief Return the most probable offset of the given sequence in the bucket.
-         *        return -1 if the sequence is considered not in the bucket.
          * @param bucket_kmer_index a pointer to the k-mer index for the target bucket.
          * @param sequence_id the index of sequence in the query file.
+         * @returns a vector containing the possible offsets and the obtained number of votes.
          */
         // load the sequence and pick up the k-mers
         auto record = _m->records[sequence_id];
@@ -48,7 +78,8 @@ private:
         sampler->sample_deterministically(kmer_hash.size()-1);
 
         // reset counter
-        counter.clear();
+        fuzzy_counter.clear();
+        exact_counter.clear();
 
         // record the possible starting positions
         for (auto i : sampler->samples) {
@@ -56,24 +87,37 @@ private:
             auto range = bucket_kmer_index.equal_range(kmer_hash[i]);
             for (auto it = range.first; it != range.second; ++it) {
                 auto position = it->second - i;
+                exact_counter[position]++;
                 for (int indel = -allowed_indel; indel <= allowed_indel; indel++) {
-                    counter[position + indel]++;
+                    fuzzy_counter[position + indel]++;
                 }
             }
         }
 
-        // find potential good offset
-        // We choose the smallest offset that contains a specific number of k-mers
-        if (!counter.empty()) {
-            auto res = std::max_element(counter.begin(), counter.end(), [](const auto &x, const auto &y) {
-                                            return (x.second < y.second) || (x.second == y.second && x.first > y.first);
-                                        });
-            if (res->second >= num_samples - allowed_mismatch && res->first >= 0) {
-                return res->first;
+        // find potential good offsets that are higher than the threshold
+        std::erase_if(fuzzy_counter, [&](const auto& item) {
+            auto const& [key, value] = item;
+            return (value < num_samples - allowed_mismatch) || (key < 0);
+        });
+
+        // only keep the first key of many consecutive keys
+        std::unordered_map<unsigned int, unsigned int> fuzzy_counter_copy(fuzzy_counter);
+        std::erase_if(fuzzy_counter, [&](const auto& item) {
+            auto const& [key, value] = item;
+            return fuzzy_counter_copy.contains(key-1);
+        });
+
+        // return the acceptable offsets
+        std::vector<std::pair<unsigned int, unsigned int>> res;
+        for (const auto& [key, value] : fuzzy_counter) {
+            for (int indel = -allowed_indel; indel <= allowed_indel; indel++) {
+                if (exact_counter.contains(key + indel)) {
+                    res.push_back(std::make_pair(key + indel, value));
+                    continue;
+                }
             }
         }
-        
-        return -1;
+        return res;
     }
 
 
@@ -95,7 +139,8 @@ public:
         srand(time(NULL));
 
         // initialize counter
-        counter.reserve(sample_size * allowed_indel);
+        fuzzy_counter.reserve(sample_size * allowed_indel);
+        exact_counter.reserve(sample_size);
 
         // initialize sampler
         sampler = new Sampler(num_samples);
@@ -112,6 +157,9 @@ public:
         // load q-gram index to the mapper
         _m->load(index_directory);
 
+        // load all index files
+        _initialize_kmer_index(fasta_file_name);
+
         // create index files
         return locator::initialize(fasta_file_name, index_directory, indicator);
     }
@@ -122,9 +170,10 @@ public:
         
     }
 
+    typedef std::tuple<unsigned int, unsigned int, unsigned int> locate_t;
 
-    std::vector<std::vector<std::pair<unsigned int, unsigned int>>> _locate(std::filesystem::path const & sequence_file, 
-                                                                            std::filesystem::path const & index_path) {
+    std::vector<std::vector<locate_t>> 
+    _locate(std::filesystem::path const & sequence_file) {
         /**
          * * This function is just for benchmarking
          * @brief Locate the exact locations for the reads in the fastq file.
@@ -138,9 +187,9 @@ public:
         unsigned int bucket_index = 0;
 
         // initialize result
-        std::vector<std::vector<std::pair<unsigned int, unsigned int>>> res;
+        std::vector<std::vector<locate_t>> res;
         for (int i = 0; i < _m->records.size(); i++) {
-            std::vector<std::pair<unsigned int, unsigned int>> bucket{};
+            std::vector<locate_t> bucket{};
             res.push_back(bucket);
         }
 
@@ -157,18 +206,14 @@ public:
             
             // for each bucket, create the corresponding kmer index
             index_timer.tick();
-            std::ifstream index_file(index_path / (std::to_string(i) + ".bhi"));
-
-            dlib::deserialize(bucket_kmer_index, index_file);
+            _create_kmer_index(bucket_kmer_index, bucket_seq[i]);
             index_timer.tock();
             
             // go through all sequences mapped to this bucket and check the offset.
             query_timer.tick();
             for (auto & id : bucket_sequence) {
-                int offset = _find_offset(bucket_kmer_index, id);
-                // the sequence is mapped to an exact location in the bucket
-                if (offset > 0) {
-                    res[id].push_back(std::make_pair(i, offset));
+                for (auto &[offset, vote] : _find_offset(bucket_kmer_index, id)) {
+                    res[id].push_back(std::make_tuple(i, offset, vote));
                 }
             }
             query_timer.tock();
@@ -184,7 +229,7 @@ public:
         return res;
     }
 
-     void _check_ground_truth(const std::vector<std::vector<std::pair<unsigned int, unsigned int>>>& query_results, 
+     void _check_ground_truth(const std::vector<std::vector<locate_t>>& query_results, 
                               std::filesystem::path ground_truth_file) {
         /**
          * * This function is just for benchmarking.
@@ -196,7 +241,7 @@ public:
         std::ifstream is(ground_truth_file);
         int bucket, exact_location;
         std::string cigar;
-
+        
         // Test statistics
         int correct_map = 0;
         int total_bucket_numbers = 0;
@@ -207,7 +252,7 @@ public:
 
         for (int i = 0; i < query_results.size(); i++) {
             is >> bucket >> exact_location >> cigar;
-            std::vector<std::pair<unsigned int, unsigned int>> buckets = query_results[i];
+            std::vector<locate_t> buckets = query_results[i];
 
             for (auto & pair : buckets) {
                 // check the bucket id

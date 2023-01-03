@@ -25,15 +25,15 @@ int main() {
     //map.store(data_path / "index");
     //map.load(data_path / "index_10-mer");
 
-    //short_read_simulator sim(bucket_length, read_length, 0.002, 0.00025, 0.00025);
-    //sim.read(genome_file);
-    //sim.generate_fastq_file(data_path / "test", "sim", 1000000);
+    short_read_simulator sim(bucket_length, read_length, 0.002, 0.00025, 0.00025);
+    sim.read(genome_file);
+    sim.generate_fastq_file(data_path / "test", "sim", 1000000);
 
     //auto res = map._query_file(data_path / "test" / "sim.fastq");
     //map._check_ground_truth(res, data_path / "test" / "sim.bucket_ground_truth");
 
     loc.initialize(genome_file, data_path / "index", "test");
-    auto res = loc._locate(data_path / "test" / "sim.fastq", data_path / "index");
+    auto res = loc._locate(data_path / "test" / "sim.fastq");
     loc._check_ground_truth(res, data_path / "test" / "sim.bucket_ground_truth");
     
     
