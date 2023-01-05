@@ -394,7 +394,6 @@ public:
 
         unsigned int index = 0;
         for (auto & rec : fin) {
-            records.push_back(rec.sequence());
             for (auto & bucket : query_sequence(rec.sequence())) {
                 res[bucket].push_back(index);
             }
@@ -403,7 +402,7 @@ public:
         clock.tock();
         float time = clock.elapsed_seconds();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for bucket mapping: " 
-                             << time << " s (" << time * 1000 * 1000 / records.size() << " μs/seq).\n";
+                             << time << " s (" << time * 1000 * 1000 / index << " μs/seq).\n";
         return res;
     }
 
@@ -419,7 +418,6 @@ public:
         clock.tick();
  
         for (auto & rec : fin) {
-            records.push_back(rec.sequence());
             std::vector<int> buckets = query_sequence(rec.sequence());
             res.push_back(buckets);
         }
@@ -454,17 +452,6 @@ public:
 
             if (std::find(buckets.begin(), buckets.end(), bucket) != buckets.end()) {
                 correct_map++;
-            } else {
-                seqan3::debug_stream << "ID: " << i << ", correct bucket: " << bucket << ", predicted buckets: " << buckets << ".";
-                query_sequence(records[i]);
-                if (!buckets.empty()) {
-                    
-                    int present_kmers_in_gt = filter->_check_bucket(bucket);
-
-                    int present_kmers_in_best = filter->_check_bucket(buckets[0]);
-                    seqan3::debug_stream << "Correct bucket k-mers: " << present_kmers_in_gt << ", Predicted bucket k-mers: " << present_kmers_in_best << ".";
-                }
-                seqan3::debug_stream << " CIGAR: " << cigar << "\n";
             }
             total_bucket_numbers += buckets.size();
             ++bucket_number_map[buckets.size()];

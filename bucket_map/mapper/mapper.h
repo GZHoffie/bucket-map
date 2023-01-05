@@ -8,9 +8,7 @@ class mapper {
      */
 public:
     mapper() {}
-
-    std::vector<std::vector<seqan3::dna4>> records; // TODO: also include the quality information
-
+    
     /**
      * @brief Load the q-gram index file to the mapper.
      */
