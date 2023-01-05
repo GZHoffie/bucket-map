@@ -145,7 +145,7 @@ public:
          * @returns the total number of buckets.
          */
         // Create directory if directory is not created yet. Otherwise report the error and return.
-        if (!check_extension_in(index_directory, EXTENSION)) {
+        if (!check_extension_in(index_directory, EXTENSION) || !check_filename_in(index_directory, "index.qgram")) {
             return 0;
         }
         Timer clock;
@@ -159,7 +159,7 @@ public:
             bucket_num++;
         };
         iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
-        create_index(index_directory);
+        //create_index(index_directory);
 
         // create q-gram index files
         _store_q_gram_index(index_directory);

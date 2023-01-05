@@ -79,6 +79,7 @@ private:
 
         // sample k-mers
         sampler->sample_deterministically(std::get<0>(record)-1);
+        auto samples = sampler->samples;
 
         // initialize result
         std::vector<std::pair<unsigned int, unsigned int>> res;
@@ -88,23 +89,19 @@ private:
         exact_counter.clear();
 
         // record the possible starting positions
-        for (auto i : sampler->samples) {
+        for (int i = 0; i < samples.size(); i++) {
             // find the positions of the k-mer
             auto range = bucket_kmer_index.equal_range(kmer_hash[i]);
             for (auto it = range.first; it != range.second; ++it) {
-                auto position = it->second - i;
+                auto position = it->second - samples[i];
                 exact_counter[position]++;
                 for (int indel = -allowed_indel; indel <= allowed_indel; indel++) {
                     fuzzy_counter[position + indel]++;
                 }
             }
         }
+        
 
-        // find potential good offsets that are higher than the threshold
-        std::erase_if(fuzzy_counter, [&](const auto& item) {
-            auto const& [key, value] = item;
-            return (value < num_samples - allowed_mismatch) || (key < 0);
-        });
 
         // find potential good offset
         // We choose the smallest offset that contains a specific number of k-mers
@@ -115,6 +112,8 @@ private:
                                         });
             if (max->second >= num_samples - allowed_mismatch && max->first >= 0) {
                 res.push_back(std::pair(max->first, max->second));
+            } else {
+                //seqan3::debug_stream << "Sequence: " << sequence_id << ", "<<  fuzzy_counter << "\n";
             }
         }
         return res;
@@ -208,6 +207,7 @@ public:
 
         // map reads to buckets
         auto sequence_ids = _m->map(sequence_file);
+
         unsigned int bucket_index = 0;
         //TODO: can delete the mapper at this point
 
@@ -234,6 +234,7 @@ public:
             
             // for each bucket, create the corresponding kmer index
             index_timer.tick();
+            //seqan3::debug_stream << "===========>>> Sequence " << i << "\n"; 
             _create_kmer_index(bucket_kmer_index, bucket_seq[i]);
             index_timer.tock();
             

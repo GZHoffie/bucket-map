@@ -334,7 +334,8 @@ public:
         for (int h : q_gram_hash) {
             filter->read(q_grams_index[h]);
         }
-        return filter->all_results();
+        return filter->best_results();
+        //return filter->all_results();
         //return filter->ok_results();
     }
 
