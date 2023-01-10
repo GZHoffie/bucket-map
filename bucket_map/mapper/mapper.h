@@ -8,6 +8,8 @@ class mapper {
      */
 public:
     mapper() {}
+
+    unsigned int num_records = 0;
     
     /**
      * @brief Load the q-gram index file to the mapper.

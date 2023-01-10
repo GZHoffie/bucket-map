@@ -392,18 +392,16 @@ public:
 
         Timer clock;
         clock.tick();
-
-        unsigned int index = 0;
         for (auto & rec : fin) {
             for (auto & bucket : query_sequence(rec.sequence())) {
-                res[bucket].push_back(index);
+                res[bucket].push_back(num_records);
             }
-            ++index;
+            ++num_records;
         }
         clock.tock();
         float time = clock.elapsed_seconds();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for bucket mapping: " 
-                             << time << " s (" << time * 1000 * 1000 / index << " μs/seq).\n";
+                             << time << " s (" << time * 1000 * 1000 / num_records << " μs/seq).\n";
         return res;
     }
 

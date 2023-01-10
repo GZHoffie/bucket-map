@@ -6,6 +6,46 @@
 
 #include <seqan3/search/fm_index/bi_fm_index.hpp>
 
+template <typename kmer_hash_t = unsigned int>
+class query_sequences_storage {
+private:
+    kmer_hash_t * kmer_samples;
+    unsigned int s;
+    unsigned int N;
+
+
+public:
+
+    query_sequences_storage(unsigned int num_sequences, unsigned int num_samples) {
+        kmer_samples = new kmer_hash_t[num_sequences * (num_samples + 1)];
+        N = num_sequences;
+        s = num_samples;
+    }
+
+    ~query_sequences_storage() {
+        delete[] kmer_samples;
+    }
+
+    kmer_hash_t get_num_kmers(unsigned int sequence_id) {
+        return kmer_samples[sequence_id * (s + 1)];
+    }
+
+    kmer_hash_t* get_samples(unsigned int sequence_id) {
+        /**
+         * @brief Return a pointer to the start of the samples.
+         */
+        return kmer_samples + sequence_id * (s + 1) + 1;
+    }
+
+    void push_back(unsigned int sequence_id, unsigned int num_kmers, std::vector<unsigned int> kmers) {
+        kmer_samples[sequence_id * (s + 1)] = num_kmers;
+        for (unsigned int i = 1; i <= s; i++) {
+            kmer_samples[sequence_id * (s + 1) + i] = kmers[i-1];
+        }
+    }
+};
+
+
 class bucket_locator : public locator {
 private:
     mapper* _m;
@@ -14,7 +54,7 @@ private:
     std::vector<std::vector<seqan3::dna4>> bucket_seq;
 
     // sampled kmers from the query sequences
-    std::vector<std::pair<unsigned int, std::vector<unsigned int>>> query_sequences;
+    query_sequences_storage<unsigned int>* records;
 
     // information for buckets
     unsigned int bucket_length;
@@ -65,21 +105,20 @@ private:
     }
 
 
-    std::vector<std::pair<unsigned int, unsigned int>> 
-    _find_offset(const std::unordered_multimap<unsigned int, int>& bucket_kmer_index, int sequence_id) {
+    std::pair<int, unsigned int> _find_offset(const std::unordered_multimap<unsigned int, int>& bucket_kmer_index, int sequence_id) {
         /**
          * @brief Return the most probable offset of the given sequence in the bucket.
          * @param bucket_kmer_index a pointer to the k-mer index for the target bucket.
          * @param sequence_id the index of sequence in the query file.
-         * @returns a vector containing the possible offsets and the obtained number of votes.
+         * @returns A possible offset for the sequence. -1 if not found.
          */
         // load the sequence and pick up the k-mers
-        auto record = query_sequences[sequence_id];
-        auto kmer_hash = std::get<1>(record);
+        auto record = records->get_samples(sequence_id);
 
         // sample k-mers
-        sampler->sample_deterministically(std::get<0>(record)-1);
+        sampler->sample_deterministically(records->get_num_kmers(sequence_id)-1);
         auto samples = sampler->samples;
+        //seqan3::debug_stream << "Sequence " << sequence_id << ": n_kmers " <<  records->get_num_kmers(sequence_id) << ", samples " << samples << "\n";
 
         // initialize result
         std::vector<std::pair<unsigned int, unsigned int>> res;
@@ -88,20 +127,26 @@ private:
         fuzzy_counter.clear();
         exact_counter.clear();
 
+        //seqan3::debug_stream << "Sequence " << sequence_id << ":\n";
         // record the possible starting positions
         for (int i = 0; i < samples.size(); i++) {
             // find the positions of the k-mer
-            auto range = bucket_kmer_index.equal_range(kmer_hash[i]);
+            //seqan3::debug_stream << "K-mer " << *(record + i) << ": ";
+            auto range = bucket_kmer_index.equal_range(*(record + i));
             for (auto it = range.first; it != range.second; ++it) {
                 auto position = it->second - samples[i];
+                //seqan3::debug_stream << position << " ";
                 exact_counter[position]++;
                 for (int indel = -allowed_indel; indel <= allowed_indel; indel++) {
                     fuzzy_counter[position + indel]++;
                 }
             }
+            //seqan3::debug_stream << "\n";
         }
         
-
+        
+        //seqan3::debug_stream << fuzzy_counter << "\n";
+        //seqan3::debug_stream << exact_counter << "\n";
 
         // find potential good offset
         // We choose the smallest offset that contains a specific number of k-mers
@@ -111,33 +156,37 @@ private:
                                             return (x.second < y.second) || (x.second == y.second && exact_counter[x.first] < exact_counter[y.first]);
                                         });
             if (max->second >= num_samples - allowed_mismatch && max->first >= 0) {
-                res.push_back(std::pair(max->first, max->second));
+                //seqan3::debug_stream << max->first << " " << max->second << "\n";
+                return std::make_pair(max->first, max->second);
             } else {
                 //seqan3::debug_stream << "Sequence: " << sequence_id << ", "<<  fuzzy_counter << "\n";
             }
         }
-        return res;
+        return std::make_pair(-1, 0);
     }
 
     void _prepare_read_query(std::filesystem::path const & sequence_file) {
         /**
-         * @brief Read the query file and store the sampled k-mers from the reads in `query_sequences`.
+         * @brief Read the query file and store the sampled k-mers from the reads in `records`.
          * @note Should be run before locating reads in the query sequence file.
          */
-        seqan3::sequence_file_input<_dna4_traits> fin{sequence_file};
+        seqan3::sequence_file_input<_dna4_traits> fastq_file{sequence_file};
+        unsigned int index = 0;
 
-        for (auto & rec : fin) {
+        for (auto & rec : fastq_file) {
             auto kmers = rec.sequence() | seqan3::views::kmer_hash(q_gram_shape);
 
             // sample k-mers from the read
             sampler->sample_deterministically(kmers.size()-1);
+            //seqan3::debug_stream << "Sequence " << index << ": n_kmers " <<  kmers.size() << ", samples " << sampler->samples << "\n";
             auto sampled_kmers = sampler->samples | std::views::transform([&](unsigned int i) {
                 return kmers[i];
             });
             std::vector<unsigned int> sampled_kmer_vec(sampled_kmers.begin(), sampled_kmers.end());
 
-            // store the sampled k-mers in `query_sequences`.
-            query_sequences.push_back(std::make_pair(kmers.size(), sampled_kmer_vec));
+            // store the sampled k-mers in `records`.
+            records->push_back(index, kmers.size(), sampled_kmer_vec);
+            index++;
         }
         
 
@@ -171,6 +220,7 @@ public:
 
     ~bucket_locator() {
         delete sampler;
+        delete records;
     }
 
     unsigned int initialize(std::filesystem::path const & fasta_file_name, 
@@ -208,6 +258,9 @@ public:
         // map reads to buckets
         auto sequence_ids = _m->map(sequence_file);
 
+        // initialze query sequence storage
+        records = new query_sequences_storage(_m->num_records, num_samples);
+
         unsigned int bucket_index = 0;
         //TODO: can delete the mapper at this point
 
@@ -216,7 +269,7 @@ public:
 
         // initialize result
         std::vector<std::vector<locate_t>> res;
-        for (int i = 0; i < query_sequences.size(); i++) {
+        for (int i = 0; i < _m->num_records; i++) {
             std::vector<locate_t> bucket{};
             res.push_back(bucket);
         }
@@ -241,7 +294,10 @@ public:
             // go through all sequences mapped to this bucket and check the offset.
             query_timer.tick();
             for (auto & id : bucket_sequence) {
-                for (auto &[offset, vote] : _find_offset(bucket_kmer_index, id)) {
+                auto offset_res = _find_offset(bucket_kmer_index, id);
+                auto offset = std::get<0>(offset_res);
+                auto vote = std::get<1>(offset_res);
+                if (offset > 0) {
                     res[id].push_back(std::make_tuple(i, offset, vote));
                 }
             }
@@ -253,7 +309,7 @@ public:
                              << index_timer.elapsed_seconds() << " s.\n";
         float time = query_timer.elapsed_seconds();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Total time used for finding exact location of the sequences: " 
-                             << time << " s (" << time * 1000 * 1000 / query_sequences.size() << " μs/seq).\n";
+                             << time << " s (" << time * 1000 * 1000 / _m->num_records << " μs/seq).\n";
 
         return res;
     }
@@ -291,6 +347,8 @@ public:
                     total_offset_error += error;
                     if (error <= allowed_indel) {
                         almost_correct_offset++;
+                    } else {
+                        //seqan3::debug_stream << std::get<1>(pair) << " answer: " << exact_location << "\n";
                     }
                 }
             }
