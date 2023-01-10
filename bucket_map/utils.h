@@ -12,11 +12,6 @@
 #include <thread>
 #include <assert.h>
 
-typedef struct config {
-    unsigned int bucket_length;
-    unsigned int read_length;
-} config_t;
-
 
 template <class DT = std::chrono::milliseconds,
           class ClockT = std::chrono::steady_clock>
@@ -122,7 +117,7 @@ bool check_extension_in(std::filesystem::path const & index_directory,
 }
 
 bool check_filename_in(std::filesystem::path const & index_directory,
-                       std::string filename) {
+                       const std::string& filename) {
     /**
      * @brief Check if the specified directory exists. If it does, check if files with certain
      *        name exist. If not, create the directory.
@@ -151,7 +146,7 @@ private:
 public:
     std::vector<unsigned int> samples;
 
-    Sampler(unsigned int num_samples) {
+    explicit Sampler(unsigned int num_samples) {
         last_upper_bound = 0;
         n = num_samples;
     }
@@ -196,9 +191,9 @@ private:
     std::vector<seqan3::cigar> CIGAR_vector;
 
 public:
-    CIGAR() {}
+    CIGAR() = default;
 
-    CIGAR(std::vector<seqan3::cigar> CIGAR_init) {
+    explicit CIGAR(std::vector<seqan3::cigar> CIGAR_init) {
         /**
          * @brief Initialize the class with a vector of seqan3::cigar objects.
          * 

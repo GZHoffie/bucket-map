@@ -125,7 +125,7 @@ public:
         }
     }
 
-    virtual ~bucket_indexer() {}
+    virtual ~bucket_indexer() = default;
 
     virtual void create_index(std::filesystem::path const & index_directory) {
         /**

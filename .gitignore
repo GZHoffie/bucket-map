@@ -6,6 +6,6 @@ build
 *.fasta
 *.pickle
 *.zip
-
+cmake-build-debug
 bucket_map/benchmark/index
 bucket_map/benchmark/output
