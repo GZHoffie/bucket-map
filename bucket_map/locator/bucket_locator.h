@@ -9,7 +9,7 @@
 template <typename kmer_hash_t = unsigned int>
 class query_sequences_storage {
 private:
-    kmer_hash_t * kmer_samples;
+    kmer_hash_t * kmer_samples; // TODO: simply use a std::vector to wrap this
     unsigned int s;
     unsigned int N;
 
@@ -240,7 +240,89 @@ public:
     void locate(std::filesystem::path const & sequence_file, 
                 std::filesystem::path const & index_file,
                 std::filesystem::path const & sam_file) {
-        
+        /**
+         * @brief Find the exact locations of the reads and output the mapping results
+         *        to a sam file.
+         * @param sequence_file the fastq file containing all the query reads.
+         * @param index_file the `.bucket_id` file created by a `bucket_indexer` object,
+         *                   which contains the name of each bucket.
+         * @param sam_file the path to the output sam file.
+         */
+
+        // find the mapped locations of all the reads.
+        auto locate_res = _locate(sequence_file);
+
+        // store the bucket information
+        std::ifstream bucket_info(index_file);
+        std::vector<std::string> bucket_name; // the name for the bucket
+        std::vector<unsigned int> bucket_offsets; // the starting index of bucket in the chromosome.
+
+        std::string name, separator, bucket_id;
+        std::string last_bucket_name;
+
+        unsigned int index = 0;
+        for (int i = 0; i < query_results.size(); i++) {
+            bucket_info >> name >> separator >> bucket_id;
+            if (name != last_bucket_name) {
+                last_bucket_name = name;
+                index = 0;
+            }
+            bucket_name.push_back(name);
+            bucket_offsets.push_back(index * bucket_length);
+            index++;
+        }
+
+        // output to the sam file
+        seqan3::sequence_file_input query_file_in{sequence_file};
+ 
+        seqan3::sam_file_output sam_out{sam_path,
+                                        seqan3::fields<seqan3::field::seq,
+                                                       seqan3::field::id,
+                                                       seqan3::field::ref_id,
+                                                       seqan3::field::ref_offset,
+                                                       seqan3::field::cigar,
+                                                       seqan3::field::qual,
+                                                       seqan3::field::mapq>{}};
+ 
+        seqan3::configuration const search_config =
+            seqan3::search_cfg::max_error_total{seqan3::search_cfg::error_count{errors}}
+            | seqan3::search_cfg::hit_all_best{};
+ 
+        seqan3::configuration const align_config =
+            seqan3::align_cfg::method_global{seqan3::align_cfg::free_end_gaps_sequence1_leading{true},
+                                             seqan3::align_cfg::free_end_gaps_sequence2_leading{true},
+                                             seqan3::align_cfg::free_end_gaps_sequence1_trailing{true},
+                                             seqan3::align_cfg::free_end_gaps_sequence2_trailing{true}}
+            | seqan3::align_cfg::edit_scheme | seqan3::align_cfg::output_alignment{}
+            | seqan3::align_cfg::output_begin_position{} | seqan3::align_cfg::output_score{};
+
+        unsigned int read_id = 0;
+        for (auto && record : query_file_in) {
+            auto & query = record.sequence();
+            for (auto & loc : locate_res[i]) {
+                // get the components of the locate_t
+                const auto [bucket_id, offset, votes] = loc;
+
+                // get the part of text that the read is mapped to
+                std::span text_view{std::data(bucket_seq[bucket_id]) + offset, query.size() + 1 + allowed_indel};
+
+                // do pairwise string alignment
+                for (auto && alignment : seqan3::align_pairwise(std::tie(text_view, query), align_config)) {
+                    auto cigar = seqan3::cigar_from_alignment(alignment.alignment());
+                    size_t ref_offset = alignment.sequence1_begin_position() + 2 + start;
+                    size_t map_qual = 60u + alignment.score(); // TODO: consider the number of votes in the mapping quality.
+
+                    // output to the sam file
+                    sam_out.emplace_back(query,
+                                         record.id(),
+                                         bucket_name[bucket_id],
+                                         bucket_offsets[bucket_id] + offset,
+                                         cigar,
+                                         record.base_qualities(),
+                                         map_qual);
+                }
+            }
+        }
     }
 
     typedef std::tuple<unsigned int, unsigned int, unsigned int> locate_t;
