@@ -154,7 +154,7 @@ public:
         unsigned int bucket_num = 0;
         auto operation = [&](std::vector<seqan3::dna4> seq, std::string id) {
             bucket_seq.push_back(seq);
-            bucket_id.push_back(id + " | " + std::to_string(bucket_num));
+            bucket_id.push_back(id);
             _insert_into_bucket(seq, bucket_num);
             bucket_num++;
         };

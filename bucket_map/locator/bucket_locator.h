@@ -4,7 +4,16 @@
 #include "./locator.h"
 #include <cstdlib>
 
+ 
+#include <seqan3/alignment/cigar_conversion/cigar_from_alignment.hpp>
+#include <seqan3/alignment/configuration/all.hpp>
+#include <seqan3/alignment/pairwise/align_pairwise.hpp>
+#include <seqan3/argument_parser/all.hpp>
+#include <seqan3/io/sam_file/output.hpp>
+#include <seqan3/io/sequence_file/input.hpp>
+#include <seqan3/search/all.hpp>
 #include <seqan3/search/fm_index/bi_fm_index.hpp>
+
 
 template <typename kmer_hash_t = unsigned int>
 class query_sequences_storage {
@@ -153,7 +162,8 @@ private:
         if (!fuzzy_counter.empty()) {
             //TODO: return all the valid offsets within a bucket. Currently only the best offset is returned.
             auto max = std::max_element(fuzzy_counter.begin(), fuzzy_counter.end(), [&](const auto &x, const auto &y) {
-                                            return (x.second < y.second) || (x.second == y.second && exact_counter[x.first] < exact_counter[y.first]);
+                                            //return (x.second < y.second) || (x.second == y.second && exact_counter[x.first] < exact_counter[y.first]);
+                                            return (x.second < y.second) || (x.second == y.second && x.first > y.first);
                                         });
             if (max->second >= num_samples - allowed_mismatch && max->first >= 0) {
                 //seqan3::debug_stream << max->first << " " << max->second << "\n";
@@ -257,12 +267,12 @@ public:
         std::vector<std::string> bucket_name; // the name for the bucket
         std::vector<unsigned int> bucket_offsets; // the starting index of bucket in the chromosome.
 
-        std::string name, separator, bucket_id;
+        std::string name;
         std::string last_bucket_name;
 
         unsigned int index = 0;
-        for (int i = 0; i < query_results.size(); i++) {
-            bucket_info >> name >> separator >> bucket_id;
+        for (int i = 0; i < bucket_seq.size(); i++) {
+            bucket_info >> name;
             if (name != last_bucket_name) {
                 last_bucket_name = name;
                 index = 0;
@@ -275,7 +285,7 @@ public:
         // output to the sam file
         seqan3::sequence_file_input query_file_in{sequence_file};
  
-        seqan3::sam_file_output sam_out{sam_path,
+        seqan3::sam_file_output sam_out{sam_file,
                                         seqan3::fields<seqan3::field::seq,
                                                        seqan3::field::id,
                                                        seqan3::field::ref_id,
@@ -284,22 +294,19 @@ public:
                                                        seqan3::field::qual,
                                                        seqan3::field::mapq>{}};
  
-        seqan3::configuration const search_config =
-            seqan3::search_cfg::max_error_total{seqan3::search_cfg::error_count{errors}}
-            | seqan3::search_cfg::hit_all_best{};
  
         seqan3::configuration const align_config =
             seqan3::align_cfg::method_global{seqan3::align_cfg::free_end_gaps_sequence1_leading{true},
-                                             seqan3::align_cfg::free_end_gaps_sequence2_leading{true},
+                                             seqan3::align_cfg::free_end_gaps_sequence2_leading{false},
                                              seqan3::align_cfg::free_end_gaps_sequence1_trailing{true},
-                                             seqan3::align_cfg::free_end_gaps_sequence2_trailing{true}}
+                                             seqan3::align_cfg::free_end_gaps_sequence2_trailing{false}}
             | seqan3::align_cfg::edit_scheme | seqan3::align_cfg::output_alignment{}
             | seqan3::align_cfg::output_begin_position{} | seqan3::align_cfg::output_score{};
 
         unsigned int read_id = 0;
         for (auto && record : query_file_in) {
             auto & query = record.sequence();
-            for (auto & loc : locate_res[i]) {
+            for (auto & loc : locate_res[index]) {
                 // get the components of the locate_t
                 const auto [bucket_id, offset, votes] = loc;
 
@@ -309,7 +316,7 @@ public:
                 // do pairwise string alignment
                 for (auto && alignment : seqan3::align_pairwise(std::tie(text_view, query), align_config)) {
                     auto cigar = seqan3::cigar_from_alignment(alignment.alignment());
-                    size_t ref_offset = alignment.sequence1_begin_position() + 2 + start;
+                    size_t ref_offset = alignment.sequence1_begin_position() + 2 + offset;
                     size_t map_qual = 60u + alignment.score(); // TODO: consider the number of votes in the mapping quality.
 
                     // output to the sam file
@@ -322,7 +329,9 @@ public:
                                          map_qual);
                 }
             }
+            index++;
         }
+        
     }
 
     typedef std::tuple<unsigned int, unsigned int, unsigned int> locate_t;

@@ -14,16 +14,10 @@ FetchContent_MakeAvailable(dlib)
 # seqan3 for the basic skeleton for the mapper
 FetchContent_Declare(seqan3
     GIT_REPOSITORY https://github.com/seqan/seqan3.git
-    GIT_TAG        "3.2.0"
+    GIT_TAG        master
 )
 FetchContent_MakeAvailable(seqan3)
 
-# parasail for efficient string alignment
-FetchContent_Declare(parasail
-    GIT_REPOSITORY https://github.com/jeffdaily/parasail.git
-    GIT_TAG        "2.6"
-)
-FetchContent_MakeAvailable(seqan3)
  
 # set common header files
 set(INDEXER_FILES
@@ -60,7 +54,7 @@ target_link_libraries(bucket_map PUBLIC seqan3::seqan3 dlib::dlib)
 add_executable(bucket_map_benchmark locator_test.cpp ${SHARED_FILES})
 target_link_libraries(bucket_map_benchmark PUBLIC seqan3::seqan3 dlib::dlib)
 add_executable(bucket_map_final main.cpp ${SHARED_FILES})
-target_link_libraries(bucket_map_final PUBLIC seqan3::seqan3 dlib::dlib parasail:parasail)
+target_link_libraries(bucket_map_final PUBLIC seqan3::seqan3 dlib::dlib)
 
 # benchmark executables
 add_executable(sam_benchmark benchmark/sam_file_analyzer.cpp)
