@@ -21,6 +21,11 @@ public:
      *        to each bucket.
      */
     virtual std::vector<std::vector<unsigned int>> map(std::filesystem::path const & sequence_file) = 0;
+
+    /**
+     * @brief Release the memory storing the sequences and index.
+     */
+    virtual void reset() = 0;
 };
 
 #endif

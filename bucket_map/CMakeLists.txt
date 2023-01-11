@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.4)
 project(bucket_mapper CXX)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -m64")
 
 include(FetchContent)
 # dlib for serialization of the index files

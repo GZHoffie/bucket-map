@@ -176,6 +176,16 @@ public:
         // Create and store 
         return bucket_id.size();
     }
+
+    void reset() {
+        /**
+         * @brief Release the memory storing the sequences and index.
+         * 
+         */
+        bucket_seq.clear();
+        bucket_id.clear();
+        q_grams_index.clear();
+    }
 };
 
 

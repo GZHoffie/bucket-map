@@ -18,7 +18,7 @@
 template <typename kmer_hash_t = unsigned int>
 class query_sequences_storage {
 private:
-    kmer_hash_t * kmer_samples; // TODO: simply use a std::vector to wrap this
+    std::vector<kmer_hash_t> kmer_samples;
     unsigned int s;
     unsigned int N;
 
@@ -26,27 +26,27 @@ private:
 public:
 
     query_sequences_storage(unsigned int num_sequences, unsigned int num_samples) {
-        kmer_samples = new kmer_hash_t[num_sequences * (num_samples + 1)];
+        kmer_samples.reserve(num_sequences * (num_samples + 1));
         N = num_sequences;
         s = num_samples;
     }
 
-    ~query_sequences_storage() {
-        delete[] kmer_samples;
+    void reset() {
+        kmer_samples.clear();
     }
 
     kmer_hash_t get_num_kmers(unsigned int sequence_id) {
         return kmer_samples[sequence_id * (s + 1)];
     }
 
-    kmer_hash_t* get_samples(unsigned int sequence_id) {
+    std::vector<kmer_hash_t>::iterator get_samples(unsigned int sequence_id) {
         /**
          * @brief Return a pointer to the start of the samples.
          */
-        return kmer_samples + sequence_id * (s + 1) + 1;
+        return kmer_samples.begin() + sequence_id * (s + 1) + 1;
     }
 
-    void push_back(unsigned int sequence_id, unsigned int num_kmers, std::vector<unsigned int> kmers) {
+    void push_back(unsigned int sequence_id, kmer_hash_t num_kmers, std::vector<kmer_hash_t> kmers) {
         kmer_samples[sequence_id * (s + 1)] = num_kmers;
         for (unsigned int i = 1; i <= s; i++) {
             kmer_samples[sequence_id * (s + 1) + i] = kmers[i-1];
@@ -353,11 +353,13 @@ public:
         // map reads to buckets
         auto sequence_ids = _m->map(sequence_file);
 
+        // reset mapper to release memory
+        _m->reset();
+
         // initialze query sequence storage
         records = new query_sequences_storage(_m->num_records, num_samples);
 
         unsigned int bucket_index = 0;
-        //TODO: can delete the mapper at this point
 
         // prepare for the offset mapping
         _prepare_read_query(sequence_file);

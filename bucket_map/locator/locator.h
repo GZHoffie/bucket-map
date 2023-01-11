@@ -30,7 +30,9 @@ public:
          * @param indicator a string indicating the name of output index file.
          * @returns how many index files we are generating.
          */
-        return _i->index(fasta_file_name, index_directory, indicator);
+        auto res = _i->index(fasta_file_name, index_directory, indicator);
+        _i->reset();
+        return res;
     }
     
     virtual void locate(std::filesystem::path const & sequence_file, 

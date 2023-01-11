@@ -190,10 +190,7 @@ public:
             fastq_file << "@" << i << "\n";
             // generate sequence
             auto res = sample(simulate_error);
-            std::vector<seqan3::dna4> sequence = std::get<0>(res);
-            int bucket = std::get<1>(res);
-            int offset = std::get<2>(res);
-            CIGAR cigar = std::get<3>(res);
+            auto & [sequence, bucket, offset, cigar] = res;
             for (auto nt : sequence) {
                 fastq_file << nt.to_char();
             }
@@ -203,7 +200,7 @@ public:
             bucket_gt_file << bucket << " " << offset << " " << cigar.to_string() << "\n";
             // record the true locations
             auto true_position = bucket_ids[bucket];
-            pos_gt_file << std::get<0>(true_position) << " " << std::get<1>(true_position) * bucket_length + offset << " " << cigar.to_string() << "\n";
+            pos_gt_file << std::get<0>(true_position) << " " << std::get<1>(true_position) * bucket_length + offset + 1 << " " << cigar.to_string() << "\n";
         }
 
         seqan3::debug_stream << "[INFO]\t\t" << "The generated fastq file is stored in: " 

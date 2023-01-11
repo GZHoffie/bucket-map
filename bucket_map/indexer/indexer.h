@@ -25,7 +25,10 @@ public:
                                std::filesystem::path const & index_directory,
                                std::string const & indicator) = 0;
         
-    
+    /**
+     * @brief Release the memory storing the sequences and index.
+     */
+    virtual void reset() = 0;
 };
 
 #endif

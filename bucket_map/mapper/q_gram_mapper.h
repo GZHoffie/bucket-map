@@ -233,7 +233,7 @@ private:
 public:
     q_gram_mapper(unsigned int bucket_len, unsigned int read_len, seqan3::shape shape, 
                   unsigned int samples, unsigned int fault, float distinguishability, 
-                  unsigned int num_candidate_buckets = 10) : mapper() {
+                  unsigned int num_candidate_buckets = 30) : mapper() {
         // initialize private variables
         bucket_length = bucket_len;
         read_length = read_len;
@@ -369,8 +369,13 @@ public:
         for (auto sample : sampler->samples) {
             samples.push_back(hash_values[sample]);
         }
+
+        auto res = query(samples);
+        if (res.size() > allowed_max_candidate_buckets) {
+            res.clear();
+        }
         
-        return query(samples);
+        return res;
         
     }
 
@@ -478,6 +483,14 @@ public:
         }
         seqan3::debug_stream << "[BENCHMARK]\t" << "Number of sequences mapped to <= 10 buckets: " 
                              << small_bucket_numbers << " (" << ((float) small_bucket_numbers) / query_results.size() * 100 << "%).\n";
+    }
+
+    void reset() {
+        /**
+         * @brief Release the memory, mainly used by the q_grams_index.
+         * TODO: release other variables.
+         */
+        q_grams_index.clear();
     }
 };
 
