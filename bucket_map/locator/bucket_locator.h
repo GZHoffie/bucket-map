@@ -270,16 +270,16 @@ public:
         std::string name;
         std::string last_bucket_name;
 
-        unsigned int index = 0;
+        unsigned int bucket_index = 0;
         for (int i = 0; i < bucket_seq.size(); i++) {
             bucket_info >> name;
             if (name != last_bucket_name) {
                 last_bucket_name = name;
-                index = 0;
+                bucket_index = 0;
             }
             bucket_name.push_back(name);
-            bucket_offsets.push_back(index * bucket_length);
-            index++;
+            bucket_offsets.push_back(bucket_index * bucket_length);
+            bucket_index++;
         }
 
         // output to the sam file
@@ -306,30 +306,34 @@ public:
         unsigned int read_id = 0;
         for (auto && record : query_file_in) {
             auto & query = record.sequence();
-            for (auto & loc : locate_res[index]) {
+            for (auto & loc : locate_res[read_id]) {
                 // get the components of the locate_t
-                const auto [bucket_id, offset, votes] = loc;
+                const auto & [bucket_id, offset, votes] = loc;
 
                 // get the part of text that the read is mapped to
                 std::span text_view{std::data(bucket_seq[bucket_id]) + offset, query.size() + 1 + allowed_indel};
 
+                //seqan3::debug_stream << "Txt: " << bucket_id << ", " << offset << ": " << text_view << "\n";
+                //seqan3::debug_stream << "Seq: " << query << "\n";
+
                 // do pairwise string alignment
                 for (auto && alignment : seqan3::align_pairwise(std::tie(text_view, query), align_config)) {
                     auto cigar = seqan3::cigar_from_alignment(alignment.alignment());
-                    size_t ref_offset = alignment.sequence1_begin_position() + 2 + offset;
+                    size_t ref_offset = alignment.sequence1_begin_position() + bucket_offsets[bucket_id] + offset;
+                    
                     size_t map_qual = 60u + alignment.score(); // TODO: consider the number of votes in the mapping quality.
 
                     // output to the sam file
                     sam_out.emplace_back(query,
                                          record.id(),
                                          bucket_name[bucket_id],
-                                         bucket_offsets[bucket_id] + offset,
+                                         ref_offset,
                                          cigar,
                                          record.base_qualities(),
                                          map_qual);
                 }
             }
-            index++;
+            read_id++;
         }
         
     }

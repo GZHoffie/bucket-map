@@ -25,7 +25,7 @@ int main() {
     if (create_new_sample) {
         short_read_simulator sim(bucket_length, read_length, 0.002, 0.00025, 0.00025);
         sim.read(genome_file);
-        sim.generate_fastq_file(data_path / "test", "sim_test", 1000);
+        sim.generate_fastq_file(data_path / "test", "sim_test", 10);
     }
     
 
