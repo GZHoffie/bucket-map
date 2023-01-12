@@ -104,6 +104,14 @@ protected:
                              << index_directory / "index.bucket_id" << ".\n";
     }
 
+    void _init_qgram_index(unsigned int q) {
+        // initialize q_gram index
+        int total_q_grams = (int) pow(4, q);
+        for (int i = 0; i < total_q_grams; i++) {
+            std::bitset<NUM_BUCKETS> q_gram_bucket;
+            q_grams_index.push_back(q_gram_bucket);
+        }
+    }
 
 public:
     bucket_indexer(unsigned int bucket_len, unsigned int read_len, seqan3::shape shape) : indexer() {
@@ -116,13 +124,6 @@ public:
         q = shape.count();
         seqan3::debug_stream << "[INFO]\t\t" << "Set q-gram shape to be: " 
                              << shape << " with number of effective characters: " << q << '\n';
-
-        // initialize q_gram index
-        int total_q_grams = (int) pow(4, q);
-        for (int i = 0; i < total_q_grams; i++) {
-            std::bitset<NUM_BUCKETS> q_gram_bucket;
-            q_grams_index.push_back(q_gram_bucket);
-        }
     }
 
     virtual ~bucket_indexer() = default;
@@ -151,9 +152,12 @@ public:
         Timer clock;
         clock.tick();
 
+        // initialize index
+        _init_qgram_index(q);
+
         unsigned int bucket_num = 0;
         auto operation = [&](std::vector<seqan3::dna4> seq, std::string id) {
-            bucket_seq.push_back(seq);
+            //bucket_seq.push_back(seq);
             bucket_id.push_back(id);
             _insert_into_bucket(seq, bucket_num);
             bucket_num++;
@@ -182,9 +186,12 @@ public:
          * @brief Release the memory storing the sequences and index.
          * 
          */
-        bucket_seq.clear();
+        //bucket_seq.clear();
+        //bucket_seq.shrink_to_fit();
         bucket_id.clear();
+        bucket_id.shrink_to_fit();
         q_grams_index.clear();
+        q_grams_index.shrink_to_fit();
     }
 };
 

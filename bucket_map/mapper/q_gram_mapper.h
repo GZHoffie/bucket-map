@@ -491,6 +491,7 @@ public:
          * TODO: release other variables.
          */
         q_grams_index.clear();
+        q_grams_index.shrink_to_fit();
     }
 };
 

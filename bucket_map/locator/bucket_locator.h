@@ -33,6 +33,7 @@ public:
 
     void reset() {
         kmer_samples.clear();
+        kmer_samples.shrink_to_fit();
     }
 
     kmer_hash_t get_num_kmers(unsigned int sequence_id) {
@@ -82,7 +83,10 @@ private:
 
     // counter to calculate the possible starting positions
     std::unordered_map<unsigned int, unsigned int> fuzzy_counter;
-    std::unordered_map<unsigned int, unsigned int> exact_counter;
+    //std::unordered_map<unsigned int, unsigned int> exact_counter;
+
+    // the path to the genome file
+    std::filesystem::path genome_file_name;
 
 
     void _initialize_kmer_index(std::filesystem::path const & fasta_file_name) {
@@ -134,7 +138,7 @@ private:
 
         // reset counter
         fuzzy_counter.clear();
-        exact_counter.clear();
+        //exact_counter.clear();
 
         //seqan3::debug_stream << "Sequence " << sequence_id << ":\n";
         // record the possible starting positions
@@ -145,7 +149,7 @@ private:
             for (auto it = range.first; it != range.second; ++it) {
                 auto position = it->second - samples[i];
                 //seqan3::debug_stream << position << " ";
-                exact_counter[position]++;
+                //exact_counter[position]++;
                 for (int indel = -allowed_indel; indel <= allowed_indel; indel++) {
                     fuzzy_counter[position + indel]++;
                 }
@@ -222,7 +226,7 @@ public:
 
         // initialize counter
         fuzzy_counter.reserve(sample_size * allowed_indel);
-        exact_counter.reserve(sample_size);
+        //exact_counter.reserve(sample_size);
 
         // initialize sampler
         sampler = new Sampler(num_samples);
@@ -236,12 +240,10 @@ public:
     unsigned int initialize(std::filesystem::path const & fasta_file_name, 
                             std::filesystem::path const & index_directory,
                             std::string const & indicator) {
+        genome_file_name = fasta_file_name;
 
         // load q-gram index to the mapper
         _m->load(index_directory);
-
-        // load all index files
-        _initialize_kmer_index(fasta_file_name);
 
         // create index files
         return locator::initialize(fasta_file_name, index_directory, indicator);
@@ -261,6 +263,7 @@ public:
 
         // find the mapped locations of all the reads.
         auto locate_res = _locate(sequence_file);
+        records->reset();
 
         // store the bucket information
         std::ifstream bucket_info(index_file);
@@ -356,6 +359,9 @@ public:
         // reset mapper to release memory
         _m->reset();
 
+        // load all index files
+        _initialize_kmer_index(genome_file_name);
+
         // initialze query sequence storage
         records = new query_sequences_storage(_m->num_records, num_samples);
 
@@ -392,8 +398,7 @@ public:
             query_timer.tick();
             for (auto & id : bucket_sequence) {
                 auto offset_res = _find_offset(bucket_kmer_index, id);
-                auto offset = std::get<0>(offset_res);
-                auto vote = std::get<1>(offset_res);
+                auto & [offset, vote] = offset_res;
                 if (offset > 0) {
                     res[id].push_back(std::make_tuple(i, offset, vote));
                 }
