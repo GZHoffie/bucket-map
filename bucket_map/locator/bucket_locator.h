@@ -61,7 +61,7 @@ private:
     mapper* _m;
 
     // sequence of each bucket
-    std::vector<std::vector<seqan3::dna4>> bucket_seq;
+    std::vector<seqan3::bitpacked_sequence<seqan3::dna4>> bucket_seq;
 
     // sampled kmers from the query sequences
     query_sequences_storage<unsigned int>* records;
@@ -94,13 +94,13 @@ private:
          * @brief Insert the sequence into `bucket_seq` variable.
          * @param fasta_file_name the path to the fasta file containing reference genome.
          */
-        auto operation = [&](std::vector<seqan3::dna4> seq, std::string id) {
+        auto operation = [&](const seqan3::bitpacked_sequence<seqan3::dna4>& seq, const std::string& id) {
             bucket_seq.push_back(seq);
         };
         iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
     }
 
-    void _create_kmer_index(std::unordered_multimap<unsigned int, int>& index, const std::vector<seqan3::dna4>& seq) {
+    void _create_kmer_index(std::unordered_multimap<unsigned int, int>& index, const seqan3::bitpacked_sequence<seqan3::dna4>& seq) {
         /**
          * @brief Create the k-mer index given the sequence in bucket.
          * @param index the k-mer index storing the positions of each k-mer.
@@ -260,7 +260,7 @@ public:
          *                   which contains the name of each bucket.
          * @param sam_file the path to the output sam file.
          */
-
+        /*
         // find the mapped locations of all the reads.
         auto locate_res = _locate(sequence_file);
         records->reset();
@@ -314,7 +314,7 @@ public:
                 const auto & [bucket_id, offset, votes] = loc;
 
                 // get the part of text that the read is mapped to
-                std::span text_view{std::data(bucket_seq[bucket_id]) + offset, query.size() + 1 + allowed_indel};
+                std::span text_view;//{bucket_seq[bucket_id].begin() + offset, query.size() + 1 + allowed_indel};
 
                 //seqan3::debug_stream << "Txt: " << bucket_id << ", " << offset << ": " << text_view << "\n";
                 //seqan3::debug_stream << "Seq: " << query << "\n";
@@ -338,7 +338,7 @@ public:
             }
             read_id++;
         }
-        
+        */
     }
 
     typedef std::tuple<unsigned int, unsigned int, unsigned int> locate_t;

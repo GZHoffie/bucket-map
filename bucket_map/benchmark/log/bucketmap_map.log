@@ -1,35 +1,35 @@
 [INFO]          Set q-gram shape to be: [1,1,1,0,1,1,1,0,1,0,1,1] with number of effective characters: 9
-[BENCHMARK]     Number of Q-grams with distinguishability >= 0.499981: 252481 (96.3139%).
-[BENCHMARK]     Elapsed time for loading index files: 17.293 s.
+[BENCHMARK]     Number of Q-grams with distinguishability >= 0.499981: 252427 (96.2933%).
+[BENCHMARK]     Elapsed time for loading index files: 17.119 s.
 [INFO]          Successfully loaded "/mnt/d/genome/index/index.qgram".
 [ERROR]         The specified file already exists in directory: "/mnt/d/genome/index/index.qgram".
-[BENCHMARK]     Elapsed time for bucket mapping: 65.348 s (65.348 μs/seq).
-[BENCHMARK]     Total time used for building k-mer index for each bucket: 173.819 s.
-[BENCHMARK]     Total time used for finding exact location of the sequences: 117.027 s (117.027 μs/seq).
+[BENCHMARK]     Elapsed time for bucket mapping: 69.113 s (69.113 μs/seq).
+[BENCHMARK]     Total time used for building k-mer index for each bucket: 189.127 s.
+[BENCHMARK]     Total time used for finding exact location of the sequences: 3.224 s (3.224 μs/seq).
 [BENCHMARK]     Total number of sequences: 1000000.
-[BENCHMARK]     Correct bucket predictions: 979581 (97.9581%).
-[BENCHMARK]     MAE of offset: 49.8088.
-[BENCHMARK]     (Almost) correct offset calculations: 976126 (97.6126%).
-[BENCHMARK]     Average number of buckets returned: 1.51016.
-[BENCHMARK]     Number of sequences that have no candidate bucket: 10216 (1.0216%).
-[BENCHMARK]     Number of uniquely mapped sequences: 938091 (93.8091%).
-[BENCHMARK]     Number of sequences mapped to <= 5 buckets: 976214 (97.6214%).
-[BENCHMARK]     Number of sequences mapped to <= 10 buckets: 981551 (98.1551%).
-        Command being timed: "./bucket_map_benchmark"
-        User time (seconds): 405.34
-        System time (seconds): 2.62
+[BENCHMARK]     Correct bucket predictions: 976326 (97.6326%).
+[BENCHMARK]     MAE of offset: 52.4609.
+[BENCHMARK]     (Almost) correct offset calculations: 969866 (96.9866%).
+[BENCHMARK]     Average number of buckets returned: 1.14689.
+[BENCHMARK]     Number of sequences that have no candidate bucket: 13807 (1.3807%).
+[BENCHMARK]     Number of uniquely mapped sequences: 938514 (93.8514%).
+[BENCHMARK]     Number of sequences mapped to <= 5 buckets: 976715 (97.6715%).
+[BENCHMARK]     Number of sequences mapped to <= 10 buckets: 981960 (98.196%).
+        Command being timed: "/home/zhenhao/bucket-map/build/bucket_map_benchmark"
+        User time (seconds): 307.48
+        System time (seconds): 1.31
         Percent of CPU this job got: 98%
-        Elapsed (wall clock) time (h:mm:ss or m:ss): 6:54.02
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 5:12.03
         Average shared text size (kbytes): 0
         Average unshared data size (kbytes): 0
         Average stack size (kbytes): 0
         Average total size (kbytes): 0
-        Maximum resident set size (kbytes): 3532956
+        Maximum resident set size (kbytes): 1703720
         Average resident set size (kbytes): 0
         Major (requiring I/O) page faults: 0
-        Minor (reclaiming a frame) page faults: 438120
+        Minor (reclaiming a frame) page faults: 138957
         Voluntary context switches: 17706
-        Involuntary context switches: 257
+        Involuntary context switches: 100
         Swaps: 0
         File system inputs: 0
         File system outputs: 0

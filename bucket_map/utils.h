@@ -7,6 +7,7 @@
 #include <seqan3/io/sequence_file/all.hpp>
 #include <seqan3/core/debug_stream.hpp>
 #include <seqan3/alphabet/cigar/all.hpp>
+#include <seqan3/alphabet/container/bitpacked_sequence.hpp>
 
 #include <chrono>
 #include <thread>
@@ -53,7 +54,7 @@ public:
 };
 
 void iterate_through_buckets(std::filesystem::path const & fasta_file_name, int bucket_length, int read_length, 
-                             std::function<void(std::vector<seqan3::dna4>, std::string)> op, bool print_info = false) {
+                             std::function<void(const seqan3::bitpacked_sequence<seqan3::dna4>&, const std::string&)> op, bool print_info = false) {
     /**
      * @brief Util function that is used to iterate through all buckets in the reference genome, end execute
      *        some operation on each of the bucket.
@@ -83,8 +84,9 @@ void iterate_through_buckets(std::filesystem::path const & fasta_file_name, int 
             if (end - start <= read_length) {
                 continue;
             }
-
-            std::vector<seqan3::dna4> bucket_sequence(&record.sequence()[start], &record.sequence()[end]);
+            std::vector<seqan3::dna4> seq(&record.sequence()[start], &record.sequence()[end]);
+            seqan3::bitpacked_sequence<seqan3::dna4> bucket_sequence(seq);
+            //std::vector<seqan3::dna4> bucket_sequence(&record.sequence()[start], &record.sequence()[end]);
             op(bucket_sequence, record.id());
             ++_bucket_num;
         }

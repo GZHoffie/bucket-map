@@ -22,7 +22,7 @@ class short_read_simulator {
      */
 private:
     // variables storing the sequence information
-    std::vector<std::vector<seqan3::dna4>> bucket_sequence;
+    std::vector<seqan3::bitpacked_sequence<seqan3::dna4>> bucket_sequence;
     std::vector<std::pair<int, int>> bucket_ids;
     int bucket_length, read_length;
 
@@ -119,7 +119,7 @@ public:
         int index = 0;
         int reference_id = -1;
         std::string last_id = "";
-        auto operation = [&](std::vector<seqan3::dna4> seq, std::string id) {
+        auto operation = [&](const seqan3::bitpacked_sequence<seqan3::dna4>& seq, const std::string& id) {
             bucket_sequence.push_back(seq);
             if (id != last_id) {
                 index = 0;
@@ -140,7 +140,7 @@ public:
          *         the starting point of the short read>.
          */
         int bucket = rand() % bucket_sequence.size();
-        std::vector<seqan3::dna4> current_bucket = bucket_sequence[bucket];
+        seqan3::bitpacked_sequence<seqan3::dna4> current_bucket = bucket_sequence[bucket];
         int size = current_bucket.size();
         int start = 0;
         if (current_bucket.size() > read_length + 1) {

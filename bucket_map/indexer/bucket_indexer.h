@@ -38,7 +38,7 @@ protected:
     unsigned int size;
 
 
-    void _insert_into_bucket(const std::vector<seqan3::dna4>& sequence, unsigned int bucket_num) {
+    void _insert_into_bucket(const seqan3::bitpacked_sequence<seqan3::dna4>& sequence, unsigned int bucket_num) {
         /**
          * @brief Read the sequence, extract all the q-grams and store in `q_grams_index`.
          * @param sequence the corresponding sequence for the bucket.
@@ -156,7 +156,7 @@ public:
         _init_qgram_index(q);
 
         unsigned int bucket_num = 0;
-        auto operation = [&](std::vector<seqan3::dna4> seq, std::string id) {
+        auto operation = [&](const seqan3::bitpacked_sequence<seqan3::dna4>& seq, const std::string& id) {
             //bucket_seq.push_back(seq);
             bucket_id.push_back(id);
             _insert_into_bucket(seq, bucket_num);
