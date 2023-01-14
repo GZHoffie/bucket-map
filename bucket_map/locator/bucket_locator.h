@@ -108,9 +108,8 @@ private:
          */
         index.clear();
         // insert the k-mers.
-        auto values = seq | seqan3::views::kmer_hash(q_gram_shape);
         int offset = 0;
-        for (auto hash : values) {
+        for (auto hash : seq | seqan3::views::kmer_hash(q_gram_shape)) {
             // Only record the last appearance of the k-mer
             index.emplace(hash, offset);
             offset++;
@@ -142,16 +141,19 @@ private:
 
         //seqan3::debug_stream << "Sequence " << sequence_id << ":\n";
         // record the possible starting positions
+        std::unordered_set<unsigned int> votes;
         for (int i = 0; i < samples.size(); i++) {
             // find the positions of the k-mer
             //seqan3::debug_stream << "K-mer " << *(record + i) << ": ";
             auto range = bucket_kmer_index.equal_range(*(record + i));
             for (auto it = range.first; it != range.second; ++it) {
+                votes.clear();
                 auto position = it->second - samples[i];
-                //seqan3::debug_stream << position << " ";
-                //exact_counter[position]++;
                 for (int indel = -allowed_indel; indel <= allowed_indel; indel++) {
-                    fuzzy_counter[position + indel]++;
+                    votes.emplace(position + indel);
+                }
+                for (auto & vote : votes) {
+                    fuzzy_counter[vote]++;
                 }
             }
             //seqan3::debug_stream << "\n";
@@ -272,6 +274,10 @@ public:
         std::vector<std::string> bucket_name; // the name for the bucket
         std::vector<unsigned int> bucket_offsets; // the starting index of bucket in the chromosome.
 
+        // store the sequence information for sam file headers.
+        std::vector<std::string> ref_ids;
+        std::vector<size_t> ref_lengths;
+
         std::string name;
         std::string last_bucket_name;
 
@@ -279,6 +285,10 @@ public:
         for (int i = 0; i < bucket_seq.size(); i++) {
             bucket_info >> name;
             if (name != last_bucket_name) {
+                if (bucket_index != 0) {
+                    ref_ids.push_back(last_bucket_name);
+                    ref_lengths.push_back(bucket_index * bucket_length); //FIXME: an upper bound on bucket length
+                }
                 last_bucket_name = name;
                 bucket_index = 0;
             }
@@ -286,11 +296,15 @@ public:
             bucket_offsets.push_back(bucket_index * bucket_length);
             bucket_index++;
         }
+        if (bucket_index != 0) {
+            ref_ids.push_back(last_bucket_name);
+            ref_lengths.push_back(bucket_index * bucket_length); //FIXME: an upper bound on bucket length
+        }
 
         // output to the sam file
         seqan3::sequence_file_input query_file_in{sequence_file};
  
-        seqan3::sam_file_output sam_out{sam_file,
+        seqan3::sam_file_output sam_out{sam_file, ref_ids, ref_lengths,
                                         seqan3::fields<seqan3::field::seq,
                                                        seqan3::field::id,
                                                        seqan3::field::ref_id,
