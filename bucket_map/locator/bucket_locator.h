@@ -260,7 +260,6 @@ public:
          *                   which contains the name of each bucket.
          * @param sam_file the path to the output sam file.
          */
-        /*
         // find the mapped locations of all the reads.
         auto locate_res = _locate(sequence_file);
         records->reset();
@@ -307,6 +306,10 @@ public:
             | seqan3::align_cfg::output_begin_position{} | seqan3::align_cfg::output_score{};
 
         unsigned int read_id = 0;
+        unsigned int mapped_locations = 0;
+
+        Timer align_timer;
+        align_timer.tick();
         for (auto && record : query_file_in) {
             auto & query = record.sequence();
             for (auto & loc : locate_res[read_id]) {
@@ -314,13 +317,16 @@ public:
                 const auto & [bucket_id, offset, votes] = loc;
 
                 // get the part of text that the read is mapped to
-                std::span text_view;//{bucket_seq[bucket_id].begin() + offset, query.size() + 1 + allowed_indel};
+                auto start = bucket_seq[bucket_id].begin() + offset;
+                size_t width = std::min(query.size() + 1 + allowed_indel, bucket_seq[bucket_id].size() - offset);
+
+                std::vector<seqan3::dna4> text(start, start + width);
 
                 //seqan3::debug_stream << "Txt: " << bucket_id << ", " << offset << ": " << text_view << "\n";
                 //seqan3::debug_stream << "Seq: " << query << "\n";
 
                 // do pairwise string alignment
-                for (auto && alignment : seqan3::align_pairwise(std::tie(text_view, query), align_config)) {
+                for (auto && alignment : seqan3::align_pairwise(std::tie(text, query), align_config)) {
                     auto cigar = seqan3::cigar_from_alignment(alignment.alignment());
                     size_t ref_offset = alignment.sequence1_begin_position() + bucket_offsets[bucket_id] + offset;
                     
@@ -334,11 +340,17 @@ public:
                                          cigar,
                                          record.base_qualities(),
                                          map_qual);
+                    mapped_locations++;
                 }
             }
             read_id++;
         }
-        */
+        align_timer.tock();
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Total mapped locations: " 
+                             << mapped_locations << " (" << (float) mapped_locations / read_id << " per sequence).\n";
+        auto elapsed_seconds = align_timer.elapsed_seconds();
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Total time used for pairwise alignment and output: " 
+                             << elapsed_seconds << " s (" << (float) elapsed_seconds / mapped_locations * 1000 * 1000 << " μs per pairwise alignment).\n";
     }
 
     typedef std::tuple<unsigned int, unsigned int, unsigned int> locate_t;

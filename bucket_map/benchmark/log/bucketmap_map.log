@@ -1,38 +1,31 @@
 [INFO]          Set q-gram shape to be: [1,1,1,0,1,1,1,0,1,0,1,1] with number of effective characters: 9
 [BENCHMARK]     Number of Q-grams with distinguishability >= 0.499981: 252427 (96.2933%).
-[BENCHMARK]     Elapsed time for loading index files: 17.119 s.
+[BENCHMARK]     Elapsed time for loading index files: 16.766 s.
 [INFO]          Successfully loaded "/mnt/d/genome/index/index.qgram".
 [ERROR]         The specified file already exists in directory: "/mnt/d/genome/index/index.qgram".
-[BENCHMARK]     Elapsed time for bucket mapping: 69.113 s (69.113 μs/seq).
-[BENCHMARK]     Total time used for building k-mer index for each bucket: 189.127 s.
-[BENCHMARK]     Total time used for finding exact location of the sequences: 3.224 s (3.224 μs/seq).
-[BENCHMARK]     Total number of sequences: 1000000.
-[BENCHMARK]     Correct bucket predictions: 976326 (97.6326%).
-[BENCHMARK]     MAE of offset: 52.4609.
-[BENCHMARK]     (Almost) correct offset calculations: 969866 (96.9866%).
-[BENCHMARK]     Average number of buckets returned: 1.14689.
-[BENCHMARK]     Number of sequences that have no candidate bucket: 13807 (1.3807%).
-[BENCHMARK]     Number of uniquely mapped sequences: 938514 (93.8514%).
-[BENCHMARK]     Number of sequences mapped to <= 5 buckets: 976715 (97.6715%).
-[BENCHMARK]     Number of sequences mapped to <= 10 buckets: 981960 (98.196%).
-        Command being timed: "/home/zhenhao/bucket-map/build/bucket_map_benchmark"
-        User time (seconds): 307.48
-        System time (seconds): 1.31
+[BENCHMARK]     Elapsed time for bucket mapping: 67.641 s (67.641 μs/seq).
+[BENCHMARK]     Total time used for building k-mer index for each bucket: 202.468 s.
+[BENCHMARK]     Total time used for finding exact location of the sequences: 3.289 s (3.289 μs/seq).
+[BENCHMARK]     Total mapped locations: 1146885 (1.14689 per sequence).
+[BENCHMARK]     Total time used for pairwise alignment and output: 87.7 s (76.468 μs per pairwise alignment).
+        Command being timed: "/home/zhenhao/bucket-map/build/bucket_map_final"
+        User time (seconds): 403.99
+        System time (seconds): 2.34
         Percent of CPU this job got: 98%
-        Elapsed (wall clock) time (h:mm:ss or m:ss): 5:12.03
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 6:53.68
         Average shared text size (kbytes): 0
         Average unshared data size (kbytes): 0
         Average stack size (kbytes): 0
         Average total size (kbytes): 0
-        Maximum resident set size (kbytes): 1703720
+        Maximum resident set size (kbytes): 1703232
         Average resident set size (kbytes): 0
         Major (requiring I/O) page faults: 0
-        Minor (reclaiming a frame) page faults: 138957
-        Voluntary context switches: 17706
-        Involuntary context switches: 100
+        Minor (reclaiming a frame) page faults: 139356
+        Voluntary context switches: 17724
+        Involuntary context switches: 181
         Swaps: 0
         File system inputs: 0
-        File system outputs: 0
+        File system outputs: 1436248
         Socket messages sent: 0
         Socket messages received: 0
         Signals delivered: 0
