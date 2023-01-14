@@ -242,11 +242,14 @@ public:
                             std::string const & indicator) {
         genome_file_name = fasta_file_name;
 
+        // do the indexing
+        auto res = locator::initialize(fasta_file_name, index_directory, indicator);
+
         // load q-gram index to the mapper
         _m->load(index_directory);
 
         // create index files
-        return locator::initialize(fasta_file_name, index_directory, indicator);
+        return res;
     }
 
     void locate(std::filesystem::path const & sequence_file, 

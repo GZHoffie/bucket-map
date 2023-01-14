@@ -206,7 +206,7 @@ private:
     // sampling k-mers
     Sampler* sampler;
 
-    std::bitset<NUM_BUCKETS> _bitset_from_bytes(const std::vector<unsigned char>& buf) {
+    std::bitset<NUM_BUCKETS> _bitset_from_bytes(const std::vector<char>& buf) {
         /**
          * @brief Convert 8-byte chars to bitset.
          * Adopted from https://stackoverflow.com/a/7463972.
@@ -281,25 +281,14 @@ public:
         if (file) {
             Timer clock;
             clock.tick();
-            // get length fo file
-            file.seekg(0, file.end);
-            int length = file.tellg();
-            file.seekg(0, file.beg);
-            
-            // read the file into buffer
-            char * buffer = new char[length];
-            file.read(buffer, length);
-            
-            // load buffer into q_grams_index
-            unsigned int start_index, end_index;
+
+            // read several bytes from file at a time
+            std::vector<char> buffer(num_chars_per_q_gram);
             for (unsigned int i = 0; i < total_q_grams; i++) {
-                start_index = i * num_chars_per_q_gram;
-                end_index = (i+1) * num_chars_per_q_gram;
-                auto data = new std::vector<unsigned char>(buffer + start_index, buffer + end_index);
-                q_grams_index.push_back(_bitset_from_bytes(*data));
-                delete data;
+                file.read(&buffer[0], sizeof(unsigned char) * num_chars_per_q_gram);
+                q_grams_index.push_back(_bitset_from_bytes(buffer));
             }
-            delete[] buffer;
+
             dist_filter->read(q_grams_index);
             dist_view = dist_filter->get_filter();
 
