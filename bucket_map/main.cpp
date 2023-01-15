@@ -21,20 +21,11 @@ int main() {
     q_gram_mapper<26507> map(bucket_length, read_length, bucket_shape, 30, 6, 0.5);
     bucket_locator loc(&ind, &map, bucket_length, read_length, locate_shape, 0.01 * locate_shape.count(), 0.001 * std::ranges::size(locate_shape), 10);
 
-    bool create_new_sample = false;
-
-    if (create_new_sample) {
-        short_read_simulator sim(bucket_length, read_length, 0.002, 0.00025, 0.00025);
-        sim.read(genome_file);
-        sim.generate_fastq_file(data_path / "test", "sim_test", 10);
-    }
-    
-
     //auto res = map._query_file(data_path / "test" / "sim.fastq");
     //map._check_ground_truth(res, data_path / "test" / "sim.bucket_ground_truth");
 
     loc.initialize(genome_file, data_path / "index", "test");
-    loc.locate(data_path / "test" / "sim.fastq", data_path / "index" / "index.bucket_id", output_path / "bucket_map.sam");
+    loc.locate(data_path / "test" / "sim_illumina_1M.fastq", data_path / "index" / "index.bucket_id", output_path / "bucket_map.sam");
     
     
 

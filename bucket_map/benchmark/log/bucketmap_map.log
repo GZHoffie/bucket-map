@@ -1,33 +1,10 @@
 [INFO]          Set q-gram shape to be: [1,1,1,0,1,1,1,0,1,0,1,1] with number of effective characters: 9
-[BENCHMARK]     Number of Q-grams with distinguishability >= 0.499981: 252427 (96.2933%).
-[BENCHMARK]     Elapsed time for loading index files: 22.51 s.
-[INFO]          Successfully loaded "/mnt/d/genome/index/index.qgram".
 [ERROR]         The specified file already exists in directory: "/mnt/d/genome/index/index.qgram".
-[BENCHMARK]     Elapsed time for bucket mapping: 66.451 s (66.451 μs/seq).
-[BENCHMARK]     Total time used for building k-mer index for each bucket: 235.311 s.
-[BENCHMARK]     Total time used for finding exact location of the sequences: 3.445 s (3.445 μs/seq).
-[BENCHMARK]     Total mapped locations: 1146885 (1.14689 per sequence).
-[BENCHMARK]     Total time used for pairwise alignment and output: 91.075 s (79.4107 μs per pairwise alignment).
-        Command being timed: "/home/zhenhao/bucket-map/build/bucket_map_final"
-        User time (seconds): 439.97
-        System time (seconds): 4.37
-        Percent of CPU this job got: 97%
-        Elapsed (wall clock) time (h:mm:ss or m:ss): 7:34.54
-        Average shared text size (kbytes): 0
-        Average unshared data size (kbytes): 0
-        Average stack size (kbytes): 0
-        Average total size (kbytes): 0
-        Maximum resident set size (kbytes): 865468
-        Average resident set size (kbytes): 0
-        Major (requiring I/O) page faults: 0
-        Minor (reclaiming a frame) page faults: 137941
-        Voluntary context switches: 120452
-        Involuntary context switches: 539
-        Swaps: 0
-        File system inputs: 0
-        File system outputs: 1436256
-        Socket messages sent: 0
-        Socket messages received: 0
-        Signals delivered: 0
-        Page size (bytes): 4096
-        Exit status: 0
+[BENCHMARK]     Number of Q-grams with distinguishability >= 0.499981: 252427 (96.2933%).
+[BENCHMARK]     Elapsed time for loading index files: 25.364 s.
+[INFO]          Successfully loaded "/mnt/d/genome/index/index.qgram".
+[BENCHMARK]     Elapsed time for bucket mapping: 71.395 s (71.395 μs/seq).
+[BENCHMARK]     Total time used for building k-mer index for each bucket: 229.2 s.
+[BENCHMARK]     Total time used for finding exact location of the sequences: 6.315 s (6.315 μs/seq).
+[BENCHMARK]     Total mapped locations: 1145380 (1.14538 per sequence).
+[BENCHMARK]     Total time used for pairwise alignment and output: 72.53 s (63.324 μs per pairwise alignment).

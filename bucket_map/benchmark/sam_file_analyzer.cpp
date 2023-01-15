@@ -25,6 +25,7 @@ public:
     void benchmark(std::filesystem::path sam_path) {
         // Benchmark statistics
         int mapped_locations = 0; // number of mapped locations
+        std::vector<bool> mapped_reads(ground_truth.size(), false); // whether the read is mapped to a location
         std::vector<bool> correct_mapped_references(ground_truth.size(), false); // number of correctly mapped sequences in reference
         std::vector<bool> correct_mapped_positions(ground_truth.size(), false); // number of correctly mapped locations
         double total_absolute_error = 0; // difference between correctly mapped sequences and true offsets
@@ -44,6 +45,8 @@ public:
                 int predict_ref = record.reference_id().value();
                 int predict_pos = record.reference_position().value();
 
+                mapped_reads[sequence_id] = true;
+
                 //seqan3::debug_stream << predict_ref << ", " << predict_pos << "\n";
 
                 // compare the two
@@ -62,9 +65,12 @@ public:
         }
 
         // print out benchmark results
+        unsigned int num_mapped_reads = std::count(mapped_reads.begin(), mapped_reads.end(), true);
         unsigned int correct_buckets = std::count(correct_mapped_references.begin(), correct_mapped_references.end(), true);
         unsigned int correct_locations = std::count(correct_mapped_positions.begin(), correct_mapped_positions.end(), true);
         seqan3::debug_stream << "[BENCHMARK]\t" << "============ Benchmarking sam file " << sam_path << " ============\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of mapped reads: " 
+                             << num_mapped_reads << " (" << ((float) num_mapped_reads) / ground_truth.size() * 100 << "%).\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of sequences: " 
                              << ground_truth.size() << ".\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Correct reference sequence predictions: " 
@@ -90,9 +96,9 @@ public:
 int main()
 {
     sam_analyzer analyzer(5);
-    analyzer.read("/mnt/d/genome/test/sim.position_ground_truth");
+    analyzer.read("/mnt/d/genome/test/sim_illumina_1M.position_ground_truth");
 
-    analyzer.benchmark("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bucket_map.sam");
+    analyzer.benchmark_directory("/home/zhenhao/bucket-map/bucket_map/benchmark/output");
     return 0;
 
 }

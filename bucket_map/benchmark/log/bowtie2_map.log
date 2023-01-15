@@ -1,4 +1,6 @@
-Error reading _ebwt[] array: no more data
-Error: Encountered internal Bowtie 2 exception (#1)
-Command: /home/zhenhao/miniconda3/bin/bowtie2-align-s --wrapper basic-0 -x egu_bowtie2 -S /home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam -U /mnt/d/genome/test/sim_illumina_1M.fastq 
-(ERR): bowtie2-align exited with value 1
+1000000 reads; of these:
+  1000000 (100.00%) were unpaired; of these:
+    1096 (0.11%) aligned 0 times
+    449108 (44.91%) aligned exactly 1 time
+    549796 (54.98%) aligned >1 times
+99.89% overall alignment rate

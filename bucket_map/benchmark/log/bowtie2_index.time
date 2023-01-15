@@ -1,24 +1,23 @@
-Command exited with non-zero status 247
-	Command being timed: "bowtie2-build /mnt/d/genome/Egu.v3.genome_f.fasta egu_bowtie2"
-	User time (seconds): 3220.81
-	System time (seconds): 62.45
-	Percent of CPU this job got: 86%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:03:23
+	Command being timed: "bowtie2-build /mnt/d/genome/Egu.v3.genome_f.fasta egu_bowtie"
+	User time (seconds): 2424.85
+	System time (seconds): 21.45
+	Percent of CPU this job got: 93%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 43:35.36
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 7400824
+	Maximum resident set size (kbytes): 7648524
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 1644803
-	Minor (reclaiming a frame) page faults: 10602226
-	Voluntary context switches: 1705842
-	Involuntary context switches: 4057
+	Major (requiring I/O) page faults: 832483
+	Minor (reclaiming a frame) page faults: 7510117
+	Voluntary context switches: 885657
+	Involuntary context switches: 1529
 	Swaps: 0
-	File system inputs: 164237864
-	File system outputs: 2778600
+	File system inputs: 39288056
+	File system outputs: 4735976
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0
 	Page size (bytes): 4096
-	Exit status: 247
+	Exit status: 0

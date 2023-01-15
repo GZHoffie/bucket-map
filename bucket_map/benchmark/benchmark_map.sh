@@ -12,7 +12,7 @@ cd "${BENCHMARK_PATH}/index"
 
 # run bowtie2 to map the reads
 echo "Mapping using bowtie2"
-/usr/bin/time -o "${BENCHMARK_PATH}/log/bowtie2_map.time" -v bowtie2 -x "${INDEX_INDICATOR}_bowtie2" -U ${FASTQ_PATH} -S "${BENCHMARK_PATH}/output/bowtie2_map.sam" &> "${BENCHMARK_PATH}/log/bowtie2_map.log"
+/usr/bin/time -o "${BENCHMARK_PATH}/log/bowtie2_map.time" -v bowtie2 -x "${INDEX_INDICATOR}_bowtie" -U ${FASTQ_PATH} -S "${BENCHMARK_PATH}/output/bowtie2_map.sam" &> "${BENCHMARK_PATH}/log/bowtie2_map.log"
 
 # run bwa to map the reads
 echo "Mapping using bwa"

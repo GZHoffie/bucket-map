@@ -9,7 +9,7 @@ cd "${BENCHMARK_PATH}/index"
 
 # run the indexing method of bowtie2
 echo "Indexing using bowtie2"
-/usr/bin/time -o "${BENCHMARK_PATH}/log/bowtie2_index.time" -v bowtie2-build ${FASTA_PATH} "${INDEX_INDICATOR}_bowtie2" &> "${BENCHMARK_PATH}/log/bowtie2_index.log"
+/usr/bin/time -o "${BENCHMARK_PATH}/log/bowtie2_index.time" -v bowtie2-build ${FASTA_PATH} "${INDEX_INDICATOR}_bowtie" &> "${BENCHMARK_PATH}/log/bowtie2_index.log"
 
 # run indexing for bwa
 echo "Indexing using bwa"

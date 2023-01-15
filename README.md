@@ -1,8 +1,10 @@
-![](./bucketmap-logo.png)
+<p align="center">
+  <img src="./bucketmap-logo.png"/>
+</p>
 
 # *BucketMap*: Hierarchical DNA Read Mapping
 
-**This repository contains my work for the MComp Dissertation at School of Computing, National University of Singapore. This work is supervised by [Prof. Wong Limsoon](https://www.comp.nus.edu.sg/~wongls/).**
+**This repository contains my experimental work for the MComp Dissertation at School of Computing, National University of Singapore. This work is supervised by [Prof. Wong Limsoon](https://www.comp.nus.edu.sg/~wongls/).**
 
 *BucketMap* is a novel DNA mapping tool that is extremely light-weight, memory-saving and fast. For a 1.7 billion base-pair long reference genome, and 1 million short reads of length 300, *BucketMap* is able to complete the mapping within 8 minutes, with 97% accuracy and a peak memory of only 0.8 GB.
 
@@ -20,6 +22,17 @@ This tool is built with [Seqan3](https://docs.seqan.de/seqan/3-master-user/index
 git clone https://github.com/GZHoffie/bucket-map.git
 cd bucket-map/bucket_map
 ```
+
+## Benchmarking
+
+We benchmark our read mapper against several popular DNA read mappers available, including
+
+- [Bowtie2](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml), 
+- [BWA-MEM](https://bio-bwa.sourceforge.net/), 
+- [subread](https://github.com/ShiLab-Bioinformatics/subread).
+
+We document a detailed guide on how we do the benchmarking, which metrics we are using, as well as some preliminary benchmark results, in [this page](./bucket_map/benchmark/README.md).
+
 ## DNA read simulator
 
 In `tools/short_read_simulator.h`, we implement a more realistic generator of DNA reads that is used for our benchmarking. The tool is easy to use,
@@ -33,7 +46,6 @@ int main() {
 
     // path to store the generated fastq file
     std::filesystem::path output_path = "/mnt/d/genome/test";
-
 
     // length of buckets, used specifically for accuracy benchmark for BucketMap
     int bucket_length = 65536;
