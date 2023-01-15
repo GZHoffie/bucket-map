@@ -1,5 +1,5 @@
 Settings:
-  Output files: "egu_genome.*.bt2"
+  Output files: "egu_bowtie2.*.bt2"
   Line rate: 6 (line is 64 bytes)
   Lines per side: 1 (side is 64 bytes)
   Offset rate: 4 (one in 16)
@@ -34,12 +34,12 @@ Building DifferenceCoverSample
   Building sPrime
   Building sPrimeOrder
   V-Sorting samples
-  V-Sorting samples time: 00:00:33
+  V-Sorting samples time: 00:00:35
   Allocating rank array
   Ranking v-sort output
-  Ranking v-sort output time: 00:00:08
+  Ranking v-sort output time: 00:00:11
   Invoking Larsson-Sadakane on ranks
-  Invoking Larsson-Sadakane on ranks time: 00:00:15
+  Invoking Larsson-Sadakane on ranks time: 00:00:17
   Sanity-checking and returning
 Building samples
 Reserving space for 12 sample suffixes
@@ -60,7 +60,7 @@ Getting block 1 of 1
   No samples; assembling all-inclusive block
   Sorting block of length 1700741999 for bucket 1
   (Using difference cover)
-  Sorting block time: 00:26:44
+  Sorting block time: 00:27:29
 Returning block of 1700742000 for bucket 1
 Exited Ebwt loop
 fchr[A]: 0
@@ -70,8 +70,8 @@ fchr[T]: 1179421646
 fchr[$]: 1700741999
 Exiting Ebwt::buildToDisk()
 Returning from initFromVector
-Wrote 571206782 bytes to primary EBWT file: egu_genome.1.bt2
-Wrote 425185504 bytes to secondary EBWT file: egu_genome.2.bt2
+Wrote 571206782 bytes to primary EBWT file: egu_bowtie2.1.bt2
+Wrote 425185504 bytes to secondary EBWT file: egu_bowtie2.2.bt2
 Re-opening _in1 and _in2 as input streams
 Returning from Ebwt constructor
 Headers:
@@ -99,14 +99,14 @@ Headers:
     ebwtTotSz: 566914048
     color: 0
     reverse: 0
-Total time for call to driver() for forward index: 00:35:10
+Total time for call to driver() for forward index: 00:35:56
 Reading reference sizes
-  Time reading reference sizes: 00:00:10
+  Time reading reference sizes: 00:00:11
 Calculating joined length
 Writing header
 Reserving space for joined string
 Joining reference sequences
-  Time to join reference sequences: 00:00:10
+  Time to join reference sequences: 00:00:13
   Time to reverse reference sequence: 00:00:01
 bmax according to bmaxDivN setting: 425185499
 Using parameters --bmax 318889125 --dcv 1024
@@ -117,10 +117,10 @@ Building DifferenceCoverSample
   Building sPrime
   Building sPrimeOrder
   V-Sorting samples
-  V-Sorting samples time: 00:00:40
+  V-Sorting samples time: 00:00:35
   Allocating rank array
   Ranking v-sort output
-  Ranking v-sort output time: 00:00:12
+  Ranking v-sort output time: 00:00:11
   Invoking Larsson-Sadakane on ranks
   Invoking Larsson-Sadakane on ranks time: 00:00:20
   Sanity-checking and returning
@@ -141,27 +141,5 @@ Allocating ftab, absorbFtab
 Entering Ebwt loop
 Getting block 1 of 1
   No samples; assembling all-inclusive block
-Command exited with non-zero status 247
-        Command being timed: "bowtie2-build /mnt/d/genome/Egu.v3.genome_f.fasta egu_genome"
-        User time (seconds): 2021.13
-        System time (seconds): 38.69
-        Percent of CPU this job got: 93%
-        Elapsed (wall clock) time (h:mm:ss or m:ss): 36:47.70
-        Average shared text size (kbytes): 0
-        Average unshared data size (kbytes): 0
-        Average stack size (kbytes): 0
-        Average total size (kbytes): 0
-        Maximum resident set size (kbytes): 7357540
-        Average resident set size (kbytes): 0
-        Major (requiring I/O) page faults: 802276
-        Minor (reclaiming a frame) page faults: 6214763
-        Voluntary context switches: 856842
-        Involuntary context switches: 3091
-        Swaps: 0
-        File system inputs: 22298552
-        File system outputs: 2781408
-        Socket messages sent: 0
-        Socket messages received: 0
-        Signals delivered: 0
-        Page size (bytes): 4096
-        Exit status: 247
+  Sorting block of length 1700741999 for bucket 1
+  (Using difference cover)

@@ -1,0 +1,23 @@
+	Command being timed: "subread-align --SAMoutput -i egu_subread -r /mnt/d/genome/test/sim_illumina_1M.fastq -t 1 -o /home/zhenhao/bucket-map/bucket_map/benchmark/output/subread_map.sam"
+	User time (seconds): 573.93
+	System time (seconds): 12.92
+	Percent of CPU this job got: 90%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 10:45.97
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 4201588
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 13
+	Minor (reclaiming a frame) page faults: 734950
+	Voluntary context switches: 319587
+	Involuntary context switches: 896
+	Swaps: 0
+	File system inputs: 6624440
+	File system outputs: 1300608
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

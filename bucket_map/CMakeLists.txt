@@ -19,11 +19,11 @@ FetchContent_Declare(seqan3
 FetchContent_MakeAvailable(seqan3)
 
 
-FetchContent_Declare(parasail
-  GIT_REPOSITORY https://github.com/jeffdaily/parasail.git
-  GIT_TAG        master
-)
-FetchContent_MakeAvailable(parasail)
+#FetchContent_Declare(parasail
+#  GIT_REPOSITORY https://github.com/jeffdaily/parasail.git
+#  GIT_TAG        master
+#)
+#FetchContent_MakeAvailable(parasail)
 
 # set common header files
 set(INDEXER_FILES
@@ -54,13 +54,17 @@ set(SHARED_FILES
     ${MAPPER_FILES}
     ${LOCATOR_FILES})
 
+# build dataset generating tools
+add_executable(generate_dataset generate_dataset.cpp ${UTIL_FILES})
+target_link_libraries(generate_dataset PUBLIC seqan3::seqan3)
+
 # build app with seqan3
 add_executable(bucket_map mapper_test.cpp ${SHARED_FILES})
 target_link_libraries(bucket_map PUBLIC seqan3::seqan3 dlib::dlib)
 add_executable(bucket_map_benchmark locator_test.cpp ${SHARED_FILES})
 target_link_libraries(bucket_map_benchmark PUBLIC seqan3::seqan3 dlib::dlib)
 add_executable(bucket_map_final main.cpp ${SHARED_FILES})
-target_link_libraries(bucket_map_final PUBLIC parasail seqan3::seqan3 dlib::dlib)
+target_link_libraries(bucket_map_final PUBLIC seqan3::seqan3 dlib::dlib)
 
 # benchmark executables
 add_executable(sam_benchmark benchmark/sam_file_analyzer.cpp)

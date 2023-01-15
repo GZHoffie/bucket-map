@@ -3,12 +3,21 @@
 
 # the path to the fasta/fastq file is required to be an absolute path
 FASTQ_PATH=$1
-INDEX_NAME=$2
+BENCHMARK_PATH=$2
+INDEX_INDICATOR=$3
 
 
 # go to the index path
-cd ./index/
-echo $(pwd)
+cd "${BENCHMARK_PATH}/index"
 
 # run bowtie2 to map the reads
-/usr/bin/time -o ../log/bowtie2_map.time -v bowtie2 -x ${INDEX_NAME} -U ${FASTQ_PATH} -S ../output/bowtie2_map.sam > ../log/bowtie2_map.log
+echo "Mapping using bowtie2"
+/usr/bin/time -o "${BENCHMARK_PATH}/log/bowtie2_map.time" -v bowtie2 -x "${INDEX_INDICATOR}_bowtie2" -U ${FASTQ_PATH} -S "${BENCHMARK_PATH}/output/bowtie2_map.sam" &> "${BENCHMARK_PATH}/log/bowtie2_map.log"
+
+# run bwa to map the reads
+echo "Mapping using bwa"
+/usr/bin/time -o "${BENCHMARK_PATH}/log/bwa_map.time" -v bwa mem "${INDEX_INDICATOR}_bwa" ${FASTQ_PATH} > "${BENCHMARK_PATH}/output/bwa_map.sam" 2> "${BENCHMARK_PATH}/log/bwa_map.log"
+
+# run subread to map the reads
+echo "Mapping using subread"
+/usr/bin/time -o "${BENCHMARK_PATH}/log/subread_map.time" -v subread-align --SAMoutput -i "${INDEX_INDICATOR}_subread" -r ${FASTQ_PATH} -t 1 -o "${BENCHMARK_PATH}/output/subread_map.sam" &> "${BENCHMARK_PATH}/log/subread_map.log"
