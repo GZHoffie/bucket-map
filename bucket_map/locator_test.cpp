@@ -37,8 +37,8 @@ int main() {
     //map._check_ground_truth(res, data_path / "test" / "sim.bucket_ground_truth");
 
     loc.initialize(genome_file, data_path / "index", "test");
-    auto res = loc._locate(data_path / "test" / "sim.fastq");
-    loc._check_ground_truth(res, data_path / "test" / "sim.bucket_ground_truth");
+    auto res = loc._locate(data_path / "test" / "sim_illumina_1M.fastq");
+    loc._check_ground_truth(res, data_path / "test" / "sim_illumina_1M.bucket_ground_truth");
     
     
 

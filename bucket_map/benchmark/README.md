@@ -2,8 +2,6 @@
 
 In this page, we note down the benchmarking methods and results of some DNA read mapping tools. The tools we use for benchmarking include [Bowtie2](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml), [BWA-MEM](https://bio-bwa.sourceforge.net/), [subread](https://github.com/ShiLab-Bioinformatics/subread).
 
-To be added: [minimap2](https://github.com/lh3/minimap2), ...
-
 ## Installation of Tools
 
 We write down how we download the read mapping tools for future reference. We also add script of adding the binary applications to `PATH` for easier usage.
@@ -28,6 +26,14 @@ We write down how we download the read mapping tools for future reference. We al
   make -f Makefile.Linux
   echo "export PATH=\${PATH}:$(pwd)/bin" >> ~/.bashrc
   ```
+
+ - **Minimap2**,
+
+   ```bash
+   git clone https://github.com/lh3/minimap2
+   cd minimap2 && make
+   echo "export PATH=\${PATH}:$(pwd)" >> ~/.bashrc
+   ```
 
 After adding everything to `.bashrc`, we can run
 ```bash
@@ -115,6 +121,7 @@ The time and memory usage of the tools with 1 million reads of length 300 (with 
 |BWA-MEM|563.19|2995356|25|436960|
 |Subread|573.93|4201588|13|734950|
 |**BucketMap**|426.78|865568|0|138474|
+|**Alignment-free BucketMap**|320.95|865344|0|135648|
 
 And the accuracy of the tools when comparing with the ground truth is
 
@@ -123,4 +130,5 @@ And the accuracy of the tools when comparing with the ground truth is
 |Bowtie2|99.8904%|1|98.4358%|97.6452%|
 |BWA-MEM|100%|1.00142|98.9025%|98.0892%|
 |Subread|96.7519%|1|95.735%|94.8024%|
-|**BucketMap**|98.6348%|1.14538|97.8566%|97.3444%
+|**BucketMap**|98.6348%|1.14538|97.8566%|97.3444%|
+|**Alignment-free BucketMap**|98.6348%|1.14538|97.8566%|97.3444%|

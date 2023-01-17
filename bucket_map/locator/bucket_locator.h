@@ -256,7 +256,8 @@ public:
 
     void locate(std::filesystem::path const & sequence_file, 
                 std::filesystem::path const & index_file,
-                std::filesystem::path const & sam_file) {
+                std::filesystem::path const & sam_file,
+                unsigned int quality_threshold = 30) {
         /**
          * @brief Find the exact locations of the reads and output the mapping results
          *        to a sam file.
@@ -264,6 +265,7 @@ public:
          * @param index_file the `.bucket_id` file created by a `bucket_indexer` object,
          *                   which contains the name of each bucket.
          * @param sam_file the path to the output sam file.
+         * @param quality_threshold the minimum quality score for an alignment to be valid.
          */
         // find the mapped locations of all the reads.
         auto locate_res = _locate(sequence_file);
@@ -309,11 +311,13 @@ public:
                                                        seqan3::field::id,
                                                        seqan3::field::ref_id,
                                                        seqan3::field::ref_offset,
+#ifdef ALIGN
                                                        seqan3::field::cigar,
+#endif
                                                        seqan3::field::qual,
                                                        seqan3::field::mapq>{}};
  
- 
+#ifdef ALIGN
         seqan3::configuration const align_config =
             seqan3::align_cfg::method_global{seqan3::align_cfg::free_end_gaps_sequence1_leading{true},
                                              seqan3::align_cfg::free_end_gaps_sequence2_leading{false},
@@ -321,6 +325,7 @@ public:
                                              seqan3::align_cfg::free_end_gaps_sequence2_trailing{false}}
             | seqan3::align_cfg::edit_scheme | seqan3::align_cfg::output_alignment{}
             | seqan3::align_cfg::output_begin_position{} | seqan3::align_cfg::output_score{};
+#endif
 
         unsigned int read_id = 0;
         unsigned int mapped_locations = 0;
@@ -339,16 +344,18 @@ public:
 
                 std::vector<seqan3::dna4> text(start, start + width);
 
-                //seqan3::debug_stream << "Txt: " << bucket_id << ", " << offset << ": " << text_view << "\n";
-                //seqan3::debug_stream << "Seq: " << query << "\n";
-
+#ifdef ALIGN
                 // do pairwise string alignment
                 for (auto && alignment : seqan3::align_pairwise(std::tie(text, query), align_config)) {
+                    size_t map_qual = 60u + alignment.score(); // TODO: consider the number of votes in the mapping quality.
+                    if (map_qual < minimum_quality) {
+                        continue;
+                    }
+
                     auto cigar = seqan3::cigar_from_alignment(alignment.alignment());
                     size_t ref_offset = alignment.sequence1_begin_position() + bucket_offsets[bucket_id] + offset;
                     
-                    size_t map_qual = 60u + alignment.score(); // TODO: consider the number of votes in the mapping quality.
-
+                    
                     // output to the sam file
                     sam_out.emplace_back(query,
                                          record.id(),
@@ -359,6 +366,17 @@ public:
                                          map_qual);
                     mapped_locations++;
                 }
+#else
+                size_t map_qual = 6 * votes;
+                size_t ref_offset = bucket_offsets[bucket_id] + offset;
+                sam_out.emplace_back(query,
+                                     record.id(),
+                                     bucket_name[bucket_id],
+                                     ref_offset,
+                                     record.base_qualities(),
+                                     map_qual);
+                mapped_locations++;
+#endif
             }
             read_id++;
         }
@@ -366,7 +384,7 @@ public:
         seqan3::debug_stream << "[BENCHMARK]\t" << "Total mapped locations: " 
                              << mapped_locations << " (" << (float) mapped_locations / read_id << " per sequence).\n";
         auto elapsed_seconds = align_timer.elapsed_seconds();
-        seqan3::debug_stream << "[BENCHMARK]\t" << "Total time used for pairwise alignment and output: " 
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Total time used for alignment verification and output: " 
                              << elapsed_seconds << " s (" << (float) elapsed_seconds / mapped_locations * 1000 * 1000 << " μs per pairwise alignment).\n";
     }
 
@@ -465,6 +483,7 @@ public:
 
         double total_offset_error = 0;
         int almost_correct_offset = 0;
+        int unique_correct_offset = 0;
 
         for (int i = 0; i < query_results.size(); i++) {
             is >> bucket >> exact_location >> cigar;
@@ -478,6 +497,9 @@ public:
                     total_offset_error += error;
                     if (error <= allowed_indel) {
                         almost_correct_offset++;
+                        if (buckets.size() == 1) {
+                            unique_correct_offset++;
+                        }
                     } else {
                         //seqan3::debug_stream << std::get<1>(pair) << " answer: " << exact_location << "\n";
                     }
@@ -492,6 +514,8 @@ public:
                              << query_results.size() << ".\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Correct bucket predictions: " 
                              << correct_map << " (" << ((float) correct_map) / query_results.size() * 100 << "%).\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Correct bucket predictions among uniquely mapped reads: " 
+                             << unique_correct_offset << " (" << ((float) unique_correct_offset) / bucket_number_map[1] * 100 << "%).\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "MAE of offset: " 
                              << total_offset_error / correct_map << ".\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "(Almost) correct offset calculations: " 

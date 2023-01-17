@@ -37,7 +37,8 @@ public:
     
     virtual void locate(std::filesystem::path const & sequence_file, 
                         std::filesystem::path const & index_path,
-                        std::filesystem::path const & sam_file) {
+                        std::filesystem::path const & sam_file,
+                        unsigned int quality_threshold = 30) {
         /**
          * @brief Find the exact location of reads in a fastq file, and output
          *        the mapping result to a sam file.

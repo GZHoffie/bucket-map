@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 project(bucket_mapper CXX)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -m64")
+add_definitions(-DALIGN)
 
 include(FetchContent)
 # dlib for serialization of the index files
@@ -61,8 +62,10 @@ target_link_libraries(generate_dataset PUBLIC seqan3::seqan3)
 # build app with seqan3
 add_executable(bucket_map mapper_test.cpp ${SHARED_FILES})
 target_link_libraries(bucket_map PUBLIC seqan3::seqan3 dlib::dlib)
+
 add_executable(bucket_map_benchmark locator_test.cpp ${SHARED_FILES})
 target_link_libraries(bucket_map_benchmark PUBLIC seqan3::seqan3 dlib::dlib)
+
 add_executable(bucket_map_final main.cpp ${SHARED_FILES})
 target_link_libraries(bucket_map_final PUBLIC seqan3::seqan3 dlib::dlib)
 

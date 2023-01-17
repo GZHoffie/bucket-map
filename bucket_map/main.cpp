@@ -8,6 +8,9 @@
 #include <chrono>
 
 int main() {
+#ifdef ALIGN
+    seqan3::debug_stream << "[INFO]\t\tAllowing pairwise alignment for alignment verifications.";
+#endif
     std::filesystem::path data_path = "/mnt/d/genome";
     std::filesystem::path genome_file = data_path / "Egu.v3.genome_f.fasta";
     std::filesystem::path output_path = "/home/zhenhao/bucket-map/bucket_map/benchmark/output";
@@ -25,7 +28,7 @@ int main() {
     //map._check_ground_truth(res, data_path / "test" / "sim.bucket_ground_truth");
 
     loc.initialize(genome_file, data_path / "index", "test");
-    loc.locate(data_path / "test" / "sim_illumina_1M.fastq", data_path / "index" / "index.bucket_id", output_path / "bucket_map.sam");
+    loc.locate(data_path / "test" / "sim_illumina_1M.fastq", data_path / "index" / "index.bucket_id", output_path / "bucket_align_map.sam");
     
     
 
