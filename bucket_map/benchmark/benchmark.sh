@@ -15,4 +15,4 @@ mkdir -p "${BENCHMARK_PATH}/output"
 ./benchmark_index.sh ${GENOME_FILE} ${BENCHMARK_PATH} ${INDICATOR}
 
 # Run map benchmarking
-./benchmark_map.sh ${QUERY_FILE} ${BENCHMARK_PATH} ${INDICATOR} {GENOME_FILE} 
+./benchmark_map.sh ${QUERY_FILE} ${BENCHMARK_PATH} ${INDICATOR}

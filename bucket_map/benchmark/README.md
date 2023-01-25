@@ -4,13 +4,21 @@ In this page, we note down the benchmarking methods and results of some DNA read
 
 ## Installation of Tools
 
-We write down how we download the read mapping tools for future reference. We also add script of adding the binary applications to `PATH` for easier usage.
+We write down how we download the read mapping tools for future reference. We also add script of adding the binary applications to `PATH` for easier usage. All tools can be built from source
 
 - **Bowtie2** can be downloaded directly using [bioconda](https://anaconda.org/bioconda).
   ```bash
   conda install -c bioconda bowtie2
   ```
-- **BWA-MEM** can be easily built from source.
+  
+  or from source
+  ```bash
+  git clone https://github.com/BenLangmead/bowtie2.git
+  cd bwa; make
+  echo "export PATH=\${PATH}:$(pwd)" >> ~/.bashrc
+  ```
+
+- **BWA-MEM**.
   
   ```bash
   git clone https://github.com/lh3/bwa.git
@@ -18,7 +26,7 @@ We write down how we download the read mapping tools for future reference. We al
   echo "export PATH=\${PATH}:$(pwd)" >> ~/.bashrc
   ```
 
-- **Subread** can also be built from source.
+- **Subread**.
 
   ```bash
   git clone https://github.com/ShiLab-Bioinformatics/subread.git
@@ -27,7 +35,7 @@ We write down how we download the read mapping tools for future reference. We al
   echo "export PATH=\${PATH}:$(pwd)/bin" >> ~/.bashrc
   ```
 
- - **Minimap2**,
+ - **Minimap2**.
 
    ```bash
    git clone https://github.com/lh3/minimap2

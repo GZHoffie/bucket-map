@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.4)
 project(bucket_mapper CXX)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -m64")
-add_definitions(-DALIGN)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 include(FetchContent)
 # dlib for serialization of the index files
@@ -60,14 +59,20 @@ add_executable(generate_dataset generate_dataset.cpp ${UTIL_FILES})
 target_link_libraries(generate_dataset PUBLIC seqan3::seqan3)
 
 # build app with seqan3
-add_executable(bucket_map mapper_test.cpp ${SHARED_FILES})
-target_link_libraries(bucket_map PUBLIC seqan3::seqan3 dlib::dlib)
+add_executable(mapper_test mapper_test.cpp ${SHARED_FILES})
+target_link_libraries(mapper_test PUBLIC seqan3::seqan3 dlib::dlib)
 
-add_executable(bucket_map_benchmark locator_test.cpp ${SHARED_FILES})
-target_link_libraries(bucket_map_benchmark PUBLIC seqan3::seqan3 dlib::dlib)
+add_executable(locator_test locator_test.cpp ${SHARED_FILES})
+target_link_libraries(locator_test PUBLIC seqan3::seqan3 dlib::dlib)
 
-add_executable(bucket_map_final main.cpp ${SHARED_FILES})
-target_link_libraries(bucket_map_final PUBLIC seqan3::seqan3 dlib::dlib)
+add_executable(bucketmap main.cpp ${SHARED_FILES})
+target_link_libraries(bucketmap PUBLIC seqan3::seqan3 dlib::dlib)
+
+add_executable(bucketmap_align main.cpp ${SHARED_FILES})
+target_link_libraries(bucketmap_align PUBLIC seqan3::seqan3 dlib::dlib)
+
+add_executable(bucketmap_index main.cpp ${SHARED_FILES})
+target_link_libraries(bucketmap_index PUBLIC seqan3::seqan3 dlib::dlib)
 
 # benchmark executables
 add_executable(sam_benchmark benchmark/sam_file_analyzer.cpp)

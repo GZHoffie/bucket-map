@@ -1,0 +1,4 @@
+[M::main::10.965*0.56] loaded/built the index for 932 target sequence(s)
+[M::mm_mapopt_update::12.059*0.60] mid_occ = 1428
+[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 932
+[M::mm_idx_stat::12.750*0.62] distinct minimizers: 61720831 (52.90% are singletons); average occurrences: 5.186; average spacing: 5.315; total length: 1701312507
