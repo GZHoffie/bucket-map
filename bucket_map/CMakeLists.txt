@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.4)
 project(bucket_mapper CXX)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 include(FetchContent)
@@ -69,10 +71,11 @@ add_executable(bucketmap main.cpp ${SHARED_FILES})
 target_link_libraries(bucketmap PUBLIC seqan3::seqan3 dlib::dlib)
 
 add_executable(bucketmap_align main.cpp ${SHARED_FILES})
+target_compile_definitions(bucketmap_align PRIVATE BM_ALIGN)
 target_link_libraries(bucketmap_align PUBLIC seqan3::seqan3 dlib::dlib)
 
-add_executable(bucketmap_index main.cpp ${SHARED_FILES})
-target_link_libraries(bucketmap_index PUBLIC seqan3::seqan3 dlib::dlib)
+#get_property(defs TARGET bucketmap_align PROPERTY COMPILE_DEFINITIONS)
+#message("Defs: ${defs}")
 
 # benchmark executables
 add_executable(sam_benchmark benchmark/sam_file_analyzer.cpp)

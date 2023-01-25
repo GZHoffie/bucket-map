@@ -8,8 +8,10 @@
 #include <chrono>
 
 int main() {
-#ifdef ALIGN
-    seqan3::debug_stream << "[INFO]\t\tAllowing pairwise alignment for alignment verifications.";
+#ifdef BM_ALIGN
+    seqan3::debug_stream << "[INFO]\t\tAllowing approximate string matching for alignment verifications.\n";
+#else
+    seqan3::debug_stream << "[INFO]\t\tNot using approximate string matching for alignment verifications.\n";
 #endif
     std::filesystem::path data_path = "/mnt/d/genome";
     std::filesystem::path genome_file = data_path / "Egu.v3.genome_f.fasta";

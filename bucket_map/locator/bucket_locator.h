@@ -311,13 +311,13 @@ public:
                                                        seqan3::field::id,
                                                        seqan3::field::ref_id,
                                                        seqan3::field::ref_offset,
-#ifdef ALIGN
+#ifdef BM_ALIGN
                                                        seqan3::field::cigar,
 #endif
                                                        seqan3::field::qual,
                                                        seqan3::field::mapq>{}};
  
-#ifdef ALIGN
+#ifdef BM_ALIGN
         seqan3::configuration const align_config =
             seqan3::align_cfg::method_global{seqan3::align_cfg::free_end_gaps_sequence1_leading{true},
                                              seqan3::align_cfg::free_end_gaps_sequence2_leading{false},
@@ -344,11 +344,11 @@ public:
 
                 std::vector<seqan3::dna4> text(start, start + width);
 
-#ifdef ALIGN
+#ifdef BM_ALIGN
                 // do pairwise string alignment
                 for (auto && alignment : seqan3::align_pairwise(std::tie(text, query), align_config)) {
                     size_t map_qual = 60u + alignment.score(); // TODO: consider the number of votes in the mapping quality.
-                    if (map_qual < minimum_quality) {
+                    if (map_qual < quality_threshold) {
                         continue;
                     }
 

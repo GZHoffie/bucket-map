@@ -20,7 +20,15 @@ This tool is built with [Seqan3](https://docs.seqan.de/seqan/3-master-user/index
 
 ```bash
 git clone https://github.com/GZHoffie/bucket-map.git
-cd bucket-map/bucket_map
+cd bucket-map
+mkdir build
+cd build; cmake ../bucket_map/
+
+# If you want to use pairwise approximate string matching for alignment verification, use
+cmake --build . --target bucketmap_align
+
+# If you want to skip pairwise alignment and build the alignment-free version, use
+cmake --build . --target bucketmap
 ```
 
 ## Benchmarking
