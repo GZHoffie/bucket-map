@@ -27,7 +27,7 @@ struct cmd_arguments
     float mapper_distinguishability_threshold = 0.5;
 
     // locator related arguments
-    float locator_allowed_seed_miss_rate = 0.1;
+    float locator_allowed_seed_miss_rate = 0.2;
     float locator_allowed_indel_rate = 0.015;
     float locator_sample_size = 10;
     unsigned int locator_quality_threshold = 40;
@@ -48,7 +48,7 @@ void initialise_parser(sharg::parser & parser, cmd_arguments & args)
                       sharg::config{.short_id = 'q',
                                     .long_id = "query-file",
                                     .description = "The path to the FASTQ query file.",
-                                    .validator = sharg::output_file_validator{"fq", "fastq"}});
+                                    .validator = sharg::input_file_validator{{"fq", "fastq"}}});
 
     parser.add_option(args.index_indicator,
                       sharg::config{.short_id = 'i',

@@ -46,8 +46,25 @@ Or we may build the full version of BucketMap, which further uses Smith-Waterman
 cmake --build . --target bucketmap_align
 ```
 
+and the binary files named `bucketmap` and `bucketmap_align` will be built under the `./build` directory.
+
 ## Usage
 
+The usage of BucketMap is simple. To build the index files, you may use
+
+```bash
+<path_to_bucketmap_binary>/bucketmap -x -i <index_name>
+```
+
+which will output `<index_name>.qgram` and `<index_name>.bucket_id` under the current directory.
+
+To map the reads in a fastq file, you may run the following command (under the directory of the index file if you have built the index file using the above command)
+
+```bash
+<path_to_bucketmap_binary>/bucketmap -i <index_name> -q <fastq_file_path> -o <output_sam_file_path>
+```
+
+which will output the `.sam` file in the desired location. You may also run the second command directly, which will build the index and do the mapping in one go. To perform pairwise alignment and output the CIGAR string in the sam files, you may simply replace `bucketmap` with `bucketmap_align`.
 
 
 

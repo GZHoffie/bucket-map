@@ -18,8 +18,8 @@ int main() {
     bucket_hash_indexer<26507> ind(bucket_length, read_length, bucket_shape, locate_shape);
     q_gram_mapper<26507> map(bucket_length, read_length, bucket_shape, 30, 6, 0.5);
 
-    ind.index(genome_file, data_path / "index");
-    map.load(data_path / "index");
+    ind.index(genome_file, data_path, "index");
+    map.load(data_path, "index");
 
     //short_read_simulator sim(bucket_length, read_length, 0.002, 0.00025, 0.00025);
     //sim.read(genome_file);

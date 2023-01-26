@@ -1,8 +1,8 @@
-[M::mm_idx_gen::23.637*1.74] collected minimizers
-[M::mm_idx_gen::30.015*2.01] sorted minimizers
-[M::main::35.365*1.83] loaded/built the index for 932 target sequence(s)
+[M::mm_idx_gen::54.069*0.80] collected minimizers
+[M::mm_idx_gen::73.719*0.85] sorted minimizers
+[M::main::79.385*0.85] loaded/built the index for 932 target sequence(s)
 [M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 932
-[M::mm_idx_stat::36.031*1.82] distinct minimizers: 61720831 (52.90% are singletons); average occurrences: 5.186; average spacing: 5.315; total length: 1701312507
+[M::mm_idx_stat::80.097*0.85] distinct minimizers: 61720831 (52.90% are singletons); average occurrences: 5.186; average spacing: 5.315; total length: 1701312507
 [M::main] Version: 2.24-r1150-dirty
-[M::main] CMD: minimap2 -d egu_minimap.mmi /mnt/d/genome/Egu.v3.genome_f.fasta
-[M::main] Real time: 36.089 sec; CPU: 65.473 sec; Peak RSS: 6.657 GB
+[M::main] CMD: minimap2 -t 1 -d egu_minimap.mmi /mnt/d/genome/Egu.v3.genome_f.fasta
+[M::main] Real time: 80.327 sec; CPU: 68.192 sec; Peak RSS: 6.550 GB

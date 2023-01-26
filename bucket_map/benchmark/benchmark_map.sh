@@ -23,5 +23,12 @@ cd "${BENCHMARK_PATH}/index"
 #/usr/bin/time -o "${BENCHMARK_PATH}/log/subread_map.time" -v subread-align --SAMoutput -i "${INDEX_INDICATOR}_subread" -r ${FASTQ_PATH} -t 1 -o "${BENCHMARK_PATH}/output/subread_map.sam" &> "${BENCHMARK_PATH}/log/subread_map.log"
 
 # run minimap2
-echo "Mapping using minimap2"
-/usr/bin/time -o "${BENCHMARK_PATH}/log/minimap2_map.time" -v minimap2 -t 1 -a "${INDEX_INDICATOR}_minimap.mmi" ${FASTQ_PATH} > "${BENCHMARK_PATH}/output/minimap2_map.sam" 2> "${BENCHMARK_PATH}/log/minimap2_map.log"
+#echo "Mapping using minimap2"
+#/usr/bin/time -o "${BENCHMARK_PATH}/log/minimap2_map.time" -v minimap2 -a "${INDEX_INDICATOR}_minimap.mmi" ${FASTQ_PATH} > "${BENCHMARK_PATH}/output/minimap2_map.sam" 2> "${BENCHMARK_PATH}/log/minimap2_map.log"
+
+# run bucketmap
+echo "Mapping using BucketMap"
+/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_map.time" -v bucketmap --version-check 0 -i "${INDEX_INDICATOR}_bucketmap" -q ${FASTQ_PATH} -o "${BENCHMARK_PATH}/output/bucketmap_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_map.log"
+
+echo "Mapping using BucketMap_align"
+/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_align_map.time" -v bucketmap_align --version-check 0 -i "${INDEX_INDICATOR}_bucketmap" -q ${FASTQ_PATH} -o "${BENCHMARK_PATH}/output/bucketmap_align_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_align_map.log"

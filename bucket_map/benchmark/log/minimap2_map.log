@@ -1,4 +1,8 @@
-[M::main::10.965*0.56] loaded/built the index for 932 target sequence(s)
-[M::mm_mapopt_update::12.059*0.60] mid_occ = 1428
+[M::main::8.939*0.77] loaded/built the index for 932 target sequence(s)
+[M::mm_mapopt_update::11.852*0.71] mid_occ = 1428
 [M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 932
-[M::mm_idx_stat::12.750*0.62] distinct minimizers: 61720831 (52.90% are singletons); average occurrences: 5.186; average spacing: 5.315; total length: 1701312507
+[M::mm_idx_stat::12.569*0.73] distinct minimizers: 61720831 (52.90% are singletons); average occurrences: 5.186; average spacing: 5.315; total length: 1701312507
+[M::worker_pipeline::526.566*2.80] mapped 1000000 sequences
+[M::main] Version: 2.24-r1150-dirty
+[M::main] CMD: minimap2 -a egu_minimap.mmi /mnt/d/genome/test/sim_illumina_1M.fastq
+[M::main] Real time: 526.711 sec; CPU: 1475.605 sec; Peak RSS: 5.867 GB

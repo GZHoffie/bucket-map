@@ -130,7 +130,7 @@ target_compile_definitions(bucketmap PRIVATE ${BM_DEFINITIONS})
 target_link_libraries(bucketmap PUBLIC seqan3::seqan3 sharg::sharg)
 
 add_executable(bucketmap_align main.cpp ${SHARED_FILES})
-target_compile_definitions(bucketmap_align PRIVATE ${BM_DEFINITIONS})
+target_compile_definitions(bucketmap_align PRIVATE BM_ALIGN ${BM_DEFINITIONS})
 target_link_libraries(bucketmap_align PUBLIC seqan3::seqan3 sharg::sharg)
 
 #get_property(defs TARGET bucketmap_align PROPERTY COMPILE_DEFINITIONS)

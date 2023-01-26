@@ -1,0 +1,12 @@
+[INFO]		Allowing Smith-Waterman for alignment verifications.
+[INFO]		Initializing indexer and mapper with bucket length: 65536, and number of buckets: 26507.
+[INFO]		Set q-gram shape to be: [1,1,1,0,1,1,1,0,1,0,1,1] with number of effective characters: 9
+[ERROR]		The specified file already exists in directory: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/egu_bucketmap.qgram".
+[BENCHMARK]	Number of Q-grams with distinguishability >= 0.499981: 252427 (96.2933%).
+[BENCHMARK]	Elapsed time for loading index files: 15.571 s.
+[INFO]		Successfully loaded "/home/zhenhao/bucket-map/bucket_map/benchmark/index/egu_bucketmap.qgram".
+[BENCHMARK]	Elapsed time for bucket mapping: 62.939 s (62.939 μs/seq).
+[BENCHMARK]	Total time used for building k-mer index for each bucket: 202.868 s.
+[BENCHMARK]	Total time used for finding exact location of the sequences: 6.124 s (6.124 μs/seq).
+[BENCHMARK]	Total mapped locations: 1141838 (1.14184 per sequence).
+[BENCHMARK]	Total time used for alignment verification and output: 69.636 s (60.9859 μs per pairwise alignment).
