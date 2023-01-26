@@ -96,7 +96,7 @@ public:
 int main()
 {
     sam_analyzer analyzer(5);
-    analyzer.read("/mnt/d/genome/test/sim_illumina_1M.position_ground_truth");
+    analyzer.read("/mnt/d/genome/test/sim_150_1M.position_ground_truth");
 
     analyzer.benchmark_directory("/home/zhenhao/bucket-map/bucket_map/benchmark/output");
     return 0;

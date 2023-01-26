@@ -2,7 +2,7 @@
 
 GENOME_FILE="/mnt/d/genome/Egu.v3.genome_f.fasta"
 BENCHMARK_PATH="/home/zhenhao/bucket-map/bucket_map/benchmark"
-QUERY_FILE="/mnt/d/genome/test/sim_illumina_1M.fastq"
+QUERY_FILE="/mnt/d/genome/test/sim_150_1M.fastq"
 INDICATOR="egu"
 
 # initialize benchmark directory if it doesnt exist
