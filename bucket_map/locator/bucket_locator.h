@@ -248,7 +248,7 @@ public:
         auto res = locator::initialize(fasta_file_name, index_directory, indicator);
 
         // load q-gram index to the mapper
-        _m->load(index_directory);
+        _m->load(index_directory, indicator);
 
         // create index files
         return res;

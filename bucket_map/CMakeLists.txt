@@ -72,6 +72,13 @@ FetchContent_Declare(seqan3
 )
 FetchContent_MakeAvailable(seqan3)
 
+# Sharg for argument parsing
+FetchContent_Declare(sharg
+    GIT_REPOSITORY https://github.com/seqan/sharg-parser.git
+    GIT_TAG        main
+)
+FetchContent_MakeAvailable(sharg)
+
 #FetchContent_Declare(parasail
 #  GIT_REPOSITORY https://github.com/jeffdaily/parasail.git
 #  GIT_TAG        master
@@ -120,11 +127,11 @@ target_link_libraries(locator_test PUBLIC seqan3::seqan3)
 
 add_executable(bucketmap main.cpp ${SHARED_FILES})
 target_compile_definitions(bucketmap PRIVATE ${BM_DEFINITIONS})
-target_link_libraries(bucketmap PUBLIC seqan3::seqan3)
+target_link_libraries(bucketmap PUBLIC seqan3::seqan3 sharg::sharg)
 
 add_executable(bucketmap_align main.cpp ${SHARED_FILES})
 target_compile_definitions(bucketmap_align PRIVATE ${BM_DEFINITIONS})
-target_link_libraries(bucketmap_align PUBLIC seqan3::seqan3)
+target_link_libraries(bucketmap_align PUBLIC seqan3::seqan3 sharg::sharg)
 
 #get_property(defs TARGET bucketmap_align PROPERTY COMPILE_DEFINITIONS)
 #message("Defs: ${defs}")

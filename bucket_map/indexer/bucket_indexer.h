@@ -64,7 +64,7 @@ protected:
     }
 
 
-    void _store_q_gram_index(std::filesystem::path const & index_directory) {
+    void _store_q_gram_index(std::filesystem::path const & index_directory, const std::string& indicator) {
         /**
          * @brief Store the created index inside the index_directory.
          * @param index_directory the directory to store the q_gram_count_file.
@@ -76,32 +76,32 @@ protected:
         }
         // Create directory if directory is not created yet.
         // Return if the index files already exist.
-        if (!check_filename_in(index_directory, "index.qgram")) {
+        if (!check_filename_in(index_directory, indicator + ".qgram")) {
             return;
         }
         // Store the q-gram index in the directory
-        std::ofstream index_file(index_directory / "index.qgram");
+        std::ofstream index_file(index_directory / (indicator + ".qgram"));
         for (const auto &i : q_grams_index) {
             std::vector<unsigned char> bytes =  _bitset_to_bytes(i);
             index_file.write((char *)&bytes[0], bytes.size());
         }
         index_file.close();
         seqan3::debug_stream << "[INFO]\t\t" << "The bucket q-gram index is stored in: " 
-                             << index_directory / "index.qgram" << ".\n";
+                             << index_directory / (indicator + ".qgram") << ".\n";
     }
 
 
-    void _store_bucket_ids(std::filesystem::path const & index_directory) {
-        if (!check_filename_in(index_directory, "index.bucket_id")) {
+    void _store_bucket_ids(std::filesystem::path const & index_directory, const std::string& indicator) {
+        if (!check_filename_in(index_directory, indicator + ".bucket_id")) {
             return;
         }
-        std::ofstream index_file(index_directory / "index.bucket_id");
+        std::ofstream index_file(index_directory / (indicator + ".bucket_id"));
         for (const auto &i : bucket_id) {
             index_file << i << "\n";
         }
         index_file.close();
         seqan3::debug_stream << "[INFO]\t\t" << "The bucket ids are stored in: " 
-                             << index_directory / "index.bucket_id" << ".\n";
+                             << index_directory / (indicator + ".bucket_id") << ".\n";
     }
 
     void _init_qgram_index(unsigned int q) {
@@ -137,7 +137,7 @@ public:
 
     unsigned int index(std::filesystem::path const & fasta_file_name, 
                        std::filesystem::path const & index_directory,
-                       std::string const & indicator = "") {
+                       std::string const & indicator) {
         /**
          * @brief Read the fasta file, index each bucket.
          * @param fasta_file_name the name of the file containing reference genome.
@@ -146,7 +146,7 @@ public:
          * @returns the total number of buckets.
          */
         // Create directory if directory is not created yet. Otherwise report the error and return.
-        if (!check_extension_in(index_directory, EXTENSION) || !check_filename_in(index_directory, "index.qgram")) {
+        if (!check_extension_in(index_directory, EXTENSION) || !check_filename_in(index_directory, indicator + ".qgram")) {
             return 0;
         }
         Timer clock;
@@ -166,12 +166,12 @@ public:
         //create_index(index_directory);
 
         // create q-gram index files
-        _store_q_gram_index(index_directory);
+        _store_q_gram_index(index_directory, indicator);
 
         seqan3::debug_stream << "[INFO]\t\t" << "The number of buckets: " 
                              << bucket_id.size() << "." << '\n';
         // Store the bucket_id in the directory
-        _store_bucket_ids(index_directory);
+        _store_bucket_ids(index_directory, indicator);
 
         clock.tock();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for creating and storing index files: " 

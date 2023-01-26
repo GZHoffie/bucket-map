@@ -261,7 +261,7 @@ public:
     }
 
 
-    void load(std::filesystem::path const & index_directory) {
+    void load(std::filesystem::path const & index_directory, const std::string& indicator) {
         /**
          * @brief Look for index and pattern file inside the index_directory,
          *        read the files and store the values in class attribute.
@@ -277,7 +277,7 @@ public:
         int num_chars_per_q_gram = (NUM_BUCKETS + 7) >> 3;
 
         // Read the index file
-        std::ifstream file(index_directory / "index.qgram");
+        std::ifstream file(index_directory / (indicator + ".qgram"));
         if (file) {
             Timer clock;
             clock.tick();
@@ -297,7 +297,7 @@ public:
             seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for loading index files: " 
                                  << clock.elapsed_seconds() << " s." << '\n';
             seqan3::debug_stream << "[INFO]\t\t" << "Successfully loaded " 
-                                 << index_directory / "index.qgram" << "." << '\n';
+                                 << index_directory / (indicator + ".qgram") << "." << '\n';
         }
     }
 

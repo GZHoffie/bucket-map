@@ -14,7 +14,7 @@ public:
     /**
      * @brief Load the q-gram index file to the mapper.
      */
-    virtual void load(std::filesystem::path const & index_file) = 0;
+    virtual void load(std::filesystem::path const & index_file, const std::string & indicator) = 0;
 
     /**
      * @brief Read a query fastq file and output the ids of the sequence that are mapped 
