@@ -22,14 +22,34 @@ This tool is built with [Seqan3](https://docs.seqan.de/seqan/3-master-user/index
 git clone https://github.com/GZHoffie/bucket-map.git
 cd bucket-map
 mkdir build
-cd build; cmake ../bucket_map/
+cd build
 
-# If you want to use pairwise approximate string matching for alignment verification, use
-cmake --build . --target bucketmap_align
+# Set the path to the fasta file and the desired size of bucket.
+FASTA_FILE=/mnt/d/genome/Egu.v3.genome_f.fasta # Should be an absolute path to the genome file.
+BUCKET_LEN=65536
 
-# If you want to skip pairwise alignment and build the alignment-free version, use
+# Build the project with the following command
+cmake ../bucket_map/ -DBM_FASTA_FILE=${FASTA_FILE} -DBM_BUCKET_LEN=${BUCKET_LEN}
+```
+Note that if the reference genome and bucket length is to be changed, we need to rebuild the project by rerunning the above commands.
+
+
+Now, we can build the binary file using CMake. For the alignment-free version of BucketMap, which doesn't output the CIGAR string in the output SAM file, we can use
+
+```bash
 cmake --build . --target bucketmap
 ```
+
+Or we may build the full version of BucketMap, which further uses Smith-Waterman algorithm to verify the mapping,
+
+```bash
+cmake --build . --target bucketmap_align
+```
+
+## Usage
+
+
+
 
 ## Benchmarking
 
@@ -69,7 +89,12 @@ int main() {
     float insertion_rate = 0.00025;
     float deletion_rate = 0.00025;
 
-    short_read_simulator sim(bucket_length, read_length, 0.002, 0.00025, 0.00025);
+    short_read_simulator sim(bucket_length, 
+                             read_length, 
+                             substitution_rate, 
+                             insertion_rate, 
+                             deletion_rate
+                             );
     sim.read(genome_file);
     sim.generate_fastq_file(output_path, "sim_illumina_1M", num_reads);
 }
@@ -79,4 +104,4 @@ The number of errors (substitutions and indels) are randomly generated with a Po
 
 1. `sim_illumina_1M.fastq`: the query file containing all the simulated reads.
 2. `sim_illumina_1M.bucket_ground_truth`: specific to benchmarking the accuracy of *BucketMap*, where each line contains the `bucket_id` and `offset` the read comes from, as well as the ground truth CIGAR string.
-2. `sim_illumina_1M.bucket_ground_truth`: each line contains the `reference_id` and `offset` the read comes from, as well as the ground truth CIGAR string.
+3. `sim_illumina_1M.bucket_ground_truth`: each line contains the `reference_id` and `offset` the read comes from, as well as the ground truth CIGAR string.

@@ -3,7 +3,7 @@
 
 #include "./bucket_indexer.h"
 
-#include <dlib/serialize.h>
+//#include <dlib/serialize.h>
 
 template<unsigned int NUM_BUCKETS>
 class bucket_hash_indexer : public bucket_indexer<NUM_BUCKETS> {
@@ -38,7 +38,7 @@ public:
                 offset++;
             }
             std::ofstream os{index_directory / (std::to_string(i) + this->EXTENSION)};
-            dlib::serialize(index, os);
+            //dlib::serialize(index, os);
             os.close();
         }
     }

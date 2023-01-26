@@ -1,17 +1,69 @@
 cmake_minimum_required(VERSION 3.4)
 project(bucket_mapper CXX)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+
+# Set environment variables
+set(BUCKETMAP_GENOME_FILE ${BM_FASTA_FILE})
+set(BUCKETMAP_BUCKET_LEN ${BM_BUCKET_LEN})
+
+message("[INFO]\t\tThe path to the reference genome file: ${BUCKETMAP_GENOME_FILE}.")
+message("[INFO]\t\tBucket length is set to be ${BUCKETMAP_BUCKET_LEN}.")
+
+execute_process(
+    COMMAND bash -c "
+        awk -v bucket_l=${BUCKETMAP_BUCKET_LEN} '
+        function ceil(value)
+        {
+            return (value == int(value)) ? value : int(value)+1
+        }
+
+        /^>/ { # header pattern detected
+            if (seqlen){
+                # print previous seqlen if exists 
+                buckets += ceil(seqlen/bucket_l)
+            }
+
+            # initialize sequence
+            seqlen = 0
+
+            # skip further processing
+            next
+        }
+
+        # accumulate sequence length
+        {
+            seqlen += length($0)
+        }
+
+        # remnant seqlen if exists
+        END{
+            if(seqlen){
+                buckets += ceil(seqlen/bucket_l)
+            }
+            print buckets
+        }
+    ' ${BUCKETMAP_GENOME_FILE}
+    "
+    OUTPUT_VARIABLE BUCKETMAP_BUCKET_NUM
+)
+string(STRIP ${BUCKETMAP_BUCKET_NUM} BUCKETMAP_BUCKET_NUM)
+
+message("[INFO]\t\tThe number of buckets is set to be ${BUCKETMAP_BUCKET_NUM}.")
+
+# Set the global variables
+set(BM_DEFINITIONS
+    BM_BUCKET_NUM=${BUCKETMAP_BUCKET_NUM} 
+    BM_GENOME_PATH=\"${BUCKETMAP_GENOME_FILE}\"
+    BM_BUCKET_LEN=${BUCKETMAP_BUCKET_LEN})
 
 include(FetchContent)
 # dlib for serialization of the index files
-FetchContent_Declare(dlib
-    GIT_REPOSITORY https://github.com/davisking/dlib.git
-    GIT_TAG        v19.24
-)
-FetchContent_MakeAvailable(dlib)
+#FetchContent_Declare(dlib
+#    GIT_REPOSITORY https://github.com/davisking/dlib.git
+#    GIT_TAG        v19.24
+#)
+#FetchContent_MakeAvailable(dlib)
 
 # seqan3 for the basic skeleton for the mapper
 FetchContent_Declare(seqan3
@@ -19,7 +71,6 @@ FetchContent_Declare(seqan3
     GIT_TAG        master
 )
 FetchContent_MakeAvailable(seqan3)
-
 
 #FetchContent_Declare(parasail
 #  GIT_REPOSITORY https://github.com/jeffdaily/parasail.git
@@ -62,17 +113,18 @@ target_link_libraries(generate_dataset PUBLIC seqan3::seqan3)
 
 # build app with seqan3
 add_executable(mapper_test mapper_test.cpp ${SHARED_FILES})
-target_link_libraries(mapper_test PUBLIC seqan3::seqan3 dlib::dlib)
+target_link_libraries(mapper_test PUBLIC seqan3::seqan3)
 
 add_executable(locator_test locator_test.cpp ${SHARED_FILES})
-target_link_libraries(locator_test PUBLIC seqan3::seqan3 dlib::dlib)
+target_link_libraries(locator_test PUBLIC seqan3::seqan3)
 
 add_executable(bucketmap main.cpp ${SHARED_FILES})
-target_link_libraries(bucketmap PUBLIC seqan3::seqan3 dlib::dlib)
+target_compile_definitions(bucketmap PRIVATE ${BM_DEFINITIONS})
+target_link_libraries(bucketmap PUBLIC seqan3::seqan3)
 
 add_executable(bucketmap_align main.cpp ${SHARED_FILES})
-target_compile_definitions(bucketmap_align PRIVATE BM_ALIGN)
-target_link_libraries(bucketmap_align PUBLIC seqan3::seqan3 dlib::dlib)
+target_compile_definitions(bucketmap_align PRIVATE ${BM_DEFINITIONS})
+target_link_libraries(bucketmap_align PUBLIC seqan3::seqan3)
 
 #get_property(defs TARGET bucketmap_align PROPERTY COMPILE_DEFINITIONS)
 #message("Defs: ${defs}")
