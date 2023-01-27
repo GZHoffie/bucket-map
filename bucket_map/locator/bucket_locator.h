@@ -285,7 +285,8 @@ public:
 
         unsigned int bucket_index = 0;
         for (int i = 0; i < bucket_seq.size(); i++) {
-            bucket_info >> name;
+            std::getline(bucket_info, name);
+            name = name.substr(0, name.find(' '));
             if (name != last_bucket_name) {
                 if (bucket_index != 0) {
                     ref_ids.push_back(last_bucket_name);

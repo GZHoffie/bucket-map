@@ -1,21 +1,21 @@
-	Command being timed: "bwa mem egu_bwa /mnt/d/genome/test/sim_150_1M.fastq"
-	User time (seconds): 262.19
-	System time (seconds): 4.39
+	Command being timed: "bwa mem GRCh38_bwa /mnt/d/genome/test/GRCH38_300_1M.fastq"
+	User time (seconds): 396.26
+	System time (seconds): 3.20
 	Percent of CPU this job got: 99%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 4:28.09
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 6:42.72
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 3038680
+	Maximum resident set size (kbytes): 5448312
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 5
-	Minor (reclaiming a frame) page faults: 56498
-	Voluntary context switches: 30144
-	Involuntary context switches: 97
+	Major (requiring I/O) page faults: 15
+	Minor (reclaiming a frame) page faults: 647209
+	Voluntary context switches: 55769
+	Involuntary context switches: 165
 	Swaps: 0
-	File system inputs: 5816552
-	File system outputs: 750368
+	File system inputs: 10724000
+	File system outputs: 1348736
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0

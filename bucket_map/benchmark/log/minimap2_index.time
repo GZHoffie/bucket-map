@@ -1,21 +1,22 @@
-	Command being timed: "minimap2 -t 1 -d egu_minimap.mmi /mnt/d/genome/Egu.v3.genome_f.fasta"
-	User time (seconds): 54.45
-	System time (seconds): 13.74
-	Percent of CPU this job got: 84%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:20.36
+Command terminated by signal 9
+	Command being timed: "minimap2 -t 1 -d GRCh38_minimap.mmi /mnt/d/genome/GRCh38_latest_genomic.fasta"
+	User time (seconds): 42.83
+	System time (seconds): 9.03
+	Percent of CPU this job got: 72%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:11.24
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 6868580
+	Maximum resident set size (kbytes): 7639796
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 1121
-	Minor (reclaiming a frame) page faults: 3067356
-	Voluntary context switches: 107057
-	Involuntary context switches: 175
+	Major (requiring I/O) page faults: 21345
+	Minor (reclaiming a frame) page faults: 2283982
+	Voluntary context switches: 159538
+	Involuntary context switches: 462
 	Swaps: 0
-	File system inputs: 22416
-	File system outputs: 8081832
+	File system inputs: 438056
+	File system outputs: 0
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0

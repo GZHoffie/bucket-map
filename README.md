@@ -14,6 +14,10 @@ Named after the classic *Bucket Sort* algorithm, the idea of *BucketMap* is simp
 - For each read, we use samping and bit-parallel data structures to quickly find the candidate buckets that might contain the read,
 - Within each bucket, we go through all reads that are mapped to it and find their exact locations.
 
+<p align="center">
+  <img src="./bucketmap_overview.png"/>
+</p>
+
 ## Installation
 
 This tool is built with [Seqan3](https://docs.seqan.de/seqan/3-master-user/index.html). To properly build the package, you need to have GCC >= 11.3, G++ and CMake installed.
@@ -74,7 +78,8 @@ We benchmark our read mapper against several popular DNA read mappers available,
 
 - [Bowtie2](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml), 
 - [BWA-MEM](https://bio-bwa.sourceforge.net/), 
-- [subread](https://github.com/ShiLab-Bioinformatics/subread).
+- [subread](https://github.com/ShiLab-Bioinformatics/subread),
+- [Minimap2](https://github.com/lh3/minimap2).
 
 We document a detailed guide on how we do the benchmarking, which metrics we are using, as well as some preliminary benchmark results, in [this page](./bucket_map/benchmark/README.md).
 

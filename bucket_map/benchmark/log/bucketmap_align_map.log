@@ -1,12 +1,12 @@
 [INFO]		Allowing Smith-Waterman for alignment verifications.
-[INFO]		Initializing indexer and mapper with bucket length: 65536, and number of buckets: 26507.
+[INFO]		Initializing indexer and mapper with bucket length: 65536, and number of buckets: 48262.
 [INFO]		Set q-gram shape to be: [1,1,1,0,1,1,1,0,1,0,1,1] with number of effective characters: 9
-[ERROR]		The specified file already exists in directory: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/egu_bucketmap.qgram".
-[BENCHMARK]	Number of Q-grams with distinguishability >= 0.499981: 252427 (96.2933%).
-[BENCHMARK]	Elapsed time for loading index files: 15.649 s.
-[INFO]		Successfully loaded "/home/zhenhao/bucket-map/bucket_map/benchmark/index/egu_bucketmap.qgram".
-[BENCHMARK]	Elapsed time for bucket mapping: 55.334 s (55.334 μs/seq).
-[BENCHMARK]	Total time used for building k-mer index for each bucket: 216.264 s.
-[BENCHMARK]	Total time used for finding exact location of the sequences: 5.719 s (5.719 μs/seq).
-[BENCHMARK]	Total mapped locations: 1259479 (1.25948 per sequence).
-[BENCHMARK]	Total time used for alignment verification and output: 51.045 s (40.5287 μs per pairwise alignment).
+[ERROR]		The specified file already exists in directory: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/GRCh38_bucketmap.qgram".
+[BENCHMARK]	Number of Q-grams with distinguishability >= 0.5: 252727 (96.4077%).
+[BENCHMARK]	Elapsed time for loading index files: 27.976 s.
+[INFO]		Successfully loaded "/home/zhenhao/bucket-map/bucket_map/benchmark/index/GRCh38_bucketmap.qgram".
+[BENCHMARK]	Elapsed time for bucket mapping: 89.254 s (89.254 μs/seq).
+[BENCHMARK]	Total time used for building k-mer index for each bucket: 286.205 s.
+[BENCHMARK]	Total time used for finding exact location of the sequences: 12.621 s (12.621 μs/seq).
+[BENCHMARK]	Total mapped locations: 1309534 (1.30953 per sequence).
+[BENCHMARK]	Total time used for alignment verification and output: 75.109 s (57.3555 μs per pairwise alignment).

@@ -1,21 +1,21 @@
-	Command being timed: "bucketmap -x -i egu_bucketmap"
-	User time (seconds): 154.56
-	System time (seconds): 5.16
+	Command being timed: "bucketmap -x -i GRCh38_bucketmap"
+	User time (seconds): 205.80
+	System time (seconds): 5.33
 	Percent of CPU this job got: 97%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:43.55
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 3:36.07
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 1151240
+	Maximum resident set size (kbytes): 1846980
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 41
-	Minor (reclaiming a frame) page faults: 10903
-	Voluntary context switches: 7192
-	Involuntary context switches: 50
+	Major (requiring I/O) page faults: 45
+	Minor (reclaiming a frame) page faults: 11447
+	Voluntary context switches: 13021
+	Involuntary context switches: 34
 	Swaps: 0
-	File system inputs: 9384
-	File system outputs: 1697112
+	File system inputs: 12360
+	File system outputs: 3095680
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0

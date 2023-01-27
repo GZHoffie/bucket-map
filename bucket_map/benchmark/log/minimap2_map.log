@@ -1,8 +1,10 @@
-[M::main::7.910*0.65] loaded/built the index for 932 target sequence(s)
-[M::mm_mapopt_update::9.191*0.70] mid_occ = 1428
-[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 932
-[M::mm_idx_stat::9.840*0.72] distinct minimizers: 61720831 (52.90% are singletons); average occurrences: 5.186; average spacing: 5.315; total length: 1701312507
-[M::worker_pipeline::179.711*2.83] mapped 1000000 sequences
+[M::mm_idx_gen::0.003*3.55] collected minimizers
+[M::mm_idx_gen::0.004*3.00] sorted minimizers
+[M::main::0.004*3.00] loaded/built the index for 0 target sequence(s)
+[M::mm_mapopt_update::0.004*2.98] mid_occ = 1000000
+[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 0
+[M::mm_idx_stat::0.004*2.96] distinct minimizers: 0 (-nan% are singletons); average occurrences: -nan; average spacing: -nan; total length: 0
+[M::worker_pipeline::8.605*0.80] mapped 1000000 sequences
 [M::main] Version: 2.24-r1150-dirty
-[M::main] CMD: minimap2 -a egu_minimap.mmi /mnt/d/genome/test/sim_150_1M.fastq
-[M::main] Real time: 179.799 sec; CPU: 508.878 sec; Peak RSS: 5.638 GB
+[M::main] CMD: minimap2 -a GRCh38_minimap.mmi /mnt/d/genome/test/GRCH38_300_1M.fastq
+[M::main] Real time: 8.607 sec; CPU: 6.847 sec; Peak RSS: 0.724 GB
