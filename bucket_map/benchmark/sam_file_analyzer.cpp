@@ -3,84 +3,66 @@
 
 class sam_analyzer {
 private:
-    std::vector<std::pair<int, int>> ground_truth;
-    int allowed_error;
+    std::map<std::string, unsigned int> read_id_to_index;
 
 public:
-    sam_analyzer(int error) {
-        allowed_error = error;
+    sam_analyzer() {
+        read_id_to_index.clear();
     }
 
-    void read(std::filesystem::path ground_truth_path) {
-        std::ifstream is(ground_truth_path);
-        int origin; 
-        int position;
-        std::string cigar;
+    /**
+     * @brief Read the fastq file, and record the sequence ids for identification 
+     *        in the SAM file.
+     * 
+     * @param sequence_file path to the fastq file
+     */
+    void read_sequence_file(std::filesystem::path sequence_file) {
+        seqan3::sequence_file_input fin{sequence_file};
+        unsigned int index = 0;
 
-        while (is >> origin >> position >> cigar) {
-            ground_truth.push_back(std::make_pair(origin, position));
+        for (auto & rec : fin) {
+            std::string id(rec.id());
+            read_id_to_index.insert({id, index});
+            index++;
         }
     }
 
     void benchmark(std::filesystem::path sam_path) {
         // Benchmark statistics
         int mapped_locations = 0; // number of mapped locations
-        std::vector<bool> mapped_reads(ground_truth.size(), false); // whether the read is mapped to a location
-        std::vector<bool> correct_mapped_references(ground_truth.size(), false); // number of correctly mapped sequences in reference
-        std::vector<bool> correct_mapped_positions(ground_truth.size(), false); // number of correctly mapped locations
-        double total_absolute_error = 0; // difference between correctly mapped sequences and true offsets
+        std::vector<bool> mapped_reads(read_id_to_index.size(), false); // whether the read is mapped to a location
 
         seqan3::sam_file_input fin{sam_path};
 
         for (auto && record : fin) {
-            mapped_locations++;
-
-            // get gound_truth
-            unsigned int sequence_id = std::stoi(record.id());
-            auto & [ref, pos] = ground_truth[sequence_id];
+            unsigned int sequence_id = read_id_to_index[record.id()];
 
             //seqan3::debug_stream << ref << ", " << pos << " | ";
             try {
-                // get predicted values
-                int predict_ref = record.reference_id().value();
-                int predict_pos = record.reference_position().value();
+                std::string id(record.id());
+                unsigned int sequence_id = read_id_to_index[id];
 
-                mapped_reads[sequence_id] = true;
-
-                //seqan3::debug_stream << predict_ref << ", " << predict_pos << "\n";
-
-                // compare the two
-                if (ref == predict_ref) {
-                    correct_mapped_references[sequence_id] = true;
-                    int error = std::abs(predict_pos - pos);
-                    
-                    if (error <= allowed_error && !correct_mapped_positions[sequence_id]) {
-                        total_absolute_error += error;
-                        correct_mapped_positions[sequence_id] = true;
-                    }
+                if (static_cast<bool>(record.flag() & seqan3::sam_flag::unmapped)) {
+                    // read is unmapped
+                    continue;
                 }
-            } catch (std::bad_optional_access e) {
+                // otherwise, the read is mapped
+                mapped_reads[sequence_id] = true;
+                mapped_locations++;
+            } catch (const std::out_of_range& oor) {
                 //seqan3::debug_stream << "\n";
             }
         }
 
         // print out benchmark results
         unsigned int num_mapped_reads = std::count(mapped_reads.begin(), mapped_reads.end(), true);
-        unsigned int correct_buckets = std::count(correct_mapped_references.begin(), correct_mapped_references.end(), true);
-        unsigned int correct_locations = std::count(correct_mapped_positions.begin(), correct_mapped_positions.end(), true);
-        seqan3::debug_stream << "[BENCHMARK]\t" << "============ Benchmarking sam file " << sam_path << " ============\n";
+        //seqan3::debug_stream << "[BENCHMARK]\t" << "============ Benchmarking sam file " << sam_path << " ============\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of mapped reads: " 
-                             << num_mapped_reads << " (" << ((float) num_mapped_reads) / ground_truth.size() * 100 << "%).\n";
+                             << num_mapped_reads << " (" << ((float) num_mapped_reads) / read_id_to_index.size() * 100 << "%).\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of sequences: " 
-                             << ground_truth.size() << ".\n";
-        seqan3::debug_stream << "[BENCHMARK]\t" << "Correct reference sequence predictions: " 
-                             << correct_buckets << " (" << ((float) correct_buckets) / ground_truth.size() * 100 << "%).\n";
+                             << read_id_to_index.size() << ".\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Number of mapped locations returned: " 
-                             << mapped_locations << " (" << ((float) mapped_locations) / ground_truth.size() << "/read).\n";
-        seqan3::debug_stream << "[BENCHMARK]\t" << "MAE of offset: " 
-                             << total_absolute_error / correct_locations << ".\n";
-        seqan3::debug_stream << "[BENCHMARK]\t" << "(Almost) correct offset calculations: " 
-                             << correct_locations << " (" << ((float) correct_locations) / ground_truth.size() * 100 << "%).\n";
+                             << mapped_locations << " (" << ((float) mapped_locations) / num_mapped_reads << " per mapped read).\n";
     }
 
     void benchmark_directory(std::filesystem::path sam_directory) {
@@ -95,10 +77,10 @@ public:
 
 int main()
 {
-    sam_analyzer analyzer(5);
-    analyzer.read("/mnt/d/genome/test/GRCH38_300_1M.position_ground_truth");
+    sam_analyzer analyzer;
+    analyzer.read_sequence_file("/mnt/d/genome/TS1.81.90.001.fq");
 
-    analyzer.benchmark_directory("/home/zhenhao/bucket-map/bucket_map/benchmark/output");
+    analyzer.benchmark("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam");
     return 0;
 
 }

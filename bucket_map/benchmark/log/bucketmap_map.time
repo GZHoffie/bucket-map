@@ -1,21 +1,21 @@
-	Command being timed: "bucketmap --version-check 0 -i GRCh38_bucketmap -q /mnt/d/genome/test/GRCH38_300_1M.fastq -o /home/zhenhao/bucket-map/bucket_map/benchmark/output/bucketmap_map.sam"
-	User time (seconds): 485.95
-	System time (seconds): 3.23
+	Command being timed: "bucketmap --version-check 0 -r 150 -s 20 -e 0.3 -n 0.02 -i egu_bucketmap -q /mnt/d/genome/TS1.81.90.001.fq -o /home/zhenhao/bucket-map/bucket_map/benchmark/output/bucketmap_map.sam"
+	User time (seconds): 848.76
+	System time (seconds): 14.11
 	Percent of CPU this job got: 98%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 8:15.10
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 14:35.98
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 1563416
+	Maximum resident set size (kbytes): 1194024
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 38
-	Minor (reclaiming a frame) page faults: 271561
-	Voluntary context switches: 23405
-	Involuntary context switches: 51
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 151313
+	Voluntary context switches: 24819
+	Involuntary context switches: 538
 	Swaps: 0
-	File system inputs: 3102168
-	File system outputs: 1647128
+	File system inputs: 0
+	File system outputs: 2855136
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0

@@ -1,21 +1,21 @@
-	Command being timed: "bowtie2 -x GRCh38_noalt_as -U /mnt/d/genome/test/GRCH38_300_1M.fastq -S /home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam"
-	User time (seconds): 740.83
-	System time (seconds): 7.44
-	Percent of CPU this job got: 99%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 12:33.77
+	Command being timed: "bowtie2 -x egu_bowtie -U /mnt/d/genome/TS1.81.90.001.fq -S /home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam"
+	User time (seconds): 818.31
+	System time (seconds): 18.45
+	Percent of CPU this job got: 98%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 14:08.39
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 3371352
+	Maximum resident set size (kbytes): 1961432
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 109
-	Minor (reclaiming a frame) page faults: 571269
-	Voluntary context switches: 84862
-	Involuntary context switches: 410
+	Major (requiring I/O) page faults: 112
+	Minor (reclaiming a frame) page faults: 210483
+	Voluntary context switches: 107659
+	Involuntary context switches: 903
 	Swaps: 0
-	File system inputs: 1929760
-	File system outputs: 1374112
+	File system inputs: 3910832
+	File system outputs: 3700552
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0
