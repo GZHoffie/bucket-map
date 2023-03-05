@@ -12,7 +12,7 @@ mkdir -p "${BENCHMARK_PATH}/log"
 mkdir -p "${BENCHMARK_PATH}/output"
 
 # Run index benchmarking
-./benchmark_index.sh ${GENOME_FILE} ${BENCHMARK_PATH} ${INDICATOR}
+#./benchmark_index.sh ${GENOME_FILE} ${BENCHMARK_PATH} ${INDICATOR}
 
 # Run map benchmarking
 ./benchmark_map.sh ${QUERY_FILE} ${BENCHMARK_PATH} ${INDICATOR}

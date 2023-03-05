@@ -1,2 +1,6 @@
-Segmentation fault
-(ERR): bowtie2-align exited with value 139
+1000000 reads; of these:
+  1000000 (100.00%) were unpaired; of these:
+    969 (0.10%) aligned 0 times
+    862734 (86.27%) aligned exactly 1 time
+    136297 (13.63%) aligned >1 times
+99.90% overall alignment rate

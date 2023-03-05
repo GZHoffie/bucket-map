@@ -19,4 +19,4 @@ def read(fasta_file_name, bucket_length=262144):
     print("total number of references", num_references)
 
 if __name__ == "__main__":
-    read("/mnt/d/genome/Egu.v3.genome_f.fasta")
+    read("/mnt/d/genome/GRCh38_latest_genomic.fasta")

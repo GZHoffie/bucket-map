@@ -19,8 +19,13 @@ public:
     /**
      * @brief Read a query fastq file and output the ids of the sequence that are mapped 
      *        to each bucket.
+     * 
+     * @returns A pair of vectors, with each element in each vector representing a bucket. Each element is storing the indices
+     *          of the reads that are mapped to the bucket. In the first vector stores the read that can be mapped directly,
+     *          while the second vector is the reads that need to be reverse complemented.
      */
-    virtual std::vector<std::vector<unsigned int>> map(std::filesystem::path const & sequence_file) = 0;
+    virtual std::pair<std::vector<std::vector<unsigned int>>, std::vector<std::vector<unsigned int>>>
+    map(std::filesystem::path const & sequence_file) = 0;
 
     /**
      * @brief Release the memory storing the sequences and index.

@@ -370,25 +370,36 @@ public:
 
 
 
-    std::vector<std::vector<unsigned int>> map(std::filesystem::path const & sequence_file) {
+    std::pair<std::vector<std::vector<unsigned int>>, std::vector<std::vector<unsigned int>>>
+    map(std::filesystem::path const & sequence_file) {
         /**
          * @brief Read a query fastq file and output the ids of the sequence that are mapped 
          *        to each file.
          */
 
-        std::vector<std::vector<unsigned int>> res;
+        std::vector<std::vector<unsigned int>> res_orig;
+        std::vector<std::vector<unsigned int>> res_rev_comp;
         seqan3::sequence_file_input<_dna4_traits> fin{sequence_file};
         // initialize returning result
         for (int i = 0; i < NUM_BUCKETS; i++) {
-            std::vector<unsigned int> sequence_ids;
-            res.push_back(sequence_ids);
+            std::vector<unsigned int> sequence_ids_orig;
+            res_orig.push_back(sequence_ids_orig);
+            std::vector<unsigned int> sequence_ids_rev_comp;
+            res_rev_comp.push_back(sequence_ids_rev_comp);
         }
 
         Timer clock;
         clock.tick();
         for (auto & rec : fin) {
+            // find if read is present in the buckets
             for (auto & bucket : query_sequence(rec.sequence())) {
-                res[bucket].push_back(num_records);
+                res_orig[bucket].push_back(num_records);
+            }
+            // find the reverse complement of the read in the buckets
+            auto rec_rev_comp = rec.sequence() | std::views::reverse | seqan3::views::complement;
+            seqan3::dna4_vector sequence_rev_comp(rec_rev_comp.begin(), rec_rev_comp.end());
+            for (auto & bucket : query_sequence(sequence_rev_comp)) {
+                res_rev_comp[bucket].push_back(num_records);
             }
             ++num_records;
         }
@@ -396,7 +407,7 @@ public:
         float time = clock.elapsed_seconds();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for bucket mapping: " 
                              << time << " s (" << time * 1000 * 1000 / num_records << " μs/seq).\n";
-        return res;
+        return std::make_pair(res_orig, res_rev_comp);
     }
 
     std::vector<std::vector<int>> _query_file(std::filesystem::path sequence_file) {

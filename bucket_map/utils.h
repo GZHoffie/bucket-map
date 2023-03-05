@@ -1,12 +1,13 @@
 #ifndef BUCKET_MAP_UTILS_H
 #define BUCKET_MAP_UTILS_H
 
-#include <seqan3/search/views/kmer_hash.hpp>
+
 #include <seqan3/search/kmer_index/shape.hpp>
 #include <seqan3/alphabet/all.hpp>
 #include <seqan3/io/sequence_file/all.hpp>
 #include <seqan3/core/debug_stream.hpp>
 #include <seqan3/alphabet/cigar/all.hpp>
+#include <seqan3/alphabet/views/all.hpp>
 #include <seqan3/alphabet/container/bitpacked_sequence.hpp>
 
 #include <chrono>

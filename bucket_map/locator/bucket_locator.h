@@ -64,7 +64,8 @@ private:
     std::vector<seqan3::bitpacked_sequence<seqan3::dna4>> bucket_seq;
 
     // sampled kmers from the query sequences
-    query_sequences_storage<unsigned int>* records;
+    query_sequences_storage<unsigned int>* records_orig; // original sequence
+    query_sequences_storage<unsigned int>* records_rev_comp; // reverse complement of the sequence
 
     // information for buckets
     unsigned int bucket_length;
@@ -117,7 +118,8 @@ private:
     }
 
 
-    std::pair<int, unsigned int> _find_offset(const std::unordered_multimap<unsigned int, int>& bucket_kmer_index, int sequence_id) {
+    std::pair<int, unsigned int> _find_offset(const std::unordered_multimap<unsigned int, int>& bucket_kmer_index, int sequence_id,
+                                              query_sequences_storage<unsigned int>* sequence_records) {
         /**
          * @brief Return the most probable offset of the given sequence in the bucket.
          * @param bucket_kmer_index a pointer to the k-mer index for the target bucket.
@@ -125,10 +127,10 @@ private:
          * @returns A possible offset for the sequence. -1 if not found.
          */
         // load the sequence and pick up the k-mers
-        auto record = records->get_samples(sequence_id);
+        auto record = sequence_records->get_samples(sequence_id);
 
         // sample k-mers
-        sampler->sample_deterministically(records->get_num_kmers(sequence_id)-1);
+        sampler->sample_deterministically(sequence_records->get_num_kmers(sequence_id)-1);
         auto samples = sampler->samples;
         //seqan3::debug_stream << "Sequence " << sequence_id << ": n_kmers " <<  records->get_num_kmers(sequence_id) << ", samples " << samples << "\n";
 
@@ -190,18 +192,20 @@ private:
         unsigned int index = 0;
 
         for (auto & rec : fastq_file) {
-            auto kmers = rec.sequence() | seqan3::views::kmer_hash(q_gram_shape);
+            auto kmers_orig = rec.sequence() | seqan3::views::kmer_hash(q_gram_shape);
+            auto kmers_rev_comp = rec.sequence() | std::views::reverse | seqan3::views::complement | seqan3::views::kmer_hash(q_gram_shape);
 
             // sample k-mers from the read
-            sampler->sample_deterministically(kmers.size()-1);
+            sampler->sample_deterministically(kmers_orig.size()-1);
             //seqan3::debug_stream << "Sequence " << index << ": n_kmers " <<  kmers.size() << ", samples " << sampler->samples << "\n";
-            auto sampled_kmers = sampler->samples | std::views::transform([&](unsigned int i) {
-                return kmers[i];
-            });
-            std::vector<unsigned int> sampled_kmer_vec(sampled_kmers.begin(), sampled_kmers.end());
+            auto sampled_kmers = sampler->samples | std::views::transform([&](unsigned int i) { return kmers_orig[i]; });
+            std::vector<unsigned int> sampled_kmer_orig(sampled_kmers.begin(), sampled_kmers.end());
+            auto sampled_kmers_rev = sampler->samples | std::views::transform([&](unsigned int i) { return kmers_rev_comp[i]; });
+            std::vector<unsigned int> sampled_kmer_rev_comp(sampled_kmers_rev.begin(), sampled_kmers_rev.end());
 
             // store the sampled k-mers in `records`.
-            records->push_back(index, kmers.size(), sampled_kmer_vec);
+            records_orig->push_back(index, kmers_orig.size(), sampled_kmer_orig);
+            records_rev_comp->push_back(index, kmers_rev_comp.size(), sampled_kmer_rev_comp);
             index++;
         }
         
@@ -236,7 +240,8 @@ public:
 
     ~bucket_locator() {
         delete sampler;
-        delete records;
+        delete records_orig;
+        delete records_rev_comp;
     }
 
     unsigned int initialize(std::filesystem::path const & fasta_file_name, 
@@ -269,7 +274,8 @@ public:
          */
         // find the mapped locations of all the reads.
         auto locate_res = _locate(sequence_file);
-        records->reset();
+        records_orig->reset();
+        records_rev_comp->reset();
 
         // store the bucket information
         std::ifstream bucket_info(index_file);
@@ -316,6 +322,7 @@ public:
                                                        seqan3::field::cigar,
 #endif
                                                        seqan3::field::qual,
+                                                       seqan3::field::flag,
                                                        seqan3::field::mapq>{}};
  
 #ifdef BM_ALIGN
@@ -337,13 +344,21 @@ public:
             auto & query = record.sequence();
             for (auto & loc : locate_res[read_id]) {
                 // get the components of the locate_t
-                const auto & [bucket_id, offset, votes] = loc;
+                const auto & [bucket_id, offset, votes, is_original] = loc;
 
                 // get the part of text that the read is mapped to
                 auto start = bucket_seq[bucket_id].begin() + offset;
                 size_t width = std::min(query.size() + 1 + allowed_indel, bucket_seq[bucket_id].size() - offset);
 
                 std::vector<seqan3::dna4> text(start, start + width);
+
+                // define flag value
+                seqan3::sam_flag flag;
+                if (!is_original) {
+                    // read is mapped to the reverse strand
+                    flag |= seqan3::sam_flag::on_reverse_strand;
+                }
+
 
 #ifdef BM_ALIGN
                 // do pairwise string alignment
@@ -364,6 +379,7 @@ public:
                                          ref_offset,
                                          cigar,
                                          record.base_qualities(),
+                                         flag,
                                          map_qual);
                     mapped_locations++;
                 }
@@ -375,6 +391,7 @@ public:
                                      bucket_name[bucket_id],
                                      ref_offset,
                                      record.base_qualities(),
+                                     flag,
                                      map_qual);
                 mapped_locations++;
 #endif
@@ -389,7 +406,11 @@ public:
                              << elapsed_seconds << " s (" << (float) elapsed_seconds / mapped_locations * 1000 * 1000 << " μs per pairwise alignment).\n";
     }
 
-    typedef std::tuple<unsigned int, unsigned int, unsigned int> locate_t;
+    typedef std::tuple<unsigned int, // bucket id
+                       unsigned int, // offset within the bucket
+                       unsigned int, // number of votes get
+                       bool          // whether the original read (true) or its reverse complement (false) is mapped
+                       > locate_t;
 
     std::vector<std::vector<locate_t>> 
     _locate(std::filesystem::path const & sequence_file) {
@@ -402,7 +423,7 @@ public:
         Timer query_timer;
 
         // map reads to buckets
-        auto sequence_ids = _m->map(sequence_file);
+        auto [sequence_ids_orig, sequence_ids_rev_comp] = _m->map(sequence_file);
 
         // reset mapper to release memory
         _m->reset();
@@ -411,7 +432,8 @@ public:
         _initialize_kmer_index(genome_file_name);
 
         // initialze query sequence storage
-        records = new query_sequences_storage(_m->num_records, num_samples);
+        records_orig = new query_sequences_storage(_m->num_records, num_samples);
+        records_rev_comp = new query_sequences_storage(_m->num_records, num_samples);
 
         unsigned int bucket_index = 0;
 
@@ -428,11 +450,12 @@ public:
         // create k-mer index
         std::unordered_multimap<unsigned int, int> bucket_kmer_index;
 
-        for (int i = 0; i < sequence_ids.size(); i++) {
-            auto & bucket_sequence = sequence_ids[i];
+        for (int i = 0; i < sequence_ids_orig.size(); i++) {
+            auto & bucket_sequence_orig = sequence_ids_orig[i];
+            auto & bucket_sequence_rev_comp = sequence_ids_rev_comp[i];
 
             // skip if no read is mapped to this bucket
-            if (bucket_sequence.empty()) {
+            if (bucket_sequence_orig.empty() && bucket_sequence_rev_comp.empty()) {
                 continue;
             }
             
@@ -444,11 +467,21 @@ public:
             
             // go through all sequences mapped to this bucket and check the offset.
             query_timer.tick();
-            for (auto & id : bucket_sequence) {
-                auto offset_res = _find_offset(bucket_kmer_index, id);
+            for (auto & id : bucket_sequence_orig) {
+                // check original read
+                auto offset_res = _find_offset(bucket_kmer_index, id, records_orig);
                 auto & [offset, vote] = offset_res;
                 if (offset > 0) {
-                    res[id].push_back(std::make_tuple(i, offset, vote));
+                    res[id].push_back(std::make_tuple(i, offset, vote, true));
+                }
+            }
+
+            for (auto & id_rev : bucket_sequence_rev_comp) {
+                // check reverse complement of the reads read
+                auto offset_res = _find_offset(bucket_kmer_index, id_rev, records_rev_comp);
+                auto & [offset, vote] = offset_res;
+                if (offset > 0) {
+                    res[id_rev].push_back(std::make_tuple(i, offset, vote, false));
                 }
             }
             query_timer.tock();
