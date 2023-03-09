@@ -100,7 +100,8 @@ set(LOCATOR_FILES
 set(MAPPER_FILES
     mapper/mapper.h
     mapper/q_gram_mapper.h
-    mapper/fm_index_mapper.h)
+    mapper/fm_index_mapper.h
+    mapper/quality_filter.h)
 
 set(UTIL_FILES
     utils.h
@@ -123,6 +124,9 @@ target_link_libraries(mapper_test PUBLIC seqan3::seqan3)
 
 add_executable(locator_test locator_test.cpp ${SHARED_FILES})
 target_link_libraries(locator_test PUBLIC seqan3::seqan3)
+
+#add_executable(quality_filter_test mapper/quality_filter.cpp ${SHARED_FILES})
+#target_link_libraries(quality_filter_test PUBLIC seqan3::seqan3)
 
 add_executable(bucketmap main.cpp ${SHARED_FILES})
 target_compile_definitions(bucketmap PRIVATE ${BM_DEFINITIONS})

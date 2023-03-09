@@ -5,6 +5,7 @@
 #include "./utils.h"
 
 #include <sharg/all.hpp>
+#include <cmath>
 
 
 struct cmd_arguments
@@ -22,12 +23,12 @@ struct cmd_arguments
     unsigned int max_read_length = 300;
 
     // mapper related arguments
-    unsigned int mapper_sample_size = 30;
-    unsigned int mapper_error_threshold = 6;
+    unsigned int mapper_sample_size = 15;
     float mapper_distinguishability_threshold = 0.5;
+    unsigned int average_base_quality = 30;
 
     // locator related arguments
-    float locator_allowed_seed_miss_rate = 0.2;
+    float allowed_seed_miss_rate = 0.4;
     float locator_allowed_indel_rate = 0.015;
     float locator_sample_size = 10;
     unsigned int locator_quality_threshold = 40;
@@ -66,6 +67,11 @@ void initialise_parser(sharg::parser & parser, cmd_arguments & args)
                       sharg::config{.short_id = 'm',
                                     .long_id = "mapper-seed",
                                     .description = "The shape of k-mer seed used in mapper, which assigns a read to its candidate bucket."});
+    
+    parser.add_option(args.average_base_quality,
+                      sharg::config{.short_id = 'b',
+                                    .long_id = "average-base-quality",
+                                    .description = "The average base quality in the read."});
 
     parser.add_option(args.locator_seed_shape,
                       sharg::config{.short_id = 'l',
@@ -82,20 +88,15 @@ void initialise_parser(sharg::parser & parser, cmd_arguments & args)
                                     .long_id = "mapper-samples",
                                     .description = "The number of k-mer samples taken by the mapper."});
 
-    parser.add_option(args.mapper_error_threshold,
-                      sharg::config{.short_id = 't',
-                                    .long_id = "mapper-errors",
-                                    .description = "The maximum number of k-mer samples that are allowed to miss in the mapper."});
-    
     parser.add_option(args.mapper_distinguishability_threshold,
                       sharg::config{.short_id = 'd',
                                     .long_id = "distinguishability",
                                     .description = "The maximum percentage of buckets a sampled k-mer is allowed to be present."});
     
-    parser.add_option(args.locator_allowed_seed_miss_rate,
+    parser.add_option(args.allowed_seed_miss_rate,
                       sharg::config{.short_id = 'e',
                                     .long_id = "max-error-rate",
-                                    .description = "The maximum percentage of k-mer samples that are allowed to miss in the locator."});
+                                    .description = "The maximum percentage of k-mer samples that are allowed to miss (1-epsilon)."});
     
     parser.add_option(args.locator_allowed_indel_rate,
                       sharg::config{.short_id = 'n',
@@ -180,14 +181,15 @@ int main(int argc, char ** argv) {
                                      args.max_read_length, 
                                      bucket_shape, 
                                      args.mapper_sample_size, 
-                                     args.mapper_error_threshold,
-                                     args.mapper_distinguishability_threshold);
+                                     ceil(args.mapper_sample_size * args.allowed_seed_miss_rate),
+                                     args.mapper_distinguishability_threshold,
+                                     args.average_base_quality);
     // initiate the locator instance
     bucket_locator loc(&ind, &map, 
                        BM_BUCKET_LEN, 
                        args.max_read_length, 
                        locate_shape, 
-                       args.locator_allowed_seed_miss_rate, 
+                       args.allowed_seed_miss_rate, 
                        args.locator_allowed_indel_rate,
                        args.locator_sample_size
                        );

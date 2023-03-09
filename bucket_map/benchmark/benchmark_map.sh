@@ -28,7 +28,7 @@ echo "Mapping using minimap2"
 
 # run bucketmap
 echo "Mapping using BucketMap"
-/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_map.time" -v bucketmap --version-check 0 -r 150 -s 20 -e 0.3 -n 0.02 -i "${INDEX_INDICATOR}_bucketmap" -q ${FASTQ_PATH} -o "${BENCHMARK_PATH}/output/bucketmap_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_map.log"
+/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_map.time" -v bucketmap --version-check 0 -r 150 -b 27 -n 0.02 -i "${INDEX_INDICATOR}_bucketmap" -q ${FASTQ_PATH} -o "${BENCHMARK_PATH}/output/bucketmap_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_map.log"
 
 echo "Mapping using BucketMap_align"
-/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_align_map.time" -v bucketmap_align --version-check 0 -r 150 -s 20 -e 0.3 -n 0.02 -i "${INDEX_INDICATOR}_bucketmap" -q ${FASTQ_PATH} -o "${BENCHMARK_PATH}/output/bucketmap_align_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_align_map.log"
+#/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_align_map.time" -v bucketmap_align --version-check 0 -r 150 -s 15 -t 4 -e 0.4 -n 0.02 -u 30 -i "${INDEX_INDICATOR}_bucketmap" -q ${FASTQ_PATH} -o "${BENCHMARK_PATH}/output/bucketmap_align_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_align_map.log"

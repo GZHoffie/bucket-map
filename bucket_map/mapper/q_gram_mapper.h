@@ -5,6 +5,7 @@
 #include "../indexer/bucket_fm_indexer.h"
 #include "../utils.h"
 #include "./mapper.h"
+#include "./quality_filter.h"
 
 #include <string>
 #include <vector>
@@ -12,6 +13,9 @@
 #include <cmath>
 #include <chrono>
 #include <fstream>
+#include <ranges>
+#include <iostream>
+#include <algorithm>
 
 #include <seqan3/search/views/kmer_hash.hpp>
 #include <seqan3/search/kmer_index/shape.hpp>
@@ -167,12 +171,12 @@ public:
                              << valid_q_grams << " (" << ((float) valid_q_grams) / q_grams_index.size() * 100 << "%).\n";
     }
 
-    std::function<bool(unsigned int)> get_filter() {
-        return [&](unsigned int kmer_hash) {
-            return zeros[kmer_hash] >= threshold;
-        };
+    bool is_highly_distinguishable(unsigned int kmer_hash) {
+        return zeros[kmer_hash] >= threshold;
     }
 };
+
+
 
 
 
@@ -200,8 +204,9 @@ private:
 
     // Q-gram filters for map efficiency
     distinguishability_filter<NUM_BUCKETS>* dist_filter;
-    std::function<bool(unsigned int)> dist_view;
-    //TODO: also consider quality
+    // quality filter for avoiding sequencing errors
+    unsigned int average_quality;
+
 
     // sampling k-mers
     Sampler* sampler;
@@ -232,7 +237,8 @@ private:
 
 public:
     q_gram_mapper(unsigned int bucket_len, unsigned int read_len, seqan3::shape shape, 
-                  unsigned int samples, unsigned int fault, float distinguishability, 
+                  unsigned int samples, unsigned int fault, float distinguishability,
+                  unsigned int quality_threshold = 35, 
                   unsigned int num_candidate_buckets = 30) : mapper() {
         // initialize private variables
         bucket_length = bucket_len;
@@ -249,6 +255,7 @@ public:
         // initialize filter
         filter = new fault_tolerate_filter<NUM_BUCKETS>(num_fault_tolerance, num_candidate_buckets);
         dist_filter = new distinguishability_filter<NUM_BUCKETS>(distinguishability);
+        average_quality = quality_threshold * q;
 
         // Initialize sampler
         sampler = new Sampler(num_samples);
@@ -290,7 +297,6 @@ public:
             }
 
             dist_filter->read(q_grams_index);
-            dist_view = dist_filter->get_filter();
 
             // Complete the read
             clock.tock();
@@ -328,17 +334,28 @@ public:
         //return filter->ok_results();
     }
 
-    std::vector<int> query_sequence(const std::vector<seqan3::dna4>& sequence) {
+    std::vector<int> query_sequence(const std::vector<seqan3::dna4>& sequence,
+                                    const std::vector<seqan3::phred42>& quality) {
         /**
          * @brief From `q_grams_index`, determine where the sequence may be coming from.
          * @param sequence A dna4 vector containing the query sequence.
+         * @param quality the read quality of the sequence.
          * @returns a vector of integers indicating the possible regions that the sequence
          *          may belong to.
-         * TODO: implement query with argument being a file containing short reads, together with quality.
          */
-        auto q_gram = seqan3::views::kmer_hash(q_gram_shape);
-        auto values = sequence | q_gram | std::views::filter(dist_view);
-        std::vector<unsigned int> hash_values(values.begin(), values.end());
+        
+        // get satisfactory k-mers that passes through quality filter and distinguishability filter
+        auto kmers = sequence | seqan3::views::kmer_hash(q_gram_shape);
+        auto kmer_qualities = quality | seqan3::views::kmer_quality(q_gram_shape);
+        int num_kmers = kmers.size();
+        //seqan3::debug_stream << std::views::iota(0, num_kmers) << "\n";
+
+        auto good_kmers = std::ranges::iota_view{0, num_kmers} | std::views::filter([&](unsigned int i) {
+                              return dist_filter->is_highly_distinguishable(kmers[i]) && kmer_qualities[i] >= average_quality;
+                          }) | std::views::transform([&](unsigned int i) {
+                              return kmers[i];
+                          });
+        std::vector<unsigned int> hash_values(good_kmers.begin(), good_kmers.end());
 
         // if not enough q-grams ramained to determine the exact location, simply ignore this query sequence.
         if (hash_values.size() < 0.2 * num_samples){
@@ -392,13 +409,15 @@ public:
         clock.tick();
         for (auto & rec : fin) {
             // find if read is present in the buckets
-            for (auto & bucket : query_sequence(rec.sequence())) {
+            for (auto & bucket : query_sequence(rec.sequence(), rec.base_qualities())) {
                 res_orig[bucket].push_back(num_records);
             }
             // find the reverse complement of the read in the buckets
             auto rec_rev_comp = rec.sequence() | std::views::reverse | seqan3::views::complement;
+            auto quality_rev = rec.base_qualities() | std::views::reverse;
+            std::vector<seqan3::phred42> qual_rev(quality_rev.begin(), quality_rev.end());
             seqan3::dna4_vector sequence_rev_comp(rec_rev_comp.begin(), rec_rev_comp.end());
-            for (auto & bucket : query_sequence(sequence_rev_comp)) {
+            for (auto & bucket : query_sequence(sequence_rev_comp, qual_rev)) {
                 res_rev_comp[bucket].push_back(num_records);
             }
             ++num_records;

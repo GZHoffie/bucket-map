@@ -3,10 +3,10 @@
 [INFO]		Set q-gram shape to be: [1,1,1,0,1,1,1,0,1,0,1,1] with number of effective characters: 9
 [ERROR]		The specified file already exists in directory: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/egu_bucketmap.qgram".
 [BENCHMARK]	Number of Q-grams with distinguishability >= 0.499981: 252427 (96.2933%).
-[BENCHMARK]	Elapsed time for loading index files: 25.336 s.
+[BENCHMARK]	Elapsed time for loading index files: 17.419 s.
 [INFO]		Successfully loaded "/home/zhenhao/bucket-map/bucket_map/benchmark/index/egu_bucketmap.qgram".
-[BENCHMARK]	Elapsed time for bucket mapping: 458.474 s (93.1372 μs/seq).
-[BENCHMARK]	Total time used for building k-mer index for each bucket: 324.194 s.
-[BENCHMARK]	Total time used for finding exact location of the sequences: 10.526 s (2.13832 μs/seq).
-[BENCHMARK]	Total mapped locations: 4472524 (0.908576 per sequence).
-[BENCHMARK]	Total time used for alignment verification and output: 12.453 s (2.78433 μs per pairwise alignment).
+[BENCHMARK]	Elapsed time for bucket mapping: 359.029 s (72.9354 μs/seq).
+[BENCHMARK]	Total time used for building k-mer index for each bucket: 288.478 s.
+[BENCHMARK]	Total time used for finding exact location of the sequences: 52.036 s (10.5709 μs/seq).
+[BENCHMARK]	Total mapped locations: 4932557 (1.00203 per sequence).
+[BENCHMARK]	Total time used for alignment verification and output: 13.195 s (2.67508 μs per pairwise alignment).

@@ -353,7 +353,7 @@ public:
                 std::vector<seqan3::dna4> text(start, start + width);
 
                 // define flag value
-                seqan3::sam_flag flag;
+                seqan3::sam_flag flag{seqan3::sam_flag::none};
                 if (!is_original) {
                     // read is mapped to the reverse strand
                     flag |= seqan3::sam_flag::on_reverse_strand;
