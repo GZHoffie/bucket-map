@@ -334,54 +334,68 @@ public:
         //return filter->ok_results();
     }
 
-    std::vector<int> query_sequence(const std::vector<seqan3::dna4>& sequence,
-                                    const std::vector<seqan3::phred42>& quality) {
+    std::pair<std::vector<int>, std::vector<int>> 
+    query_sequence(const std::vector<seqan3::dna4>& sequence,
+                   const std::vector<seqan3::phred42>& quality) {
         /**
          * @brief From `q_grams_index`, determine where the sequence may be coming from.
          * @param sequence A dna4 vector containing the query sequence.
          * @param quality the read quality of the sequence.
-         * @returns a vector of integers indicating the possible regions that the sequence
-         *          may belong to.
+         * @returns two vectors of integers indicating the possible regions that the sequence
+         *          may belong to. The first represent the buckets that the read can be mapped 
+         *          directly, and the second is the ones where reads can be mapped after
+         *          reverse complementing.
          */
+        // initialize results
+        std::vector<int> candidates_orig;
+        std::vector<int> candidates_rev_comp;
         
         // get satisfactory k-mers that passes through quality filter and distinguishability filter
         auto kmers = sequence | seqan3::views::kmer_hash(q_gram_shape);
         auto kmer_qualities = quality | seqan3::views::kmer_quality(q_gram_shape);
         int num_kmers = kmers.size();
-        //seqan3::debug_stream << std::views::iota(0, num_kmers) << "\n";
 
         auto good_kmers = std::ranges::iota_view{0, num_kmers} | std::views::filter([&](unsigned int i) {
                               return dist_filter->is_highly_distinguishable(kmers[i]) && kmer_qualities[i] >= average_quality;
                           }) | std::views::transform([&](unsigned int i) {
                               return kmers[i];
                           });
-        std::vector<unsigned int> hash_values(good_kmers.begin(), good_kmers.end());
+        std::vector<int> hash_values(good_kmers.begin(), good_kmers.end());
 
         // if not enough q-grams ramained to determine the exact location, simply ignore this query sequence.
         if (hash_values.size() < 0.2 * num_samples){
-            std::vector<int> res;
-            return res;
+            return std::make_pair(candidates_orig, candidates_rev_comp);
         }
 
-        std::vector<int> samples;
+        std::vector<int> samples_orig;
         /*
         // Randomly sample `num_samples` q-grams for query.
         std::sample(hash_values.begin(), hash_values.end(), 
-                    std::back_inserter(samples), num_samples,
+                    std::back_inserter(samples_orig), num_samples,
                     std::mt19937{std::random_device{}()});
         */
         // Deterministically sample from the hash values.
         sampler->sample_deterministically(hash_values.size()-1);
         for (auto sample : sampler->samples) {
-            samples.push_back(hash_values[sample]);
-        }
-
-        auto res = query(samples);
-        if (res.size() > allowed_max_candidate_buckets) {
-            res.clear();
+            samples_orig.push_back(hash_values[sample]);
         }
         
-        return res;
+        candidates_orig = query(samples_orig);
+
+        // query the reverse complements of the sampled k-mers
+        auto samples_rev_comp = samples_orig | std::views::transform([&](unsigned int hash) {
+            return hash_reverse_complement(hash, q);
+        });
+        std::vector<int> samples_rev_comp_vec(samples_rev_comp.begin(), samples_rev_comp.end());
+        candidates_rev_comp = query(samples_rev_comp_vec);
+        //if (candidates_orig.size() > allowed_max_candidate_buckets) {
+        //    candidates_orig.clear();
+        //}
+        //if (candidates_rev_comp.size() > allowed_max_candidate_buckets) {
+        //    candidates_rev_comp.clear();
+        //}
+        
+        return std::make_pair(candidates_orig, candidates_rev_comp);
         
     }
 
@@ -393,11 +407,14 @@ public:
          * @brief Read a query fastq file and output the ids of the sequence that are mapped 
          *        to each file.
          */
-
-        std::vector<std::vector<unsigned int>> res_orig;
-        std::vector<std::vector<unsigned int>> res_rev_comp;
+        // benchmarking percentage of mapped reads.
+        unsigned int mapped_reads = 0;
+        unsigned int num_buckets_orig = 0, num_buckets_rev_comp = 0;
+        
         seqan3::sequence_file_input<_dna4_traits> fin{sequence_file};
         // initialize returning result
+        std::vector<std::vector<unsigned int>> res_orig;
+        std::vector<std::vector<unsigned int>> res_rev_comp;
         for (int i = 0; i < NUM_BUCKETS; i++) {
             std::vector<unsigned int> sequence_ids_orig;
             res_orig.push_back(sequence_ids_orig);
@@ -409,16 +426,17 @@ public:
         clock.tick();
         for (auto & rec : fin) {
             // find if read is present in the buckets
-            for (auto & bucket : query_sequence(rec.sequence(), rec.base_qualities())) {
-                res_orig[bucket].push_back(num_records);
+            auto [buckets_orig, buckets_rev_comp] = query_sequence(rec.sequence(), rec.base_qualities());
+            for (auto & b : buckets_orig) {
+                res_orig[b].push_back(num_records);
             }
-            // find the reverse complement of the read in the buckets
-            auto rec_rev_comp = rec.sequence() | std::views::reverse | seqan3::views::complement;
-            auto quality_rev = rec.base_qualities() | std::views::reverse;
-            std::vector<seqan3::phred42> qual_rev(quality_rev.begin(), quality_rev.end());
-            seqan3::dna4_vector sequence_rev_comp(rec_rev_comp.begin(), rec_rev_comp.end());
-            for (auto & bucket : query_sequence(sequence_rev_comp, qual_rev)) {
-                res_rev_comp[bucket].push_back(num_records);
+            for (auto & b_ : buckets_rev_comp) {
+                res_rev_comp[b_].push_back(num_records);
+            }
+            if (!buckets_orig.empty() || !buckets_rev_comp.empty()) {
+                ++mapped_reads;
+                num_buckets_orig += buckets_orig.size();
+                num_buckets_rev_comp += buckets_rev_comp.size();
             }
             ++num_records;
         }
@@ -426,8 +444,15 @@ public:
         float time = clock.elapsed_seconds();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for bucket mapping: " 
                              << time << " s (" << time * 1000 * 1000 / num_records << " μs/seq).\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Number of reads that have at least one candidate bucket: " 
+                             << mapped_reads << "  (" << ((float)mapped_reads) / num_records * 100 << "%).\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Average number of buckets an original read is mapped to: " 
+                             << ((float) num_buckets_orig) / mapped_reads << ".\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Average number of buckets a reverse complement of the read is mapped to: " 
+                             << ((float) num_buckets_rev_comp) / mapped_reads << ".\n";
         return std::make_pair(res_orig, res_rev_comp);
     }
+
 
     std::vector<std::vector<int>> _query_file(std::filesystem::path sequence_file) {
         /**
@@ -441,8 +466,8 @@ public:
         clock.tick();
  
         for (auto & rec : fin) {
-            std::vector<int> buckets = query_sequence(rec.sequence());
-            res.push_back(buckets);
+            auto [buckets_orig, buckets_rev_comp] = query_sequence(rec.sequence(), rec.base_qualities());
+            res.push_back(buckets_orig);
         }
         clock.tock();
         float time = clock.elapsed_seconds();

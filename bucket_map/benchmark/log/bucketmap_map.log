@@ -3,10 +3,13 @@
 [INFO]		Set q-gram shape to be: [1,1,1,0,1,1,1,0,1,0,1,1] with number of effective characters: 9
 [ERROR]		The specified file already exists in directory: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/egu_bucketmap.qgram".
 [BENCHMARK]	Number of Q-grams with distinguishability >= 0.499981: 252427 (96.2933%).
-[BENCHMARK]	Elapsed time for loading index files: 17.419 s.
+[BENCHMARK]	Elapsed time for loading index files: 17.163 s.
 [INFO]		Successfully loaded "/home/zhenhao/bucket-map/bucket_map/benchmark/index/egu_bucketmap.qgram".
-[BENCHMARK]	Elapsed time for bucket mapping: 359.029 s (72.9354 μs/seq).
-[BENCHMARK]	Total time used for building k-mer index for each bucket: 288.478 s.
-[BENCHMARK]	Total time used for finding exact location of the sequences: 52.036 s (10.5709 μs/seq).
-[BENCHMARK]	Total mapped locations: 4932557 (1.00203 per sequence).
-[BENCHMARK]	Total time used for alignment verification and output: 13.195 s (2.67508 μs per pairwise alignment).
+[BENCHMARK]	Elapsed time for bucket mapping: 305.646 s (62.0908 μs/seq).
+[BENCHMARK]	Number of reads that have at least one candidate bucket: 4680663  (95.0859%).
+[BENCHMARK]	Average number of buckets an original read is mapped to: 2.07723.
+[BENCHMARK]	Average number of buckets a reverse complement of the read is mapped to: 2.62573.
+[BENCHMARK]	Total time used for building k-mer index for each bucket: 139.174 s.
+[BENCHMARK]	Total time used for finding exact location of the sequences: 20.297 s (4.12326 μs/seq).
+[BENCHMARK]	Total mapped locations: 2472 (0.000502177 per sequence).
+[BENCHMARK]	Total time used for alignment verification and output: 5.084 s (2056.63 μs per pairwise alignment).

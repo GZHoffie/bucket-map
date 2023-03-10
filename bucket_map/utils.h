@@ -12,6 +12,9 @@
 
 #include <chrono>
 #include <thread>
+#include <ranges>
+#include <iostream>
+#include <algorithm>
 #include <assert.h>
 
 
@@ -261,6 +264,27 @@ public:
         return res;
     }
 };
+
+/**
+ * @brief Given the hash value of the k-mer, return the hash value of its
+ *        reverse complement.
+ * 
+ * @param hash_value the hash value of the seqan3::dna4_vector
+ * @param k size of the k-mer
+ * @return unsigned int the hash value of the reverse complement of the k-mer
+ */
+unsigned int hash_reverse_complement(unsigned int hash_value, unsigned int k) {
+    unsigned int hash_orig = hash_value;
+    unsigned int hash_rev_comp = 0;
+    for (unsigned int i = 0; i < k; i++) {
+        hash_rev_comp |= (~hash_orig) & 3;
+        if (i != k-1) {
+            hash_rev_comp <<= 2;
+            hash_orig >>= 2;
+        }
+    }
+    return hash_rev_comp;
+}
 
 
 #endif

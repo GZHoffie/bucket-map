@@ -21,7 +21,7 @@ echo "Indexing using bowtie2"
 
 # run indexing for minimap2
 echo "Indexing using minimap2"
-/usr/bin/time -o "${BENCHMARK_PATH}/log/minimap2_index.time" -v minimap2 -t 1 -d "${INDEX_INDICATOR}_minimap.mmi" ${FASTA_PATH} &> "${BENCHMARK_PATH}/log/minimap2_index.log"
+/usr/bin/time -o "${BENCHMARK_PATH}/log/minimap2_index.time" -v minimap2 -d "${INDEX_INDICATOR}_minimap.mmi" ${FASTA_PATH} &> "${BENCHMARK_PATH}/log/minimap2_index.log"
 
 # run indexing for BucketMap
 #echo "Indexing using BucketMap"

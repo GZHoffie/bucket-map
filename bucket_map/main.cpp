@@ -191,8 +191,8 @@ int main(int argc, char ** argv) {
                        locate_shape, 
                        args.allowed_seed_miss_rate, 
                        args.locator_allowed_indel_rate,
-                       args.locator_sample_size
-                       );
+                       args.locator_sample_size,
+                       args.average_base_quality);
     
     // initialize the locator
     loc.initialize(BM_GENOME_PATH, std::filesystem::current_path(), args.index_indicator);
