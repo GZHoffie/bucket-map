@@ -389,9 +389,21 @@ public:
         align_timer.tick();
         for (auto && record : query_file_in) {
             auto & query = record.sequence();
+            // find the locations with the most votes
+            unsigned int most_votes = 0;
             for (auto & loc : locate_res[read_id]) {
                 // get the components of the locate_t
                 const auto & [bucket_id, offset, votes, is_original] = loc;
+                if (votes > most_votes) most_votes = votes;
+            }
+
+            // output to sam file
+            for (auto & loc : locate_res[read_id]) {
+                // get the components of the locate_t
+                const auto & [bucket_id, offset, votes, is_original] = loc;
+
+                // only output the reads with the most votes
+                if (votes < most_votes) continue;
 
                 // get the part of text that the read is mapped to
                 auto start = bucket_seq[bucket_id].begin() + offset;
