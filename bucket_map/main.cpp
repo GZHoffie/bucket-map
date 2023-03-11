@@ -17,8 +17,8 @@ struct cmd_arguments
     std::string index_indicator;
     std::filesystem::path output_sam_path{};
 
-    std::string mapper_seed_shape = "110101110111";
-    std::string locator_seed_shape = "111011011010111";
+    std::string mapper_seed_shape = "111111111";
+    std::string locator_seed_shape = "11111111111";
 
     unsigned int max_read_length = 300;
 
@@ -66,7 +66,7 @@ void initialise_parser(sharg::parser & parser, cmd_arguments & args)
     parser.add_option(args.mapper_seed_shape,
                       sharg::config{.short_id = 'm',
                                     .long_id = "mapper-seed",
-                                    .description = "The shape of k-mer seed used in mapper, which assigns a read to its candidate bucket."});
+                                    .description = "The shape of k-mer seed used in mapper, which assigns a read to its candidate bucket. Required to be symmetric."});
     
     parser.add_option(args.average_base_quality,
                       sharg::config{.short_id = 'b',
@@ -76,7 +76,7 @@ void initialise_parser(sharg::parser & parser, cmd_arguments & args)
     parser.add_option(args.locator_seed_shape,
                       sharg::config{.short_id = 'l',
                                     .long_id = "locator-seed",
-                                    .description = "The shape of k-mer seed used in locator, which finds a read's exact location within the bucket."});
+                                    .description = "The shape of k-mer seed used in locator, which finds a read's exact location within the bucket. Required to be symmetric."});
 
     parser.add_option(args.max_read_length,
                       sharg::config{.short_id = 'r',

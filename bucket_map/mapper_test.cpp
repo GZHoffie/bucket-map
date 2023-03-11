@@ -12,8 +12,8 @@ int main() {
     std::vector<seqan3::dna4> text{"ACGTAGC"_dna4};
     unsigned int k = 4;
 
-    auto hashes = text | seqan3::views::kmer_hash(seqan3::shape{seqan3::ungapped{(uint8_t)k}});
-    auto hashes_rev_comp_seqan = text | std::views::reverse | seqan3::views::complement | seqan3::views::kmer_hash(seqan3::shape{seqan3::ungapped{(uint8_t)k}});
+    auto hashes = text | seqan3::views::kmer_hash(seqan3::shape{0b1101_shape});
+    auto hashes_rev_comp_seqan = text | std::views::reverse | seqan3::views::complement | seqan3::views::kmer_hash(seqan3::shape{0b1101_shape});
     seqan3::debug_stream << hashes_rev_comp_seqan << "\n";
 
     auto hashes_rev_comp = hashes | std::views::transform([&](unsigned int hash) {
