@@ -25,11 +25,11 @@ struct cmd_arguments
     // mapper related arguments
     unsigned int mapper_sample_size = 15;
     float mapper_distinguishability_threshold = 0.5;
-    unsigned int average_base_quality = 30;
+    unsigned int average_base_quality = 25;
 
     // locator related arguments
     float allowed_seed_miss_rate = 0.4;
-    float locator_allowed_indel_rate = 0.015;
+    float locator_allowed_indel_rate = 0.02;
     float locator_sample_size = 10;
     unsigned int locator_quality_threshold = 40;
 };

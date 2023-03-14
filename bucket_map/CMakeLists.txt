@@ -125,6 +125,9 @@ target_link_libraries(mapper_test PUBLIC seqan3::seqan3)
 add_executable(locator_test locator_test.cpp ${SHARED_FILES})
 target_link_libraries(locator_test PUBLIC seqan3::seqan3)
 
+add_executable(fastq_analyzer benchmark/fastq_analyzer.cpp ${SHARED_FILES})
+target_link_libraries(fastq_analyzer PUBLIC seqan3::seqan3)
+
 #add_executable(quality_filter_test mapper/quality_filter.cpp ${SHARED_FILES})
 #target_link_libraries(quality_filter_test PUBLIC seqan3::seqan3)
 

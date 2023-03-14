@@ -1,9 +1,9 @@
 #!/bin/bash
 
-GENOME_FILE="/mnt/d/genome/Egu.v3.genome_f.fasta"
+GENOME_FILE="/mnt/d/genome/GRCh38_latest_genomic.fasta"
 BENCHMARK_PATH="/home/zhenhao/bucket-map/bucket_map/benchmark"
-QUERY_FILE="/mnt/d/genome/TS1.81.90.001.fq"
-INDICATOR="egu"
+QUERY_FILE="/mnt/d/genome/test/GRCH38_300_1M.fastq"
+INDICATOR="GRCh38"
 
 # initialize benchmark directory if it doesnt exist
 mkdir -p ${BENCHMARK_PATH}

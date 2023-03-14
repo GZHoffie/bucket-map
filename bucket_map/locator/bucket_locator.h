@@ -102,6 +102,7 @@ private:
     unsigned int average_quality;
     seqan3::shape q_gram_shape;
     unsigned int k; //size of k-mer
+    unsigned int kmer_span; //span of spaced k-mer
 
     // Parameters for verification
     int allowed_mismatch;
@@ -179,7 +180,7 @@ private:
             unsigned int current_kmer = *(record + i), current_index = *(index + i);
             if (reverse_complement) {
                 current_kmer = hash_reverse_complement(current_kmer, k);
-                current_index = length - k - current_index;
+                current_index = length - kmer_span - current_index;
             }
             auto range = bucket_kmer_index.equal_range(current_kmer);
             for (auto it = range.first; it != range.second; ++it) {
@@ -269,6 +270,7 @@ public:
         read_length = read_len;
         q_gram_shape = shape;
         k = shape.count();
+        kmer_span = std::ranges::size(shape);
 
         allowed_mismatch = ceil(mismatch_rate * sample_size);
         allowed_indel = ceil(indel_rate * sample_size);

@@ -1,24 +1,24 @@
-Command exited with non-zero status 247
-	Command being timed: "bowtie2-build /mnt/d/genome/GRCh38_latest_genomic.fasta GRCh38_bowtie"
-	User time (seconds): 2268.79
-	System time (seconds): 13.03
-	Percent of CPU this job got: 99%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 38:18.69
+Command terminated by signal 2
+	Command being timed: "bowtie2-build /mnt/d/genome/Egu.v3.genome_f.fasta egu_bowtie"
+	User time (seconds): 2.65
+	System time (seconds): 0.28
+	Percent of CPU this job got: 67%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:04.35
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 7616724
+	Maximum resident set size (kbytes): 11940
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 15026
-	Minor (reclaiming a frame) page faults: 898454
-	Voluntary context switches: 63550
-	Involuntary context switches: 469
+	Major (requiring I/O) page faults: 1
+	Minor (reclaiming a frame) page faults: 3515
+	Voluntary context switches: 4857
+	Involuntary context switches: 7
 	Swaps: 0
-	File system inputs: 918336
-	File system outputs: 1532288
+	File system inputs: 0
+	File system outputs: 303376
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0
 	Page size (bytes): 4096
-	Exit status: 247
+	Exit status: 0
