@@ -25,7 +25,7 @@ struct cmd_arguments
     // mapper related arguments
     unsigned int mapper_sample_size = 15;
     float mapper_distinguishability_threshold = 0.5;
-    unsigned int average_base_quality = 25;
+    unsigned int average_base_quality = 20;
 
     // locator related arguments
     float allowed_seed_miss_rate = 0.4;
@@ -158,6 +158,11 @@ int main(int argc, char ** argv) {
     std::filesystem::path output_path = "/home/zhenhao/bucket-map/bucket_map/benchmark/output";
     seqan3::shape bucket_shape = string_to_shape(args.mapper_seed_shape);
     seqan3::shape locate_shape = string_to_shape(args.locator_seed_shape);
+    // only support non-spaced k-mers... for now.
+    if (!bucket_shape.all() || !locate_shape.all()) {
+        seqan3::debug_stream << "[ERROR]\t\tOnly non-spaced k-mers are supported for now.\n";
+        return -1;
+    }
 
 
     // build the indexer and mapper

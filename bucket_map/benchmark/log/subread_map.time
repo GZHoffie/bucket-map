@@ -1,22 +1,21 @@
-Command terminated by signal 9
-	Command being timed: "subread-align --SAMoutput -i GRCh38_subread -r /mnt/d/genome/test/GRCH38_300_1M.fastq -t 1 -o /home/zhenhao/bucket-map/bucket_map/benchmark/output/subread_map.sam"
-	User time (seconds): 306.92
-	System time (seconds): 27.06
-	Percent of CPU this job got: 72%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 7:43.60
+	Command being timed: "subread-align --SAMoutput -i EColi_subread -r /mnt/d/genome/DRR035999.fastq -t 1 -o /home/zhenhao/bucket-map/bucket_map/benchmark/output/subread_map.sam"
+	User time (seconds): 91.35
+	System time (seconds): 9.48
+	Percent of CPU this job got: 81%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:03.43
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 7030180
+	Maximum resident set size (kbytes): 1175060
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 171959
-	Minor (reclaiming a frame) page faults: 1415042
-	Voluntary context switches: 362232
-	Involuntary context switches: 1603
+	Major (requiring I/O) page faults: 9
+	Minor (reclaiming a frame) page faults: 76091
+	Voluntary context switches: 364551
+	Involuntary context switches: 603
 	Swaps: 0
-	File system inputs: 57386792
-	File system outputs: 120
+	File system inputs: 1416
+	File system outputs: 1556680
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0

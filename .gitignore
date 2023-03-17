@@ -9,3 +9,5 @@ build
 cmake-build-debug
 bucket_map/benchmark/index
 bucket_map/benchmark/output
+bucket_map/benchmark/output_temp
+bucket_map/benchmark/log_temp

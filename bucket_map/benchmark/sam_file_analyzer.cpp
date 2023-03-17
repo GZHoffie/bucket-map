@@ -25,10 +25,11 @@ private:
      * @param id the id of the read
      * @return std::string the id with the '/' character and everything after it deleted.
      */
-    std::string _remove_substring_after_slash(std::string id) {
+    std::string _remove_substring_after_slash_or_blank(std::string id) {
         std::size_t slash = id.find('/');
-        if (slash != std::string::npos) {
-            std::string res(id.begin(), id.begin() + slash);
+        std::size_t blank = id.find(' ');
+        if (std::min(blank, slash) != std::string::npos) {
+            std::string res(id.begin(), id.begin() + std::min(blank, slash));
             return res;
         } else {
             return id;
@@ -54,7 +55,7 @@ public:
 
             //seqan3::debug_stream << ref << ", " << pos << " | ";
             try {
-                unsigned int sequence_id = read_id_to_index.at(_remove_substring_after_slash(record.id()));
+                unsigned int sequence_id = read_id_to_index.at(_remove_substring_after_slash_or_blank(record.id()));
 
                 if (static_cast<bool>(record.flag() & seqan3::sam_flag::unmapped)) {
                     // read is unmapped
@@ -108,7 +109,7 @@ public:
         unsigned int index = 0;
 
         for (auto & rec : fin) {
-            std::string id = _remove_substring_after_slash(rec.id());
+            std::string id = _remove_substring_after_slash_or_blank(rec.id());
             read_id_to_index.emplace(id, index);
             index++;
         }
@@ -136,7 +137,7 @@ public:
 
             //seqan3::debug_stream << ref << ", " << pos << " | ";
             try {
-                unsigned int sequence_id = read_id_to_index.at(_remove_substring_after_slash(record.id()));
+                unsigned int sequence_id = read_id_to_index.at(_remove_substring_after_slash_or_blank(record.id()));
 
                 if (static_cast<bool>(record.flag() & seqan3::sam_flag::unmapped)) {
                     // read is unmapped
@@ -197,9 +198,10 @@ public:
 int main()
 {
     sam_analyzer analyzer;
-    analyzer.read_sequence_file("/mnt/d/genome/TS1.81.90.001.fq");
-    analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bwa_map.sam");
+    analyzer.read_sequence_file("/mnt/d/genome/DRR035999.fastq");
+    //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bwa_map.sam");
     analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam");
+    analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/minimap2_map.sam");
 
     analyzer.benchmark_directory("/home/zhenhao/bucket-map/bucket_map/benchmark/output");
     return 0;

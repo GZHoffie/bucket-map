@@ -1,15 +1,15 @@
 [INFO]		Not using Smith-Waterman for alignment verifications.
-[INFO]		Initializing indexer and mapper with bucket length: 65536, and number of buckets: 26507.
+[INFO]		Initializing indexer and mapper with bucket length: 65536, and number of buckets: 88.
 [INFO]		Set q-gram shape to be: [1,1,1,1,1,1,1,1,1] with number of effective characters: 9
-[ERROR]		The specified file already exists in directory: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/GRCh38_bucketmap.qgram".
-[BENCHMARK]	Number of Q-grams with distinguishability >= 0.499981: 253222 (96.5965%).
-[BENCHMARK]	Elapsed time for loading index files: 19.485 s.
-[INFO]		Successfully loaded "/home/zhenhao/bucket-map/bucket_map/benchmark/index/GRCh38_bucketmap.qgram".
-[BENCHMARK]	Elapsed time for bucket mapping: 69.824 s (69.824 μs/seq).
-[BENCHMARK]	Number of reads that have at least one candidate bucket: 559603  (55.9603%).
-[BENCHMARK]	Average number of buckets an original read is mapped to: 0.929847.
-[BENCHMARK]	Average number of buckets a reverse complement of the read is mapped to: 1.57837.
-[BENCHMARK]	Total time used for building k-mer index for each bucket: 101.285 s.
-[BENCHMARK]	Total time used for finding exact location of the sequences: 0.016 s (0.016 μs/seq).
-[BENCHMARK]	Total mapped locations: 14 (1.4e-05 per sequence).
-[BENCHMARK]	Total time used for alignment verification and output: 2.004 s (143143 μs per pairwise alignment).
+[ERROR]		The specified file already exists in directory: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/EColi_bucketmap.qgram".
+[BENCHMARK]	Number of Q-grams with distinguishability >= 0.5: 252778 (96.4272%).
+[BENCHMARK]	Elapsed time for loading index files: 0.067 s.
+[INFO]		Successfully loaded "/home/zhenhao/bucket-map/bucket_map/benchmark/index/EColi_bucketmap.qgram".
+[BENCHMARK]	Elapsed time for bucket mapping: 13.417 s (10.3018 μs/seq).
+[BENCHMARK]	Number of reads that have at least one candidate bucket: 1171707  (89.9656%).
+[BENCHMARK]	Average number of buckets an original read is mapped to: 0.85592.
+[BENCHMARK]	Average number of buckets a reverse complement of the read is mapped to: 0.869373.
+[BENCHMARK]	Total time used for building k-mer index for each bucket: 0.293 s.
+[BENCHMARK]	Total time used for finding exact location of the sequences: 3.866 s (2.96838 μs/seq).
+[BENCHMARK]	Total mapped locations: 1043188 (0.800977 per sequence).
+[BENCHMARK]	Total time used for alignment verification and output: 3.245 s (3.11066 μs per pairwise alignment).

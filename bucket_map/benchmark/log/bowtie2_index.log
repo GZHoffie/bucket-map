@@ -1,5 +1,5 @@
 Settings:
-  Output files: "egu_bowtie.*.bt2"
+  Output files: "EColi_bowtie.*.bt2"
   Line rate: 6 (line is 64 bytes)
   Lines per side: 1 (side is 64 bytes)
   Offset rate: 4 (one in 16)
@@ -16,20 +16,170 @@ Settings:
   Random seed: 0
   Sizeofs: void*:8, int:4, long:8, size_t:8
 Input files DNA, FASTA:
-  /mnt/d/genome/Egu.v3.genome_f.fasta
+  /mnt/d/genome/GCA_900166955.1.fasta
 Building a SMALL index
 Reading reference sizes
-Traceback (most recent call last):
-  File "/home/zhenhao/miniconda3/bin/bowtie2-build", line 94, in <module>
-    main()
-  File "/home/zhenhao/miniconda3/bin/bowtie2-build", line 91, in main
-    sys.exit(subprocess.call(list(argv)))
-  File "/home/zhenhao/miniconda3/lib/python3.8/subprocess.py", line 342, in call
-    return p.wait(timeout=timeout)
-  File "/home/zhenhao/miniconda3/lib/python3.8/subprocess.py", line 1083, in wait
-    return self._wait(timeout=timeout)
-  File "/home/zhenhao/miniconda3/lib/python3.8/subprocess.py", line 1806, in _wait
-    (pid, sts) = self._try_wait(0)
-  File "/home/zhenhao/miniconda3/lib/python3.8/subprocess.py", line 1764, in _try_wait
-    (pid, sts) = os.waitpid(self.pid, wait_flags)
-KeyboardInterrupt
+  Time reading reference sizes: 00:00:00
+Calculating joined length
+Writing header
+Reserving space for joined string
+Joining reference sequences
+  Time to join reference sequences: 00:00:00
+bmax according to bmaxDivN setting: 1383039
+Using parameters --bmax 1037280 --dcv 1024
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 1037280 --dcv 1024
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:00
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:00
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:00
+  Sanity-checking and returning
+Building samples
+Reserving space for 12 sample suffixes
+Generating random suffixes
+QSorting 12 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 12 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 5.53216e+06 (target: 1037279)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Sorting block of length 5532158 for bucket 1
+  (Using difference cover)
+  Sorting block time: 00:00:01
+Returning block of 5532159 for bucket 1
+Exited Ebwt loop
+fchr[A]: 0
+fchr[C]: 1368477
+fchr[G]: 2761687
+fchr[T]: 4159906
+fchr[$]: 5532158
+Exiting Ebwt::buildToDisk()
+Returning from initFromVector
+Wrote 6039197 bytes to primary EBWT file: EColi_bowtie.1.bt2
+Wrote 1383044 bytes to secondary EBWT file: EColi_bowtie.2.bt2
+Re-opening _in1 and _in2 as input streams
+Returning from Ebwt constructor
+Headers:
+    len: 5532158
+    bwtLen: 5532159
+    sz: 1383040
+    bwtSz: 1383040
+    lineRate: 6
+    offRate: 4
+    offMask: 0xfffffff0
+    ftabChars: 10
+    eftabLen: 20
+    eftabSz: 80
+    ftabLen: 1048577
+    ftabSz: 4194308
+    offsLen: 345760
+    offsSz: 1383040
+    lineSz: 64
+    sideSz: 64
+    sideBwtSz: 48
+    sideBwtLen: 192
+    numSides: 28814
+    numLines: 28814
+    ebwtTotLen: 1844096
+    ebwtTotSz: 1844096
+    color: 0
+    reverse: 0
+Total time for call to driver() for forward index: 00:00:01
+Reading reference sizes
+  Time reading reference sizes: 00:00:00
+Calculating joined length
+Writing header
+Reserving space for joined string
+Joining reference sequences
+  Time to join reference sequences: 00:00:00
+  Time to reverse reference sequence: 00:00:00
+bmax according to bmaxDivN setting: 1383039
+Using parameters --bmax 1037280 --dcv 1024
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 1037280 --dcv 1024
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:00
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:00
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:00
+  Sanity-checking and returning
+Building samples
+Reserving space for 12 sample suffixes
+Generating random suffixes
+QSorting 12 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 12 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 5.53216e+06 (target: 1037279)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Sorting block of length 5532158 for bucket 1
+  (Using difference cover)
+  Sorting block time: 00:00:00
+Returning block of 5532159 for bucket 1
+Exited Ebwt loop
+fchr[A]: 0
+fchr[C]: 1368477
+fchr[G]: 2761687
+fchr[T]: 4159906
+fchr[$]: 5532158
+Exiting Ebwt::buildToDisk()
+Returning from initFromVector
+Wrote 6039197 bytes to primary EBWT file: EColi_bowtie.rev.1.bt2
+Wrote 1383044 bytes to secondary EBWT file: EColi_bowtie.rev.2.bt2
+Re-opening _in1 and _in2 as input streams
+Returning from Ebwt constructor
+Headers:
+    len: 5532158
+    bwtLen: 5532159
+    sz: 1383040
+    bwtSz: 1383040
+    lineRate: 6
+    offRate: 4
+    offMask: 0xfffffff0
+    ftabChars: 10
+    eftabLen: 20
+    eftabSz: 80
+    ftabLen: 1048577
+    ftabSz: 4194308
+    offsLen: 345760
+    offsSz: 1383040
+    lineSz: 64
+    sideSz: 64
+    sideBwtSz: 48
+    sideBwtLen: 192
+    numSides: 28814
+    numLines: 28814
+    ebwtTotLen: 1844096
+    ebwtTotSz: 1844096
+    color: 0
+    reverse: 1
+Total time for backward call to driver() for mirror index: 00:00:01

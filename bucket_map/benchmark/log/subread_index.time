@@ -1,21 +1,21 @@
-	Command being timed: "subread-buildindex -o GRCh38_subread /mnt/d/genome/GRCh38_latest_genomic.fasta"
-	User time (seconds): 773.14
-	System time (seconds): 49.06
-	Percent of CPU this job got: 94%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 14:27.96
+	Command being timed: "subread-buildindex -o EColi_subread /mnt/d/genome/GCA_900166955.1.fasta"
+	User time (seconds): 1.67
+	System time (seconds): 2.33
+	Percent of CPU this job got: 97%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:04.12
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 6224132
+	Maximum resident set size (kbytes): 1769780
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 461
-	Minor (reclaiming a frame) page faults: 1983655
-	Voluntary context switches: 776281
-	Involuntary context switches: 1616
+	Major (requiring I/O) page faults: 9
+	Minor (reclaiming a frame) page faults: 504181
+	Voluntary context switches: 1620
+	Involuntary context switches: 14
 	Swaps: 0
-	File system inputs: 6208848
-	File system outputs: 18489968
+	File system inputs: 12680
+	File system outputs: 89984
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0

@@ -19,6 +19,7 @@
 
 #include <seqan3/search/views/kmer_hash.hpp>
 #include <seqan3/search/kmer_index/shape.hpp>
+#include <seqan3/search/views/minimiser.hpp>
 
 using seqan3::operator""_shape;
 
@@ -205,7 +206,8 @@ private:
     // Q-gram filters for map efficiency
     distinguishability_filter<NUM_BUCKETS>* dist_filter;
     // quality filter for avoiding sequencing errors
-    unsigned int average_quality;
+    unsigned int min_base_quality;
+    std::vector<bool> high_quality_kmers;
 
 
     // sampling k-mers
@@ -223,16 +225,34 @@ private:
         return result;
     }
 
-    struct _dna4_traits : seqan3::sequence_file_input_default_traits_dna {
-        /**
-         * @brief Syntax for reading the query file.
-         * 
-         */
-        using sequence_alphabet = seqan3::dna4; // instead of dna5
- 
-        template <typename alph>
-        using sequence_container = std::vector<alph>; // must be defined as a template!
-    };
+    /**
+     * @brief Find all high quality k-mers.
+     * 
+     * @param quality the vector of quality alphabets.
+     * fills in `high_quality_kmers`: A vector with the i-th element representing whether
+     *                                the i-th k-mer is high-quality.
+     * TODO: support spaced k-mer.
+     */
+    void _high_quality_kmers(const std::vector<seqan3::phred42>& quality) {
+        unsigned int consecutive_high_quality_base = 0, index = 0;
+        high_quality_kmers.clear();
+        for (auto & qual: quality) {
+            if (qual.to_rank() >= min_base_quality) {
+                consecutive_high_quality_base++;
+                if (consecutive_high_quality_base >= q) {
+                    high_quality_kmers.push_back(true);
+                    continue;
+                }
+            } else {
+                consecutive_high_quality_base = 0;
+            }
+            index++;
+            if (index >= q) {
+                high_quality_kmers.push_back(false);
+            }
+        }
+        assert(high_quality_kmers.size() == quality.size() - q + 1);
+    }
 
 
 public:
@@ -255,7 +275,7 @@ public:
         // initialize filter
         filter = new fault_tolerate_filter<NUM_BUCKETS>(num_fault_tolerance, num_candidate_buckets);
         dist_filter = new distinguishability_filter<NUM_BUCKETS>(distinguishability);
-        average_quality = quality_threshold * q;
+        min_base_quality = quality_threshold;
 
         // Initialize sampler
         sampler = new Sampler(num_samples);
@@ -352,11 +372,12 @@ public:
         
         // get satisfactory k-mers that passes through quality filter and distinguishability filter
         auto kmers = sequence | seqan3::views::kmer_hash(q_gram_shape);
-        auto kmer_qualities = quality | seqan3::views::kmer_quality(q_gram_shape);
+        _high_quality_kmers(quality);
+        //std::vector<unsigned int> qualities(kmer_qualities.begin(), kmer_qualities.end());
         int num_kmers = kmers.size();
 
         auto good_kmers = std::ranges::iota_view{0, num_kmers} | std::views::filter([&](unsigned int i) {
-                              return dist_filter->is_highly_distinguishable(kmers[i]) && kmer_qualities[i] >= average_quality;
+                              return dist_filter->is_highly_distinguishable(kmers[i]) && high_quality_kmers[i];
                           }) | std::views::transform([&](unsigned int i) {
                               return kmers[i];
                           });
@@ -388,12 +409,12 @@ public:
         });
         std::vector<int> samples_rev_comp_vec(samples_rev_comp.begin(), samples_rev_comp.end());
         candidates_rev_comp = query(samples_rev_comp_vec);
-        //if (candidates_orig.size() > allowed_max_candidate_buckets) {
-        //    candidates_orig.clear();
-        //}
-        //if (candidates_rev_comp.size() > allowed_max_candidate_buckets) {
-        //    candidates_rev_comp.clear();
-        //}
+        if (candidates_orig.size() > allowed_max_candidate_buckets) {
+            candidates_orig.clear();
+        }
+        if (candidates_rev_comp.size() > allowed_max_candidate_buckets) {
+            candidates_rev_comp.clear();
+        }
         
         return std::make_pair(candidates_orig, candidates_rev_comp);
         

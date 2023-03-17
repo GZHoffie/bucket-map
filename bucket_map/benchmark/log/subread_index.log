@@ -9,52 +9,49 @@
 
 //================================= setting ==================================\\
 ||                                                                            ||
-||                Index name : GRCh38_subread                                 ||
+||                Index name : EColi_subread                                  ||
 ||               Index space : base space                                     ||
 ||                    Memory : 8000 Mbytes                                    ||
 ||          Repeat threshold : 100 repeats                                    ||
 ||              Gapped index : yes                                            ||
 ||                                                                            ||
-||       Free / total memory : 6.9GB / 7.7GB                                  ||
+||       Free / total memory : 5.1GB / 7.7GB                                  ||
 ||                                                                            ||
 ||               Input files : 1 file in total                                ||
-||                             o GRCh38_latest_genomic.fasta                  ||
+||                             o GCA_900166955.1.fasta                        ||
 ||                                                                            ||
 \\============================================================================//
 
 //================================= Running ==================================\\
 ||                                                                            ||
 || Check the integrity of provided reference sequences ...                    ||
-|| There were 103 notes for reference sequences.                              ||
-|| The notes can be found in the log file, 'GRCh38_subread.log'.              ||
+|| No format issues were found                                                ||
 || Scan uninformative subreads in reference sequences ...                     ||
-|| 243243 uninformative subreads were found.                                  ||
-|| These subreads were excluded from index building.                          ||
 || Estimate the index size...                                                 ||
-||    8%,   0 mins elapsed, rate=17982.9k bps/s                               ||
-||   16%,   0 mins elapsed, rate=18662.3k bps/s                               ||
-||   24%,   0 mins elapsed, rate=18984.0k bps/s                               ||
-||   33%,   0 mins elapsed, rate=19133.0k bps/s                               ||
-||   41%,   1 mins elapsed, rate=19260.9k bps/s                               ||
-||   49%,   1 mins elapsed, rate=19340.9k bps/s                               ||
-||   58%,   1 mins elapsed, rate=19418.6k bps/s                               ||
-||   66%,   1 mins elapsed, rate=19457.5k bps/s                               ||
-||   74%,   2 mins elapsed, rate=19501.3k bps/s                               ||
-||   83%,   2 mins elapsed, rate=19565.9k bps/s                               ||
-||   91%,   2 mins elapsed, rate=19599.4k bps/s                               ||
-|| 6.2 GB of memory is needed for index building.                             ||
+||    8%,   0 mins elapsed, rate=21032.6k bps/s                               ||
+||   16%,   0 mins elapsed, rate=22034.2k bps/s                               ||
+||   25%,   0 mins elapsed, rate=21356.2k bps/s                               ||
+||   33%,   0 mins elapsed, rate=21521.7k bps/s                               ||
+||   41%,   0 mins elapsed, rate=21422.1k bps/s                               ||
+||   50%,   0 mins elapsed, rate=21356.2k bps/s                               ||
+||   58%,   0 mins elapsed, rate=21450.5k bps/s                               ||
+||   66%,   0 mins elapsed, rate=21397.4k bps/s                               ||
+||   75%,   0 mins elapsed, rate=21356.2k bps/s                               ||
+||   83%,   0 mins elapsed, rate=21622.3k bps/s                               ||
+||   91%,   0 mins elapsed, rate=21567.4k bps/s                               ||
+|| 0.6 GB of memory is needed for index building.                             ||
 || Build the index...                                                         ||
-||    8%,   0 mins elapsed, rate=7727.0k bps/s                                ||
-||   16%,   1 mins elapsed, rate=8157.9k bps/s                                ||
-||   24%,   1 mins elapsed, rate=8308.8k bps/s                                ||
-||   33%,   2 mins elapsed, rate=8383.9k bps/s                                ||
-||   41%,   2 mins elapsed, rate=8417.9k bps/s                                ||
-||   49%,   3 mins elapsed, rate=8454.5k bps/s                                ||
-||   58%,   3 mins elapsed, rate=8488.4k bps/s                                ||
-||   66%,   4 mins elapsed, rate=8510.8k bps/s                                ||
-||   74%,   4 mins elapsed, rate=8536.5k bps/s                                ||
-||   83%,   5 mins elapsed, rate=8571.6k bps/s                                ||
-||   91%,   5 mins elapsed, rate=8580.4k bps/s                                ||
+||    8%,   0 mins elapsed, rate=7463.2k bps/s                                ||
+||   16%,   0 mins elapsed, rate=9540.6k bps/s                                ||
+||   25%,   0 mins elapsed, rate=10516.3k bps/s                               ||
+||   33%,   0 mins elapsed, rate=10887.5k bps/s                               ||
+||   41%,   0 mins elapsed, rate=10861.9k bps/s                               ||
+||   50%,   0 mins elapsed, rate=11017.1k bps/s                               ||
+||   58%,   0 mins elapsed, rate=11169.1k bps/s                               ||
+||   66%,   0 mins elapsed, rate=11355.0k bps/s                               ||
+||   75%,   0 mins elapsed, rate=11316.5k bps/s                               ||
+||   83%,   0 mins elapsed, rate=11341.1k bps/s                               ||
+||   91%,   0 mins elapsed, rate=11386.8k bps/s                               ||
 || Save current index block...                                                ||
 ||  [ 0.0% finished ]                                                         ||
 ||  [ 10.0% finished ]                                                        ||
@@ -68,8 +65,8 @@
 ||  [ 90.0% finished ]                                                        ||
 ||  [ 100.0% finished ]                                                       ||
 ||                                                                            ||
-||                     Total running time: 14.5 minutes.                      ||
-||                Index GRCh38_subread was successfully built.                ||
+||                      Total running time: 0.1 minutes.                      ||
+||                Index EColi_subread was successfully built.                 ||
 ||                                                                            ||
 \\============================================================================//
 

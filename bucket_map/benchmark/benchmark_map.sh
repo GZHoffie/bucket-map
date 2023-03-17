@@ -16,11 +16,11 @@ echo "Mapping using bowtie2"
 
 # run bwa to map the reads
 echo "Mapping using bwa"
-/usr/bin/time -o "${BENCHMARK_PATH}/log/bwa_map.time" -v bwa mem "${INDEX_INDICATOR}_bwa" ${FASTQ_PATH} > "${BENCHMARK_PATH}/output/bwa_map.sam" 2> "${BENCHMARK_PATH}/log/bwa_map.log"
+#/usr/bin/time -o "${BENCHMARK_PATH}/log/bwa_map.time" -v bwa mem "${INDEX_INDICATOR}_bwa" ${FASTQ_PATH} > "${BENCHMARK_PATH}/output/bwa_map.sam" 2> "${BENCHMARK_PATH}/log/bwa_map.log"
 
 # run subread to map the reads
 echo "Mapping using subread"
-/usr/bin/time -o "${BENCHMARK_PATH}/log/subread_map.time" -v subread-align --SAMoutput -i "${INDEX_INDICATOR}_subread" -r ${FASTQ_PATH} -t 1 -o "${BENCHMARK_PATH}/output/subread_map.sam" &> "${BENCHMARK_PATH}/log/subread_map.log"
+#/usr/bin/time -o "${BENCHMARK_PATH}/log/subread_map.time" -v subread-align --SAMoutput -i "${INDEX_INDICATOR}_subread" -r ${FASTQ_PATH} -t 1 -o "${BENCHMARK_PATH}/output/subread_map.sam" &> "${BENCHMARK_PATH}/log/subread_map.log"
 
 # run minimap2
 echo "Mapping using minimap2"
@@ -28,7 +28,7 @@ echo "Mapping using minimap2"
 
 # run bucketmap
 echo "Mapping using BucketMap"
-/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_map.time" -v bucketmap --version-check 0 -r 150 -n 0.02 -i "${INDEX_INDICATOR}_bucketmap" -q ${FASTQ_PATH} -o "${BENCHMARK_PATH}/output/bucketmap_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_map.log"
+/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_map.time" -v bucketmap --version-check 0 -r 310 -s 20 -p 15 -e 0.5 -n 0.03 -i "${INDEX_INDICATOR}_bucketmap" -q ${FASTQ_PATH} -o "${BENCHMARK_PATH}/output/bucketmap_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_map.log"
 
-echo "Mapping using BucketMap_align"
+#echo "Mapping using BucketMap_align"
 #/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_align_map.time" -v bucketmap_align --version-check 0 -r 150 -s 15 -t 4 -e 0.4 -n 0.02 -u 30 -i "${INDEX_INDICATOR}_bucketmap" -q ${FASTQ_PATH} -o "${BENCHMARK_PATH}/output/bucketmap_align_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_align_map.log"

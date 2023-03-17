@@ -189,6 +189,21 @@ struct _dna4_traits : seqan3::sequence_file_input_default_traits_dna {
 };
 
 
+struct _phred94_traits : seqan3::sequence_file_input_default_traits_dna {
+    /**
+     * @brief Syntax for reading the query file.
+     */
+    using sequence_alphabet = seqan3::dna4; // instead of dna5
+    using quality_alphabet = seqan3::phred94; // instead of phred42
+ 
+    template <typename alph>
+    using sequence_container = std::vector<alph>; // must be defined as a template!
+    
+    //template <typename alph>
+    //using quality_container = std::vector<alph>;
+};
+
+
 class CIGAR {
     /**
      * @brief Util class for the cigar string, with support of inserting cigar operation.

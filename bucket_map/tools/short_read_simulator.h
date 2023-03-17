@@ -3,6 +3,7 @@
 
 #include <seqan3/search/kmer_index/shape.hpp>
 #include <seqan3/alphabet/all.hpp>
+#include <seqan3/alphabet/views/all.hpp>
 
 #include <cstdlib>
 #include <ctime>
@@ -56,7 +57,24 @@ private:
     void _add_deletion(std::vector<seqan3::dna4>& sequence, CIGAR& cigar) {
         unsigned int index = rand() % sequence.size();
         sequence.erase(sequence.begin() + index);
-        cigar.insert(index, 'D'_cigar_operation);
+        cigar.replace(index, 'D'_cigar_operation);
+    }
+    
+    /**
+     * @brief Randomly choose to reverse complement the sequence.
+     * 
+     * @return true if we return the reverse complement
+     * @return false if we do nothing.
+     */
+    bool _random_reverse_complement(std::vector<seqan3::dna4>& sequence) {
+        // randomly sample true/false
+        static auto gen = std::bind(std::uniform_int_distribution<>(0,1),std::default_random_engine());
+        bool reverse_comp = gen();
+        if (reverse_comp) {
+            auto sequence_rev_comp = sequence | std::views::reverse | seqan3::views::complement;
+            std::copy(sequence_rev_comp.begin(), sequence_rev_comp.end(), sequence.begin());
+        }
+        return reverse_comp;
     }
 
 public:
@@ -132,7 +150,7 @@ public:
         iterate_through_buckets(fasta_file_name, bucket_length, read_length, operation);
     }
 
-    std::tuple<std::vector<seqan3::dna4>, int, int, CIGAR> sample(bool simulate_error = true) {
+    std::tuple<std::vector<seqan3::dna4>, int, int, bool, CIGAR> sample(bool simulate_error = true) {
         /**
          * @brief Take a sample short read from the reference genome and add errors to it.
          * @param simulate_error whether we add random error to the sequence or not.
@@ -158,7 +176,12 @@ public:
         if (simulate_error) {
             simulate_errors(sample_sequence, cigar);
         }
-        return std::make_tuple(sample_sequence, bucket, start, cigar);
+
+        // with probability 1/2, get the sample from the reversed strand.
+        bool rev_comp = _random_reverse_complement(sample_sequence);
+    
+
+        return std::make_tuple(sample_sequence, bucket, start, rev_comp, cigar);
     }
 
     void generate_fastq_file(std::filesystem::path output_path, std::string indicator, unsigned int size,  
@@ -190,17 +213,18 @@ public:
             fastq_file << "@" << i << "\n";
             // generate sequence
             auto res = sample(simulate_error);
-            auto & [sequence, bucket, offset, cigar] = res;
+            auto & [sequence, bucket, offset, reverse_comp, cigar] = res;
             for (auto nt : sequence) {
                 fastq_file << nt.to_char();
             }
             // insert a quality string.
             fastq_file << "\n+\n" << std::string(sequence.size(), 'E') << "\n";
             // record the ground truth.
-            bucket_gt_file << bucket << " " << offset << " " << cigar.to_string() << "\n";
+            bucket_gt_file << bucket << " " << offset << " " << reverse_comp << " " << cigar.to_string() << "\n";
             // record the true locations
             auto true_position = bucket_ids[bucket];
-            pos_gt_file << std::get<0>(true_position) << " " << std::get<1>(true_position) * bucket_length + offset + 1 << " " << cigar.to_string() << "\n";
+            pos_gt_file << std::get<0>(true_position) << " " << std::get<1>(true_position) * bucket_length + offset + 1 << " " << reverse_comp
+                        << " " << cigar.to_string() << "\n";
         }
 
         seqan3::debug_stream << "[INFO]\t\t" << "The generated fastq file is stored in: " 

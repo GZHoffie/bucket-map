@@ -99,7 +99,8 @@ private:
     // information for buckets
     unsigned int bucket_length;
     unsigned int read_length;
-    unsigned int average_quality;
+    unsigned int min_base_quality;
+    std::vector<bool> high_quality_kmers;
     seqan3::shape q_gram_shape;
     unsigned int k; //size of k-mer
     unsigned int kmer_span; //span of spaced k-mer
@@ -147,6 +148,35 @@ private:
             index.emplace(hash, offset);
             offset++;
         }
+    }
+
+    /**
+     * @brief Find all high quality k-mers. (Same as in the mapper)
+     * 
+     * @param quality the vector of quality alphabets.
+     * fills in `high_quality_kmers`: A vector with the i-th element representing whether
+     *                                the i-th k-mer is high-quality.
+     * TODO: support spaced k-mer.
+     */
+    void _high_quality_kmers(const std::vector<seqan3::phred42>& quality) {
+        unsigned int consecutive_high_quality_base = 0, index = 0;
+        high_quality_kmers.clear();
+        for (auto & qual: quality) {
+            if (qual.to_rank() >= min_base_quality) {
+                consecutive_high_quality_base++;
+                if (consecutive_high_quality_base >= k) {
+                    high_quality_kmers.push_back(true);
+                    continue;
+                }
+            } else {
+                consecutive_high_quality_base = 0;
+            }
+            index++;
+            if (index >= k) {
+                high_quality_kmers.push_back(false);
+            }
+        }
+        assert(high_quality_kmers.size() == quality.size() - k + 1);
     }
 
 
@@ -232,8 +262,9 @@ private:
             int num_kmers = kmers.size();
 
             // filter out low-quality k-mers
+            _high_quality_kmers(rec.base_qualities());
             auto good_kmers = std::ranges::iota_view{0, num_kmers} | std::views::filter([&](unsigned int i) {
-                                  return kmer_qualities[i] >= average_quality;
+                                  return high_quality_kmers[i] >= min_base_quality;
                               });
             // sample kmers
             std::vector<uint16_t> good_indices(good_kmers.begin(), good_kmers.end());
@@ -286,7 +317,7 @@ public:
         // initialize sampler
         sampler = new Sampler(num_samples);
 
-        average_quality = quality_threshold * q_gram_shape.count();
+        min_base_quality = quality_threshold;
     }
 
     ~bucket_locator() {

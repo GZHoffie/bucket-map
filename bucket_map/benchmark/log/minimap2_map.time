@@ -1,22 +1,21 @@
-Command terminated by signal 9
-	Command being timed: "minimap2 -a egu_minimap.mmi /mnt/d/genome/TS1.81.90.001.fq"
-	User time (seconds): 99.80
-	System time (seconds): 62.74
-	Percent of CPU this job got: 111%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:25.55
+	Command being timed: "minimap2 -a EColi_minimap.mmi /mnt/d/genome/DRR035999.fastq"
+	User time (seconds): 97.06
+	System time (seconds): 1.66
+	Percent of CPU this job got: 255%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:38.63
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 6548572
+	Maximum resident set size (kbytes): 1093816
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 271480
-	Minor (reclaiming a frame) page faults: 1876419
-	Voluntary context switches: 559031
-	Involuntary context switches: 808
+	Major (requiring I/O) page faults: 6
+	Minor (reclaiming a frame) page faults: 253536
+	Voluntary context switches: 45828
+	Involuntary context switches: 171
 	Swaps: 0
-	File system inputs: 12778944
-	File system outputs: 64
+	File system inputs: 38472
+	File system outputs: 1819944
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0
