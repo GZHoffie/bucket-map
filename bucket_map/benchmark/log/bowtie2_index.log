@@ -1,5 +1,5 @@
 Settings:
-  Output files: "EColi_bowtie.*.bt2"
+  Output files: "GRCh38_bowtie.*.bt2"
   Line rate: 6 (line is 64 bytes)
   Lines per side: 1 (side is 64 bytes)
   Offset rate: 4 (one in 16)
@@ -16,30 +16,30 @@ Settings:
   Random seed: 0
   Sizeofs: void*:8, int:4, long:8, size_t:8
 Input files DNA, FASTA:
-  /mnt/d/genome/GCA_900166955.1.fasta
+  /mnt/d/genome/GRCh38_latest_genomic.fasta
 Building a SMALL index
 Reading reference sizes
-  Time reading reference sizes: 00:00:00
+  Time reading reference sizes: 00:00:16
 Calculating joined length
 Writing header
 Reserving space for joined string
 Joining reference sequences
-  Time to join reference sequences: 00:00:00
-bmax according to bmaxDivN setting: 1383039
-Using parameters --bmax 1037280 --dcv 1024
+  Time to join reference sequences: 00:00:13
+bmax according to bmaxDivN setting: 784204788
+Using parameters --bmax 588153591 --dcv 1024
   Doing ahead-of-time memory usage test
-  Passed!  Constructing with these parameters: --bmax 1037280 --dcv 1024
+  Passed!  Constructing with these parameters: --bmax 588153591 --dcv 1024
 Constructing suffix-array element generator
 Building DifferenceCoverSample
   Building sPrime
   Building sPrimeOrder
   V-Sorting samples
-  V-Sorting samples time: 00:00:00
+  V-Sorting samples time: 00:00:49
   Allocating rank array
   Ranking v-sort output
-  Ranking v-sort output time: 00:00:00
+  Ranking v-sort output time: 00:00:11
   Invoking Larsson-Sadakane on ranks
-  Invoking Larsson-Sadakane on ranks time: 00:00:00
+  Invoking Larsson-Sadakane on ranks time: 00:00:26
   Sanity-checking and returning
 Building samples
 Reserving space for 12 sample suffixes
@@ -52,134 +52,1104 @@ Multikey QSorting 12 samples
 Calculating bucket sizes
 Splitting and merging
   Splitting and merging time: 00:00:00
-Avg bucket size: 5.53216e+06 (target: 1037279)
+Avg bucket size: 3.13682e+09 (target: 588153590)
 Converting suffix-array elements to index image
 Allocating ftab, absorbFtab
 Entering Ebwt loop
 Getting block 1 of 1
   No samples; assembling all-inclusive block
-  Sorting block of length 5532158 for bucket 1
-  (Using difference cover)
-  Sorting block time: 00:00:01
-Returning block of 5532159 for bucket 1
-Exited Ebwt loop
-fchr[A]: 0
-fchr[C]: 1368477
-fchr[G]: 2761687
-fchr[T]: 4159906
-fchr[$]: 5532158
-Exiting Ebwt::buildToDisk()
-Returning from initFromVector
-Wrote 6039197 bytes to primary EBWT file: EColi_bowtie.1.bt2
-Wrote 1383044 bytes to secondary EBWT file: EColi_bowtie.2.bt2
-Re-opening _in1 and _in2 as input streams
-Returning from Ebwt constructor
-Headers:
-    len: 5532158
-    bwtLen: 5532159
-    sz: 1383040
-    bwtSz: 1383040
-    lineRate: 6
-    offRate: 4
-    offMask: 0xfffffff0
-    ftabChars: 10
-    eftabLen: 20
-    eftabSz: 80
-    ftabLen: 1048577
-    ftabSz: 4194308
-    offsLen: 345760
-    offsSz: 1383040
-    lineSz: 64
-    sideSz: 64
-    sideBwtSz: 48
-    sideBwtLen: 192
-    numSides: 28814
-    numLines: 28814
-    ebwtTotLen: 1844096
-    ebwtTotSz: 1844096
-    color: 0
-    reverse: 0
-Total time for call to driver() for forward index: 00:00:01
-Reading reference sizes
-  Time reading reference sizes: 00:00:00
-Calculating joined length
-Writing header
-Reserving space for joined string
-Joining reference sequences
-  Time to join reference sequences: 00:00:00
-  Time to reverse reference sequence: 00:00:00
-bmax according to bmaxDivN setting: 1383039
-Using parameters --bmax 1037280 --dcv 1024
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 441115194 --dcv 1024
   Doing ahead-of-time memory usage test
-  Passed!  Constructing with these parameters: --bmax 1037280 --dcv 1024
+  Passed!  Constructing with these parameters: --bmax 441115194 --dcv 1024
 Constructing suffix-array element generator
 Building DifferenceCoverSample
   Building sPrime
   Building sPrimeOrder
   V-Sorting samples
-  V-Sorting samples time: 00:00:00
+  V-Sorting samples time: 00:00:48
   Allocating rank array
   Ranking v-sort output
-  Ranking v-sort output time: 00:00:00
+  Ranking v-sort output time: 00:00:12
   Invoking Larsson-Sadakane on ranks
-  Invoking Larsson-Sadakane on ranks time: 00:00:00
+  Invoking Larsson-Sadakane on ranks time: 00:00:25
   Sanity-checking and returning
 Building samples
-Reserving space for 12 sample suffixes
+Reserving space for 16 sample suffixes
 Generating random suffixes
-QSorting 12 sample offsets, eliminating duplicates
+QSorting 16 sample offsets, eliminating duplicates
 QSorting sample offsets, eliminating duplicates time: 00:00:00
-Multikey QSorting 12 samples
+Multikey QSorting 16 samples
   (Using difference cover)
   Multikey QSorting samples time: 00:00:00
 Calculating bucket sizes
 Splitting and merging
   Splitting and merging time: 00:00:00
-Avg bucket size: 5.53216e+06 (target: 1037279)
+Avg bucket size: 3.13682e+09 (target: 441115193)
 Converting suffix-array elements to index image
 Allocating ftab, absorbFtab
 Entering Ebwt loop
 Getting block 1 of 1
   No samples; assembling all-inclusive block
-  Sorting block of length 5532158 for bucket 1
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 330836396 --dcv 1024
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 330836396 --dcv 1024
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:48
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:12
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:27
+  Sanity-checking and returning
+Building samples
+Reserving space for 20 sample suffixes
+Generating random suffixes
+QSorting 20 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 20 samples
   (Using difference cover)
-  Sorting block time: 00:00:00
-Returning block of 5532159 for bucket 1
-Exited Ebwt loop
-fchr[A]: 0
-fchr[C]: 1368477
-fchr[G]: 2761687
-fchr[T]: 4159906
-fchr[$]: 5532158
-Exiting Ebwt::buildToDisk()
-Returning from initFromVector
-Wrote 6039197 bytes to primary EBWT file: EColi_bowtie.rev.1.bt2
-Wrote 1383044 bytes to secondary EBWT file: EColi_bowtie.rev.2.bt2
-Re-opening _in1 and _in2 as input streams
-Returning from Ebwt constructor
-Headers:
-    len: 5532158
-    bwtLen: 5532159
-    sz: 1383040
-    bwtSz: 1383040
-    lineRate: 6
-    offRate: 4
-    offMask: 0xfffffff0
-    ftabChars: 10
-    eftabLen: 20
-    eftabSz: 80
-    ftabLen: 1048577
-    ftabSz: 4194308
-    offsLen: 345760
-    offsSz: 1383040
-    lineSz: 64
-    sideSz: 64
-    sideBwtSz: 48
-    sideBwtLen: 192
-    numSides: 28814
-    numLines: 28814
-    ebwtTotLen: 1844096
-    ebwtTotSz: 1844096
-    color: 0
-    reverse: 1
-Total time for backward call to driver() for mirror index: 00:00:01
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 330836395)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 248127297 --dcv 1024
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 248127297 --dcv 1024
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:48
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:12
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:29
+  Sanity-checking and returning
+Building samples
+Reserving space for 26 sample suffixes
+Generating random suffixes
+QSorting 26 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 26 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 248127296)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 186095473 --dcv 1024
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 186095473 --dcv 1024
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:48
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:12
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:28
+  Sanity-checking and returning
+Building samples
+Reserving space for 34 sample suffixes
+Generating random suffixes
+QSorting 34 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 34 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 186095472)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 186095473 --dcv 2048
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 186095473 --dcv 2048
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:36
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:09
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:19
+  Sanity-checking and returning
+Building samples
+Reserving space for 34 sample suffixes
+Generating random suffixes
+QSorting 34 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 34 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 186095472)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 139571605 --dcv 2048
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 139571605 --dcv 2048
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:36
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:08
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:19
+  Sanity-checking and returning
+Building samples
+Reserving space for 46 sample suffixes
+Generating random suffixes
+QSorting 46 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 46 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 139571604)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 104678704 --dcv 2048
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 104678704 --dcv 2048
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:36
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:09
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:17
+  Sanity-checking and returning
+Building samples
+Reserving space for 60 sample suffixes
+Generating random suffixes
+QSorting 60 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 60 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 104678703)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 78509028 --dcv 2048
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 78509028 --dcv 2048
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:36
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:08
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:18
+  Sanity-checking and returning
+Building samples
+Reserving space for 80 sample suffixes
+Generating random suffixes
+QSorting 80 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 80 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 78509027)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 58881771 --dcv 2048
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 58881771 --dcv 2048
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:36
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:08
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:18
+  Sanity-checking and returning
+Building samples
+Reserving space for 108 sample suffixes
+Generating random suffixes
+QSorting 108 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 108 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 58881770)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 44161329 --dcv 2048
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 44161329 --dcv 2048
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:36
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:08
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:18
+  Sanity-checking and returning
+Building samples
+Reserving space for 144 sample suffixes
+Generating random suffixes
+QSorting 144 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 144 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 44161328)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 44161329 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 44161329 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 144 sample suffixes
+Generating random suffixes
+QSorting 144 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 144 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 44161328)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 33120997 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 33120997 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:11
+  Sanity-checking and returning
+Building samples
+Reserving space for 190 sample suffixes
+Generating random suffixes
+QSorting 190 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 190 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 33120996)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 24840748 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 24840748 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:28
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 254 sample suffixes
+Generating random suffixes
+QSorting 254 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 254 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 24840747)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 18630561 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 18630561 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 338 sample suffixes
+Generating random suffixes
+QSorting 338 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 338 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 18630560)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 13972921 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 13972921 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 450 sample suffixes
+Generating random suffixes
+QSorting 450 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 450 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 13972920)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 10479691 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 10479691 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 600 sample suffixes
+Generating random suffixes
+QSorting 600 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 600 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 10479690)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 7859769 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 7859769 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 800 sample suffixes
+Generating random suffixes
+QSorting 800 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 800 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 7859768)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 5894827 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 5894827 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:28
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 1066 sample suffixes
+Generating random suffixes
+QSorting 1066 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 1066 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 5894826)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 4421121 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 4421121 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 1420 sample suffixes
+Generating random suffixes
+QSorting 1420 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 1420 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 4421120)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 3315841 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 3315841 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 1894 sample suffixes
+Generating random suffixes
+QSorting 1894 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 1894 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 3315840)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 2486881 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 2486881 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 2524 sample suffixes
+Generating random suffixes
+QSorting 2524 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 2524 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 2486880)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 1865161 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 1865161 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 3364 sample suffixes
+Generating random suffixes
+QSorting 3364 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 3364 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 1865160)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 1398871 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 1398871 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 4486 sample suffixes
+Generating random suffixes
+QSorting 4486 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 4486 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 1398870)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 1049154 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 1049154 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:05
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 5980 sample suffixes
+Generating random suffixes
+QSorting 5980 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 5980 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 1049153)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 786866 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 786866 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 7974 sample suffixes
+Generating random suffixes
+QSorting 7974 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 7974 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 786865)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 590150 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 590150 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:13
+  Sanity-checking and returning
+Building samples
+Reserving space for 10632 sample suffixes
+Generating random suffixes
+QSorting 10632 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 10632 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 590149)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 442613 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 442613 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 14176 sample suffixes
+Generating random suffixes
+QSorting 14176 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 14176 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 442612)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 331960 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 331960 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:28
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 18900 sample suffixes
+Generating random suffixes
+QSorting 18900 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 18900 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:00
+Avg bucket size: 3.13682e+09 (target: 331959)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 248970 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 248970 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 25200 sample suffixes
+Generating random suffixes
+QSorting 25200 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 25200 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:01
+Avg bucket size: 3.13682e+09 (target: 248969)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 186728 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 186728 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 33598 sample suffixes
+Generating random suffixes
+QSorting 33598 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 33598 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:01
+Avg bucket size: 3.13682e+09 (target: 186727)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 140046 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 140046 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:13
+  Sanity-checking and returning
+Building samples
+Reserving space for 44798 sample suffixes
+Generating random suffixes
+QSorting 44798 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 44796 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:01
+Avg bucket size: 3.13682e+09 (target: 140045)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 105035 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 105035 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:06
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:13
+  Sanity-checking and returning
+Building samples
+Reserving space for 59730 sample suffixes
+Generating random suffixes
+QSorting 59730 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 59728 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:02
+Avg bucket size: 3.13682e+09 (target: 105034)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 1
+  No samples; assembling all-inclusive block
+  Ran out of memory; automatically trying more memory-economical parameters.
+Using parameters --bmax 78777 --dcv 4096
+  Doing ahead-of-time memory usage test
+  Passed!  Constructing with these parameters: --bmax 78777 --dcv 4096
+Constructing suffix-array element generator
+Building DifferenceCoverSample
+  Building sPrime
+  Building sPrimeOrder
+  V-Sorting samples
+  V-Sorting samples time: 00:00:27
+  Allocating rank array
+  Ranking v-sort output
+  Ranking v-sort output time: 00:00:07
+  Invoking Larsson-Sadakane on ranks
+  Invoking Larsson-Sadakane on ranks time: 00:00:12
+  Sanity-checking and returning
+Building samples
+Reserving space for 79640 sample suffixes
+Generating random suffixes
+QSorting 79640 sample offsets, eliminating duplicates
+QSorting sample offsets, eliminating duplicates time: 00:00:00
+Multikey QSorting 79638 samples
+  (Using difference cover)
+  Multikey QSorting samples time: 00:00:00
+Calculating bucket sizes
+Splitting and merging
+  Splitting and merging time: 00:00:04
+Avg bucket size: 1.56841e+09 (target: 78776)
+Converting suffix-array elements to index image
+Allocating ftab, absorbFtab
+Entering Ebwt loop
+Getting block 1 of 2
+  Reserving size (78777) for bucket 1
+  Calculating Z arrays for bucket 1
+  Entering block accumulator loop for bucket 1:
+  bucket 1: 10%
+  bucket 1: 20%
+  bucket 1: 30%
+  bucket 1: 40%

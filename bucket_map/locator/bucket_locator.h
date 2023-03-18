@@ -424,26 +424,33 @@ public:
             auto & query = record.sequence();
             // find the locations with the most votes
             unsigned int most_votes = 0;
+
+#ifndef BM_ALIGN
             for (auto & loc : locate_res[read_id]) {
                 // get the components of the locate_t
                 const auto & [bucket_id, offset, votes, is_original] = loc;
                 if (votes > most_votes) most_votes = votes;
             }
+#else
+            // record the alignment with the highest alignment score
+            //TODO: only report one map with the highest alignment score.
+#endif
 
             // output to sam file
             for (auto & loc : locate_res[read_id]) {
                 // get the components of the locate_t
                 const auto & [bucket_id, offset, votes, is_original] = loc;
 
+#ifndef BM_ALIGN
                 // only output the reads with the most votes
                 if (votes < most_votes) continue;
+#endif
 
                 // get the part of text that the read is mapped to
                 auto start = bucket_seq[bucket_id].begin() + offset;
                 size_t width = std::min(query.size() + 1 + allowed_indel, bucket_seq[bucket_id].size() - offset);
 
-                std::vector<seqan3::dna4> text(start, start + width);
-
+                
                 // define flag value
                 seqan3::sam_flag flag{seqan3::sam_flag::none};
                 if (!is_original) {
@@ -453,9 +460,16 @@ public:
 
 
 #ifdef BM_ALIGN
+                // pick up the text
+                std::vector<seqan3::dna4> text(start, start + width);
+                if (!is_original) {
+                    auto text_rev_comp = text | std::views::reverse | seqan3::views::complement;
+                    std::vector<seqan3::dna4> text_copy(text_rev_comp.begin(), text_rev_comp.end());
+                    text = text_copy;
+                }
                 // do pairwise string alignment
                 for (auto && alignment : seqan3::align_pairwise(std::tie(text, query), align_config)) {
-                    size_t map_qual = 60u + alignment.score(); // TODO: consider the number of votes in the mapping quality.
+                    size_t map_qual = 60u + alignment.score();
                     if (map_qual < quality_threshold) {
                         continue;
                     }

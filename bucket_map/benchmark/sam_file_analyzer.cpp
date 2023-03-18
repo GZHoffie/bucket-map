@@ -87,7 +87,7 @@ public:
 
         unsigned int index = 0;
 
-        while (is >> origin >> position >> cigar >> reverse_complement) {
+        while (is >> origin >> position >> reverse_complement >> cigar) {
             map_position_t pos;
             pos.reverse_complement = static_cast<bool>(reverse_complement);
             pos.sequence_id = origin;
@@ -198,11 +198,11 @@ public:
 int main()
 {
     sam_analyzer analyzer;
-    analyzer.read_sequence_file("/mnt/d/genome/DRR035999.fastq");
+    analyzer.read_sequence_file("/mnt/d/genome/test/EGU_300_1M.fastq");
     //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bwa_map.sam");
-    analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam");
-    analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/minimap2_map.sam");
-
+    //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam");
+    //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/minimap2_map.sam");
+    analyzer.read_ground_truth_file("/mnt/d/genome/test/EGU_300_1M.position_ground_truth");
     analyzer.benchmark_directory("/home/zhenhao/bucket-map/bucket_map/benchmark/output");
     return 0;
 

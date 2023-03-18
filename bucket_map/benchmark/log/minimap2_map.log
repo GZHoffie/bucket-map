@@ -1,8 +1,8 @@
-[M::main::0.081*0.72] loaded/built the index for 7 target sequence(s)
-[M::mm_mapopt_update::0.094*0.76] mid_occ = 10
-[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 7
-[M::mm_idx_stat::0.105*0.78] distinct minimizers: 999604 (97.80% are singletons); average occurrences: 1.034; average spacing: 5.353; total length: 5532158
-[M::worker_pipeline::38.573*2.56] mapped 1302395 sequences
+[M::main::8.180*0.64] loaded/built the index for 932 target sequence(s)
+[M::mm_mapopt_update::9.253*0.68] mid_occ = 1428
+[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 932
+[M::mm_idx_stat::9.924*0.70] distinct minimizers: 61720831 (52.90% are singletons); average occurrences: 5.186; average spacing: 5.315; total length: 1701312507
+[M::worker_pipeline::482.511*2.93] mapped 1000000 sequences
 [M::main] Version: 2.24-r1150-dirty
-[M::main] CMD: minimap2 -a EColi_minimap.mmi /mnt/d/genome/DRR035999.fastq
-[M::main] Real time: 38.580 sec; CPU: 98.714 sec; Peak RSS: 1.043 GB
+[M::main] CMD: minimap2 -a egu_minimap.mmi /mnt/d/genome/test/EGU_300_1M.fastq
+[M::main] Real time: 482.609 sec; CPU: 1412.789 sec; Peak RSS: 6.020 GB

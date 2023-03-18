@@ -72,7 +72,11 @@ private:
         bool reverse_comp = gen();
         if (reverse_comp) {
             auto sequence_rev_comp = sequence | std::views::reverse | seqan3::views::complement;
-            std::copy(sequence_rev_comp.begin(), sequence_rev_comp.end(), sequence.begin());
+            std::vector<seqan3::dna4> sequence_copy(sequence_rev_comp.begin(), sequence_rev_comp.end());
+            sequence.clear();
+            for (auto n : sequence_copy) {
+                sequence.push_back(n);
+            }
         }
         return reverse_comp;
     }
