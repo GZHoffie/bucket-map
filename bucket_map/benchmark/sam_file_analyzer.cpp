@@ -198,11 +198,11 @@ public:
 int main()
 {
     sam_analyzer analyzer;
-    analyzer.read_sequence_file("/mnt/d/genome/test/EGU_300_1M.fastq");
-    //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bwa_map.sam");
-    //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam");
+    analyzer.read_sequence_file("/mnt/d/genome/DRR035999.fastq");
+    analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bwa_map.sam");
+    analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam");
     //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/minimap2_map.sam");
-    analyzer.read_ground_truth_file("/mnt/d/genome/test/EGU_300_1M.position_ground_truth");
+    //analyzer.read_ground_truth_file("/mnt/d/genome/test/EGU_1500_10K.position_ground_truth");
     analyzer.benchmark_directory("/home/zhenhao/bucket-map/bucket_map/benchmark/output");
     return 0;
 
