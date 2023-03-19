@@ -1,18 +1,18 @@
 	Command being timed: "minimap2 -a EColi_minimap.mmi /mnt/d/genome/DRR035999.fastq"
-	User time (seconds): 97.52
-	System time (seconds): 1.96
-	Percent of CPU this job got: 254%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:39.04
+	User time (seconds): 97.45
+	System time (seconds): 1.64
+	Percent of CPU this job got: 255%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:38.77
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 1092064
+	Maximum resident set size (kbytes): 1095088
 	Average resident set size (kbytes): 0
 	Major (requiring I/O) page faults: 4
-	Minor (reclaiming a frame) page faults: 253660
-	Voluntary context switches: 45809
-	Involuntary context switches: 162
+	Minor (reclaiming a frame) page faults: 252810
+	Voluntary context switches: 45823
+	Involuntary context switches: 152
 	Swaps: 0
 	File system inputs: 38576
 	File system outputs: 1819944

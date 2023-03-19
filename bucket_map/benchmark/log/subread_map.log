@@ -26,7 +26,7 @@
 ||                                                                            ||
 \\============================================================================//
 
-//================ Running (18-Mar-2023 20:10:40, pid=10982) =================\\
+//================= Running (19-Mar-2023 14:20:20, pid=7829) =================\\
 ||                                                                            ||
 || Check the input reads.                                                     ||
 || The input file contains base space reads.                                  ||
@@ -40,16 +40,16 @@
 || Load the 1-th index block...                                               ||
 || The index block has been loaded.                                           ||
 || Start read mapping in chunk.                                               ||
-||    0% completed, 0.0 mins elapsed, rate=10.8k reads per second             ||
-||    7% completed, 0.2 mins elapsed, rate=10.6k reads per second             ||
-||   13% completed, 0.3 mins elapsed, rate=10.6k reads per second             ||
-||   20% completed, 0.4 mins elapsed, rate=10.6k reads per second             ||
-||   27% completed, 0.6 mins elapsed, rate=10.5k reads per second             ||
-||   33% completed, 0.7 mins elapsed, rate=10.5k reads per second             ||
-||   40% completed, 0.9 mins elapsed, rate=10.5k reads per second             ||
+||    0% completed, 0.0 mins elapsed, rate=10.7k reads per second             ||
+||    7% completed, 0.2 mins elapsed, rate=10.8k reads per second             ||
+||   13% completed, 0.3 mins elapsed, rate=10.8k reads per second             ||
+||   20% completed, 0.4 mins elapsed, rate=10.8k reads per second             ||
+||   27% completed, 0.6 mins elapsed, rate=10.7k reads per second             ||
+||   33% completed, 0.7 mins elapsed, rate=10.7k reads per second             ||
+||   40% completed, 0.8 mins elapsed, rate=10.6k reads per second             ||
 ||   47% completed, 1.0 mins elapsed, rate=10.6k reads per second             ||
-||   53% completed, 1.1 mins elapsed, rate=10.7k reads per second             ||
-||   60% completed, 1.3 mins elapsed, rate=10.7k reads per second             ||
+||   53% completed, 1.1 mins elapsed, rate=10.6k reads per second             ||
+||   60% completed, 1.3 mins elapsed, rate=10.6k reads per second             ||
 ||   69% completed, 1.5 mins elapsed, rate=10.5k reads per second             ||
 ||   73% completed, 1.5 mins elapsed, rate=10.5k reads per second             ||
 ||   76% completed, 1.6 mins elapsed, rate=10.5k reads per second             ||

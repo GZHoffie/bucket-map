@@ -158,7 +158,7 @@ private:
      *                                the i-th k-mer is high-quality.
      * TODO: support spaced k-mer.
      */
-    void _high_quality_kmers(const std::vector<seqan3::phred42>& quality) {
+    void _high_quality_kmers(const std::vector<seqan3::phred94>& quality) {
         unsigned int consecutive_high_quality_base = 0, index = 0;
         high_quality_kmers.clear();
         for (auto & qual: quality) {
@@ -253,7 +253,7 @@ private:
          * @brief Read the query file and store the sampled k-mers from the reads in `records`.
          * @note Should be run before locating reads in the query sequence file.
          */
-        seqan3::sequence_file_input<_dna4_traits> fastq_file{sequence_file};
+        seqan3::sequence_file_input<_phred94_traits> fastq_file{sequence_file};
 
         for (auto & rec : fastq_file) {
             auto kmers = rec.sequence() | seqan3::views::kmer_hash(q_gram_shape);
@@ -262,9 +262,9 @@ private:
             int num_kmers = kmers.size();
 
             // filter out low-quality k-mers
-            _high_quality_kmers(rec.base_qualities());
+            //_high_quality_kmers(rec.base_qualities());
             auto good_kmers = std::ranges::iota_view{0, num_kmers} | std::views::filter([&](unsigned int i) {
-                                  return high_quality_kmers[i] >= min_base_quality;
+                                  return kmer_qualities[i] >= min_base_quality;
                               });
             // sample kmers
             std::vector<uint16_t> good_indices(good_kmers.begin(), good_kmers.end());
@@ -317,7 +317,7 @@ public:
         // initialize sampler
         sampler = new Sampler(num_samples);
 
-        min_base_quality = quality_threshold;
+        min_base_quality = quality_threshold * k;
     }
 
     ~bucket_locator() {
@@ -391,7 +391,7 @@ public:
         }
 
         // output to the sam file
-        seqan3::sequence_file_input query_file_in{sequence_file};
+        seqan3::sequence_file_input<_phred94_traits> query_file_in{sequence_file};
  
         seqan3::sam_file_output sam_out{sam_file, ref_ids, ref_lengths,
                                         seqan3::fields<seqan3::field::seq,

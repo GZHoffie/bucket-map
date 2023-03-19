@@ -1,20 +1,20 @@
 	Command being timed: "bowtie2 -x EColi_bowtie -U /mnt/d/genome/DRR035999.fastq -S /home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam"
-	User time (seconds): 181.83
-	System time (seconds): 2.81
+	User time (seconds): 169.32
+	System time (seconds): 2.18
 	Percent of CPU this job got: 97%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 3:09.58
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:56.08
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 28188
+	Maximum resident set size (kbytes): 26476
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 78
-	Minor (reclaiming a frame) page faults: 6870
-	Voluntary context switches: 30302
-	Involuntary context switches: 201
+	Major (requiring I/O) page faults: 112
+	Minor (reclaiming a frame) page faults: 6851
+	Voluntary context switches: 29013
+	Involuntary context switches: 190
 	Swaps: 0
-	File system inputs: 12608
+	File system inputs: 47664
 	File system outputs: 1693272
 	Socket messages sent: 0
 	Socket messages received: 0

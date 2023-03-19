@@ -18,7 +18,7 @@ struct cmd_arguments
     std::filesystem::path output_sam_path{};
 
     std::string mapper_seed_shape = "111111111";
-    std::string locator_seed_shape = "11111111111";
+    std::string locator_seed_shape = "111111111";
 
     unsigned int max_read_length = 300;
 

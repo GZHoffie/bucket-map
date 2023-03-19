@@ -233,7 +233,7 @@ private:
      *                                the i-th k-mer is high-quality.
      * TODO: support spaced k-mer.
      */
-    void _high_quality_kmers(const std::vector<seqan3::phred42>& quality) {
+    void _high_quality_kmers(const std::vector<seqan3::phred94>& quality) {
         unsigned int consecutive_high_quality_base = 0, index = 0;
         high_quality_kmers.clear();
         for (auto & qual: quality) {
@@ -275,7 +275,7 @@ public:
         // initialize filter
         filter = new fault_tolerate_filter<NUM_BUCKETS>(num_fault_tolerance, num_candidate_buckets);
         dist_filter = new distinguishability_filter<NUM_BUCKETS>(distinguishability);
-        min_base_quality = quality_threshold;
+        min_base_quality = quality_threshold * q;
 
         // Initialize sampler
         sampler = new Sampler(num_samples);
@@ -356,7 +356,7 @@ public:
 
     std::pair<std::vector<int>, std::vector<int>> 
     query_sequence(const std::vector<seqan3::dna4>& sequence,
-                   const std::vector<seqan3::phred42>& quality) {
+                   const std::vector<seqan3::phred94>& quality) {
         /**
          * @brief From `q_grams_index`, determine where the sequence may be coming from.
          * @param sequence A dna4 vector containing the query sequence.
@@ -372,12 +372,13 @@ public:
         
         // get satisfactory k-mers that passes through quality filter and distinguishability filter
         auto kmers = sequence | seqan3::views::kmer_hash(q_gram_shape);
-        _high_quality_kmers(quality);
-        //std::vector<unsigned int> qualities(kmer_qualities.begin(), kmer_qualities.end());
+        auto kmer_qualities = quality | seqan3::views::kmer_quality(q_gram_shape);
+        //_high_quality_kmers(quality);
+        std::vector<unsigned int> qualities(kmer_qualities.begin(), kmer_qualities.end());
         int num_kmers = kmers.size();
 
         auto good_kmers = std::ranges::iota_view{0, num_kmers} | std::views::filter([&](unsigned int i) {
-                              return dist_filter->is_highly_distinguishable(kmers[i]) && high_quality_kmers[i];
+                              return dist_filter->is_highly_distinguishable(kmers[i]) && qualities[i] >= min_base_quality;
                           }) | std::views::transform([&](unsigned int i) {
                               return kmers[i];
                           });
@@ -432,7 +433,7 @@ public:
         unsigned int mapped_reads = 0;
         unsigned int num_buckets_orig = 0, num_buckets_rev_comp = 0;
         
-        seqan3::sequence_file_input<_dna4_traits> fin{sequence_file};
+        seqan3::sequence_file_input<_phred94_traits> fin{sequence_file};
         // initialize returning result
         std::vector<std::vector<unsigned int>> res_orig;
         std::vector<std::vector<unsigned int>> res_rev_comp;
@@ -482,7 +483,7 @@ public:
          * TODO: include the quality information for fastq.
          */
         std::vector<std::vector<int>> res;
-        seqan3::sequence_file_input<_dna4_traits> fin{sequence_file};
+        seqan3::sequence_file_input<_phred94_traits> fin{sequence_file};
         Timer clock;
         clock.tick();
  

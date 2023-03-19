@@ -105,7 +105,7 @@ public:
      * @param sequence_file path to the fastq file
      */
     void read_sequence_file(std::filesystem::path sequence_file) {
-        seqan3::sequence_file_input fin{sequence_file};
+        seqan3::sequence_file_input<_phred94_traits> fin{sequence_file};
         unsigned int index = 0;
 
         for (auto & rec : fin) {
