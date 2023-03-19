@@ -85,6 +85,6 @@ public:
 
 
 int main() {
-    fastq_analyzer analyzer(25);
-    analyzer.read("/mnt/d/genome/DRR035999.fastq");
+    fastq_analyzer analyzer(20);
+    analyzer.read("/mnt/d/genome/TS1.81.90.001.fq");
 }

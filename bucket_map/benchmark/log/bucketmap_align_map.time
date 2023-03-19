@@ -1,21 +1,21 @@
-	Command being timed: "bucketmap_align --version-check 0 -r 310 -s 30 -e 0.6 -b 30 -u 30 -i EColi_bucketmap -q /mnt/d/genome/DRR035999.fastq -o /home/zhenhao/bucket-map/bucket_map/benchmark/output/bucketmap_align_map.sam"
-	User time (seconds): 82.64
-	System time (seconds): 0.77
-	Percent of CPU this job got: 97%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:25.75
+	Command being timed: "bucketmap_align --version-check 0 -r 150 -u 30 -i egu_bucketmap -q /mnt/d/genome/TS1.81.90.001.fq -o /home/zhenhao/bucket-map/bucket_map/benchmark/output/bucketmap_align_map.sam"
+	User time (seconds): 852.20
+	System time (seconds): 3.88
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 14:21.91
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 168024
+	Maximum resident set size (kbytes): 1081252
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 13
-	Minor (reclaiming a frame) page faults: 17193
-	Voluntary context switches: 9231
-	Involuntary context switches: 83
+	Major (requiring I/O) page faults: 2
+	Minor (reclaiming a frame) page faults: 192708
+	Voluntary context switches: 24820
+	Involuntary context switches: 596
 	Swaps: 0
-	File system inputs: 1824
-	File system outputs: 1279992
+	File system inputs: 16
+	File system outputs: 3484984
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0
