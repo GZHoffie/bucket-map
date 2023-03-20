@@ -198,7 +198,7 @@ public:
 int main()
 {
     sam_analyzer analyzer;
-    analyzer.read_sequence_file("/mnt/d/genome/TS1.81.90.001.fq");
+    analyzer.read_sequence_file("/mnt/d/genome/DRR035999.fastq");
     analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bwa_map.sam");
     analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam");
     //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/subread_map.sam");

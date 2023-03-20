@@ -1,8 +1,8 @@
-[M::mm_idx_gen::0.157*0.85] collected minimizers
-[M::mm_idx_gen::0.190*1.20] sorted minimizers
-[M::main::0.231*1.17] loaded/built the index for 7 target sequence(s)
-[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 7
-[M::mm_idx_stat::0.241*1.16] distinct minimizers: 999604 (97.80% are singletons); average occurrences: 1.034; average spacing: 5.353; total length: 5532158
+[M::mm_idx_gen::0.118*0.85] collected minimizers
+[M::mm_idx_gen::0.143*1.19] sorted minimizers
+[M::main::0.175*1.16] loaded/built the index for 1 target sequence(s)
+[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 1
+[M::mm_idx_stat::0.182*1.15] distinct minimizers: 838542 (98.18% are singletons); average occurrences: 1.034; average spacing: 5.352; total length: 4641652
 [M::main] Version: 2.24-r1150-dirty
-[M::main] CMD: minimap2 -d EColi_minimap.mmi /mnt/d/genome/GCA_900166955.1.fasta
-[M::main] Real time: 0.249 sec; CPU: 0.287 sec; Peak RSS: 0.056 GB
+[M::main] CMD: minimap2 -d EColi_minimap.mmi /mnt/d/genome/GCA_000005845.2.fasta
+[M::main] Real time: 0.188 sec; CPU: 0.215 sec; Peak RSS: 0.048 GB

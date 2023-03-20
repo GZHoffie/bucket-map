@@ -1,21 +1,21 @@
-	Command being timed: "bowtie2-build /mnt/d/genome/GCA_900166955.1.fasta EColi_bowtie"
-	User time (seconds): 1.51
-	System time (seconds): 0.13
-	Percent of CPU this job got: 94%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.74
+	Command being timed: "bowtie2-build /mnt/d/genome/GCA_000005845.2.fasta EColi_bowtie"
+	User time (seconds): 1.28
+	System time (seconds): 0.09
+	Percent of CPU this job got: 97%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.41
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 103104
+	Maximum resident set size (kbytes): 101960
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 109
-	Minor (reclaiming a frame) page faults: 12988
-	Voluntary context switches: 418
-	Involuntary context switches: 3
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 15265
+	Voluntary context switches: 193
+	Involuntary context switches: 1
 	Swaps: 0
-	File system inputs: 25488
-	File system outputs: 31736
+	File system inputs: 0
+	File system outputs: 29272
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0

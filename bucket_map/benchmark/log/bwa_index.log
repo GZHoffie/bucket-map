@@ -1,9 +1,9 @@
-[bwa_index] Pack FASTA... 0.04 sec
+[bwa_index] Pack FASTA... 0.03 sec
 [bwa_index] Construct BWT for the packed sequence...
-[bwa_index] 1.01 seconds elapse.
+[bwa_index] 0.71 seconds elapse.
 [bwa_index] Update BWT... 0.02 sec
-[bwa_index] Pack forward-only FASTA... 0.03 sec
-[bwa_index] Construct SA from BWT and Occ... 0.47 sec
+[bwa_index] Pack forward-only FASTA... 0.02 sec
+[bwa_index] Construct SA from BWT and Occ... 0.37 sec
 [main] Version: 0.7.17-r1198-dirty
-[main] CMD: bwa index -p EColi_bwa /mnt/d/genome/GCA_900166955.1.fasta
-[main] Real time: 1.646 sec; CPU: 1.579 sec
+[main] CMD: bwa index -p EColi_bwa /mnt/d/genome/GCA_000005845.2.fasta
+[main] Real time: 1.226 sec; CPU: 1.164 sec

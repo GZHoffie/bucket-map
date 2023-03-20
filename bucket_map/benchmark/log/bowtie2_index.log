@@ -16,7 +16,7 @@ Settings:
   Random seed: 0
   Sizeofs: void*:8, int:4, long:8, size_t:8
 Input files DNA, FASTA:
-  /mnt/d/genome/GCA_900166955.1.fasta
+  /mnt/d/genome/GCA_000005845.2.fasta
 Building a SMALL index
 Reading reference sizes
   Time reading reference sizes: 00:00:00
@@ -25,10 +25,10 @@ Writing header
 Reserving space for joined string
 Joining reference sequences
   Time to join reference sequences: 00:00:00
-bmax according to bmaxDivN setting: 1383039
-Using parameters --bmax 1037280 --dcv 1024
+bmax according to bmaxDivN setting: 1160413
+Using parameters --bmax 870310 --dcv 1024
   Doing ahead-of-time memory usage test
-  Passed!  Constructing with these parameters: --bmax 1037280 --dcv 1024
+  Passed!  Constructing with these parameters: --bmax 870310 --dcv 1024
 Constructing suffix-array element generator
 Building DifferenceCoverSample
   Building sPrime
@@ -52,33 +52,33 @@ Multikey QSorting 12 samples
 Calculating bucket sizes
 Splitting and merging
   Splitting and merging time: 00:00:00
-Avg bucket size: 5.53216e+06 (target: 1037279)
+Avg bucket size: 4.64165e+06 (target: 870309)
 Converting suffix-array elements to index image
 Allocating ftab, absorbFtab
 Entering Ebwt loop
 Getting block 1 of 1
   No samples; assembling all-inclusive block
-  Sorting block of length 5532158 for bucket 1
+  Sorting block of length 4641652 for bucket 1
   (Using difference cover)
   Sorting block time: 00:00:00
-Returning block of 5532159 for bucket 1
+Returning block of 4641653 for bucket 1
 Exited Ebwt loop
 fchr[A]: 0
-fchr[C]: 1368477
-fchr[G]: 2761687
-fchr[T]: 4159906
-fchr[$]: 5532158
+fchr[C]: 1142742
+fchr[G]: 2322833
+fchr[T]: 3500270
+fchr[$]: 4641652
 Exiting Ebwt::buildToDisk()
 Returning from initFromVector
-Wrote 6039197 bytes to primary EBWT file: EColi_bowtie.1.bt2
-Wrote 1383044 bytes to secondary EBWT file: EColi_bowtie.2.bt2
+Wrote 5741809 bytes to primary EBWT file: EColi_bowtie.1.bt2
+Wrote 1160420 bytes to secondary EBWT file: EColi_bowtie.2.bt2
 Re-opening _in1 and _in2 as input streams
 Returning from Ebwt constructor
 Headers:
-    len: 5532158
-    bwtLen: 5532159
-    sz: 1383040
-    bwtSz: 1383040
+    len: 4641652
+    bwtLen: 4641653
+    sz: 1160413
+    bwtSz: 1160414
     lineRate: 6
     offRate: 4
     offMask: 0xfffffff0
@@ -87,19 +87,19 @@ Headers:
     eftabSz: 80
     ftabLen: 1048577
     ftabSz: 4194308
-    offsLen: 345760
-    offsSz: 1383040
+    offsLen: 290104
+    offsSz: 1160416
     lineSz: 64
     sideSz: 64
     sideBwtSz: 48
     sideBwtLen: 192
-    numSides: 28814
-    numLines: 28814
-    ebwtTotLen: 1844096
-    ebwtTotSz: 1844096
+    numSides: 24176
+    numLines: 24176
+    ebwtTotLen: 1547264
+    ebwtTotSz: 1547264
     color: 0
     reverse: 0
-Total time for call to driver() for forward index: 00:00:01
+Total time for call to driver() for forward index: 00:00:00
 Reading reference sizes
   Time reading reference sizes: 00:00:00
 Calculating joined length
@@ -108,10 +108,10 @@ Reserving space for joined string
 Joining reference sequences
   Time to join reference sequences: 00:00:00
   Time to reverse reference sequence: 00:00:00
-bmax according to bmaxDivN setting: 1383039
-Using parameters --bmax 1037280 --dcv 1024
+bmax according to bmaxDivN setting: 1160413
+Using parameters --bmax 870310 --dcv 1024
   Doing ahead-of-time memory usage test
-  Passed!  Constructing with these parameters: --bmax 1037280 --dcv 1024
+  Passed!  Constructing with these parameters: --bmax 870310 --dcv 1024
 Constructing suffix-array element generator
 Building DifferenceCoverSample
   Building sPrime
@@ -135,33 +135,33 @@ Multikey QSorting 12 samples
 Calculating bucket sizes
 Splitting and merging
   Splitting and merging time: 00:00:00
-Avg bucket size: 5.53216e+06 (target: 1037279)
+Avg bucket size: 4.64165e+06 (target: 870309)
 Converting suffix-array elements to index image
 Allocating ftab, absorbFtab
 Entering Ebwt loop
 Getting block 1 of 1
   No samples; assembling all-inclusive block
-  Sorting block of length 5532158 for bucket 1
+  Sorting block of length 4641652 for bucket 1
   (Using difference cover)
-  Sorting block time: 00:00:00
-Returning block of 5532159 for bucket 1
+  Sorting block time: 00:00:01
+Returning block of 4641653 for bucket 1
 Exited Ebwt loop
 fchr[A]: 0
-fchr[C]: 1368477
-fchr[G]: 2761687
-fchr[T]: 4159906
-fchr[$]: 5532158
+fchr[C]: 1142742
+fchr[G]: 2322833
+fchr[T]: 3500270
+fchr[$]: 4641652
 Exiting Ebwt::buildToDisk()
 Returning from initFromVector
-Wrote 6039197 bytes to primary EBWT file: EColi_bowtie.rev.1.bt2
-Wrote 1383044 bytes to secondary EBWT file: EColi_bowtie.rev.2.bt2
+Wrote 5741809 bytes to primary EBWT file: EColi_bowtie.rev.1.bt2
+Wrote 1160420 bytes to secondary EBWT file: EColi_bowtie.rev.2.bt2
 Re-opening _in1 and _in2 as input streams
 Returning from Ebwt constructor
 Headers:
-    len: 5532158
-    bwtLen: 5532159
-    sz: 1383040
-    bwtSz: 1383040
+    len: 4641652
+    bwtLen: 4641653
+    sz: 1160413
+    bwtSz: 1160414
     lineRate: 6
     offRate: 4
     offMask: 0xfffffff0
@@ -170,16 +170,16 @@ Headers:
     eftabSz: 80
     ftabLen: 1048577
     ftabSz: 4194308
-    offsLen: 345760
-    offsSz: 1383040
+    offsLen: 290104
+    offsSz: 1160416
     lineSz: 64
     sideSz: 64
     sideBwtSz: 48
     sideBwtLen: 192
-    numSides: 28814
-    numLines: 28814
-    ebwtTotLen: 1844096
-    ebwtTotSz: 1844096
+    numSides: 24176
+    numLines: 24176
+    ebwtTotLen: 1547264
+    ebwtTotSz: 1547264
     color: 0
     reverse: 1
-Total time for backward call to driver() for mirror index: 00:00:00
+Total time for backward call to driver() for mirror index: 00:00:01

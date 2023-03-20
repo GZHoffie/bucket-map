@@ -1,7 +1,7 @@
 from Bio import SeqIO
 import math
 
-def read(fasta_file_name, bucket_length=262144):
+def read(fasta_file_name, bucket_length=65536):
     print("Opening FASTA file:", fasta_file_name)
     fasta_sequences = SeqIO.parse(open(fasta_file_name), 'fasta')
     total_buckets = 0
@@ -19,4 +19,4 @@ def read(fasta_file_name, bucket_length=262144):
     print("total number of references", num_references)
 
 if __name__ == "__main__":
-    read("/mnt/d/genome/GRCh38_latest_genomic.fasta")
+    read("/mnt/d/genome/GCA_000005845.2.fasta")

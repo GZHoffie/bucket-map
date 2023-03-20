@@ -15,10 +15,10 @@
 ||          Repeat threshold : 100 repeats                                    ||
 ||              Gapped index : yes                                            ||
 ||                                                                            ||
-||       Free / total memory : 5.1GB / 7.7GB                                  ||
+||       Free / total memory : 6.0GB / 7.7GB                                  ||
 ||                                                                            ||
 ||               Input files : 1 file in total                                ||
-||                             o GCA_900166955.1.fasta                        ||
+||                             o GCA_000005845.2.fasta                        ||
 ||                                                                            ||
 \\============================================================================//
 
@@ -28,30 +28,30 @@
 || No format issues were found                                                ||
 || Scan uninformative subreads in reference sequences ...                     ||
 || Estimate the index size...                                                 ||
-||    8%,   0 mins elapsed, rate=21032.6k bps/s                               ||
-||   16%,   0 mins elapsed, rate=22034.2k bps/s                               ||
-||   25%,   0 mins elapsed, rate=21356.2k bps/s                               ||
-||   33%,   0 mins elapsed, rate=21521.7k bps/s                               ||
-||   41%,   0 mins elapsed, rate=21422.1k bps/s                               ||
-||   50%,   0 mins elapsed, rate=21356.2k bps/s                               ||
-||   58%,   0 mins elapsed, rate=21450.5k bps/s                               ||
-||   66%,   0 mins elapsed, rate=21397.4k bps/s                               ||
-||   75%,   0 mins elapsed, rate=21356.2k bps/s                               ||
-||   83%,   0 mins elapsed, rate=21622.3k bps/s                               ||
-||   91%,   0 mins elapsed, rate=21567.4k bps/s                               ||
+||    8%,   0 mins elapsed, rate=22782.8k bps/s                               ||
+||   16%,   0 mins elapsed, rate=21517.0k bps/s                               ||
+||   24%,   0 mins elapsed, rate=22344.6k bps/s                               ||
+||   33%,   0 mins elapsed, rate=22452.6k bps/s                               ||
+||   41%,   0 mins elapsed, rate=22782.8k bps/s                               ||
+||   49%,   0 mins elapsed, rate=22561.5k bps/s                               ||
+||   58%,   0 mins elapsed, rate=22975.8k bps/s                               ||
+||   66%,   0 mins elapsed, rate=23296.6k bps/s                               ||
+||   74%,   0 mins elapsed, rate=23712.7k bps/s                               ||
+||   83%,   0 mins elapsed, rate=23907.8k bps/s                               ||
+||   91%,   0 mins elapsed, rate=24069.9k bps/s                               ||
 || 0.6 GB of memory is needed for index building.                             ||
 || Build the index...                                                         ||
-||    8%,   0 mins elapsed, rate=7463.2k bps/s                                ||
-||   16%,   0 mins elapsed, rate=9540.6k bps/s                                ||
-||   25%,   0 mins elapsed, rate=10516.3k bps/s                               ||
-||   33%,   0 mins elapsed, rate=10887.5k bps/s                               ||
-||   41%,   0 mins elapsed, rate=10861.9k bps/s                               ||
-||   50%,   0 mins elapsed, rate=11017.1k bps/s                               ||
-||   58%,   0 mins elapsed, rate=11169.1k bps/s                               ||
-||   66%,   0 mins elapsed, rate=11355.0k bps/s                               ||
-||   75%,   0 mins elapsed, rate=11316.5k bps/s                               ||
-||   83%,   0 mins elapsed, rate=11341.1k bps/s                               ||
-||   91%,   0 mins elapsed, rate=11386.8k bps/s                               ||
+||    8%,   0 mins elapsed, rate=6455.1k bps/s                                ||
+||   16%,   0 mins elapsed, rate=8703.5k bps/s                                ||
+||   24%,   0 mins elapsed, rate=10016.6k bps/s                               ||
+||   33%,   0 mins elapsed, rate=10467.8k bps/s                               ||
+||   41%,   0 mins elapsed, rate=10818.6k bps/s                               ||
+||   49%,   0 mins elapsed, rate=10961.5k bps/s                               ||
+||   58%,   0 mins elapsed, rate=11249.6k bps/s                               ||
+||   66%,   0 mins elapsed, rate=11433.4k bps/s                               ||
+||   74%,   0 mins elapsed, rate=11504.2k bps/s                               ||
+||   83%,   0 mins elapsed, rate=11561.4k bps/s                               ||
+||   91%,   0 mins elapsed, rate=11608.7k bps/s                               ||
 || Save current index block...                                                ||
 ||  [ 0.0% finished ]                                                         ||
 ||  [ 10.0% finished ]                                                        ||
@@ -65,7 +65,7 @@
 ||  [ 90.0% finished ]                                                        ||
 ||  [ 100.0% finished ]                                                       ||
 ||                                                                            ||
-||                      Total running time: 0.1 minutes.                      ||
+||                      Total running time: 0.0 minutes.                      ||
 ||                Index EColi_subread was successfully built.                 ||
 ||                                                                            ||
 \\============================================================================//
