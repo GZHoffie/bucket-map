@@ -17,8 +17,8 @@ struct cmd_arguments
     std::string index_indicator;
     std::filesystem::path output_sam_path{};
 
-    std::string mapper_seed_shape = "111111111";
-    std::string locator_seed_shape = "111111111";
+    unsigned int query_seed_length = 12;
+    unsigned int index_seed_length = 9;
 
     unsigned int max_read_length = 300;
 
@@ -63,20 +63,20 @@ void initialise_parser(sharg::parser & parser, cmd_arguments & args)
                                     .description = "The path to the output sam file.",
                                     .validator = sharg::output_file_validator{"sam"}});
     
-    parser.add_option(args.mapper_seed_shape,
-                      sharg::config{.short_id = 'm',
-                                    .long_id = "mapper-seed",
-                                    .description = "The shape of k-mer seed used in mapper, which assigns a read to its candidate bucket. Required to be symmetric."});
+    parser.add_option(args.index_seed_length,
+                      sharg::config{.short_id = 'k',
+                                    .long_id = "index-seed",
+                                    .description = "The length of k-mer used for indexing."});
     
     parser.add_option(args.average_base_quality,
                       sharg::config{.short_id = 'b',
                                     .long_id = "average-base-quality",
                                     .description = "The average base quality in the read."});
 
-    parser.add_option(args.locator_seed_shape,
+    parser.add_option(args.query_seed_length,
                       sharg::config{.short_id = 'l',
-                                    .long_id = "locator-seed",
-                                    .description = "The shape of k-mer seed used in locator, which finds a read's exact location within the bucket. Required to be symmetric."});
+                                    .long_id = "query-seed",
+                                    .description = "The length of k-mer used for querying in the mapper and the locator. Must be larger than the index seed length ('-k' option)."});
 
     parser.add_option(args.max_read_length,
                       sharg::config{.short_id = 'r',
@@ -156,14 +156,6 @@ int main(int argc, char ** argv) {
 
     std::filesystem::path data_path = "/mnt/d/genome";
     std::filesystem::path output_path = "/home/zhenhao/bucket-map/bucket_map/benchmark/output";
-    seqan3::shape bucket_shape = string_to_shape(args.mapper_seed_shape);
-    seqan3::shape locate_shape = string_to_shape(args.locator_seed_shape);
-    // only support non-spaced k-mers... for now.
-    if (!bucket_shape.all() || !locate_shape.all()) {
-        seqan3::debug_stream << "[ERROR]\t\tOnly non-spaced k-mers are supported for now.\n";
-        return -1;
-    }
-
 
     // build the indexer and mapper
 #if defined(BM_BUCKET_NUM) && defined(BM_BUCKET_LEN) && defined(BM_GENOME_PATH)
@@ -172,19 +164,23 @@ int main(int argc, char ** argv) {
     
     bucket_hash_indexer<BM_BUCKET_NUM> ind(BM_BUCKET_LEN, 
                                            args.max_read_length, 
-                                           bucket_shape, 
-                                           locate_shape);
+                                           args.index_seed_length);
     if (args.only_indexer) {
         ind.index(BM_GENOME_PATH, std::filesystem::current_path(), args.index_indicator);
         return 0;
     }
     if (args.output_sam_path.empty()) {
-        seqan3::debug_stream << "The output sam file is not set. Please set the output path using '-o' option.\n";
+        seqan3::debug_stream << "[ERROR]\t\tThe output sam file is not set. Please set the output path using '-o' option.\n";
+        return 1;
+    }
+    if (args.query_seed_length < args.index_seed_length) {
+        seqan3::debug_stream << "[ERROR]\t\tThe query seed length (currently set to " << args.query_seed_length <<  ") should be larger than"
+                             << "the index seed length (currently set to " << args.index_seed_length << ").\n";
         return 1;
     }
     q_gram_mapper<BM_BUCKET_NUM> map(BM_BUCKET_LEN, 
                                      args.max_read_length, 
-                                     bucket_shape, 
+                                     args.query_seed_length, 
                                      args.mapper_sample_size, 
                                      ceil(args.mapper_sample_size * args.allowed_seed_miss_rate),
                                      args.mapper_distinguishability_threshold,
@@ -193,7 +189,7 @@ int main(int argc, char ** argv) {
     bucket_locator loc(&ind, &map, 
                        BM_BUCKET_LEN, 
                        args.max_read_length, 
-                       locate_shape, 
+                       args.query_seed_length, 
                        args.allowed_seed_miss_rate, 
                        args.locator_allowed_indel_rate,
                        args.locator_sample_size,

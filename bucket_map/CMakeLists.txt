@@ -79,6 +79,7 @@ FetchContent_Declare(sharg
 )
 FetchContent_MakeAvailable(sharg)
 
+
 #FetchContent_Declare(parasail
 #  GIT_REPOSITORY https://github.com/jeffdaily/parasail.git
 #  GIT_TAG        master
@@ -120,7 +121,7 @@ target_link_libraries(generate_dataset PUBLIC seqan3::seqan3)
 
 # build app with seqan3
 add_executable(mapper_test mapper_test.cpp ${SHARED_FILES})
-target_link_libraries(mapper_test PUBLIC seqan3::seqan3)
+target_link_libraries(mapper_test PUBLIC seqan3::seqan3 cuco)
 
 
 add_executable(fastq_analyzer benchmark/fastq_analyzer.cpp ${SHARED_FILES})
@@ -131,7 +132,7 @@ target_link_libraries(fastq_analyzer PUBLIC seqan3::seqan3)
 
 add_executable(bucketmap main.cpp ${SHARED_FILES})
 target_compile_definitions(bucketmap PRIVATE ${BM_DEFINITIONS})
-target_link_libraries(bucketmap PUBLIC seqan3::seqan3 sharg::sharg)
+target_link_libraries(bucketmap PUBLIC seqan3::seqan3 sharg::sharg cuco)
 
 add_executable(bucketmap_align main.cpp ${SHARED_FILES})
 target_compile_definitions(bucketmap_align PRIVATE BM_ALIGN ${BM_DEFINITIONS})

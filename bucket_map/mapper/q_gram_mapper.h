@@ -186,9 +186,8 @@ template<unsigned int NUM_BUCKETS>
 class q_gram_mapper : public mapper {
 private:
     // q-gram index related information
-    seqan3::shape q_gram_shape;
     std::vector<std::bitset<NUM_BUCKETS>> q_grams_index;
-    unsigned int q;
+    unsigned int k; // query seed length
     unsigned int size;
 
     // bucket index related information
@@ -256,7 +255,7 @@ private:
 
 
 public:
-    q_gram_mapper(unsigned int bucket_len, unsigned int read_len, seqan3::shape shape, 
+    q_gram_mapper(unsigned int bucket_len, unsigned int read_len, unsigned int query_seed_length, 
                   unsigned int samples, unsigned int fault, float distinguishability,
                   unsigned int quality_threshold = 35, 
                   unsigned int num_candidate_buckets = 30) : mapper() {
@@ -264,9 +263,7 @@ public:
         bucket_length = bucket_len;
         read_length = read_len;
         
-        q_gram_shape = shape;
-        size = std::ranges::size(shape);
-        q = shape.count();
+        k = unsigned int query_seed_length;
         
         num_samples = samples;
         num_fault_tolerance = fault;
@@ -328,7 +325,7 @@ public:
     }
 
 
-    std::vector<int> query(const std::vector<int>& q_gram_hash) {
+    std::vector<unsigned int> query(const std::vector<unsigned int>& q_gram_hash) {
         /**
          * @brief From `q_grams_index`, determine where the sequence may be coming from.
          * @param q_gram_hash the vector containing all hash values of q-grams in the
@@ -371,8 +368,8 @@ public:
         std::vector<int> candidates_rev_comp;
         
         // get satisfactory k-mers that passes through quality filter and distinguishability filter
-        auto kmers = sequence | seqan3::views::kmer_hash(q_gram_shape);
-        auto kmer_qualities = quality | seqan3::views::kmer_quality(q_gram_shape);
+        auto kmers = sequence | seqan3::views::kmer_hash(seqan3::ungapped{k});
+        auto kmer_qualities = quality | seqan3::views::kmer_quality(seqan3::ungapped{k});
         //_high_quality_kmers(quality);
         std::vector<unsigned int> qualities(kmer_qualities.begin(), kmer_qualities.end());
         int num_kmers = kmers.size();
@@ -406,7 +403,7 @@ public:
 
         // query the reverse complements of the sampled k-mers
         auto samples_rev_comp = samples_orig | std::views::transform([&](unsigned int hash) {
-            return hash_reverse_complement(hash, q);
+            return hash_reverse_complement(hash, k);
         });
         std::vector<int> samples_rev_comp_vec(samples_rev_comp.begin(), samples_rev_comp.end());
         candidates_rev_comp = query(samples_rev_comp_vec);

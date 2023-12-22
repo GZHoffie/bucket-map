@@ -32,10 +32,8 @@ protected:
     std::string EXTENSION;                               // file name extension for the perticular indexer
 
     // q-gram index related information
-    seqan3::shape q_gram_shape;
     std::vector<std::bitset<NUM_BUCKETS>> q_grams_index;
     unsigned int q;
-    unsigned int size;
 
 
     void _insert_into_bucket(const seqan3::bitpacked_sequence<seqan3::dna4>& sequence, unsigned int bucket_num) {
@@ -46,7 +44,7 @@ protected:
          *                   between 0 and NUM_BUCKETS - 1.
          */
         // Extract all q_grams from sequence
-        for (auto && value : sequence | seqan3::views::kmer_hash(q_gram_shape)) {
+        for (auto && value : sequence | seqan3::views::kmer_hash(seqan3::ungapped{q})) {
             q_grams_index[value].set(bucket_num);
         }
     }
@@ -114,16 +112,13 @@ protected:
     }
 
 public:
-    bucket_indexer(unsigned int bucket_len, unsigned int read_len, seqan3::shape shape) : indexer() {
+    bucket_indexer(unsigned int bucket_len, unsigned int read_len, unsigned int index_seed_length) : indexer() {
         bucket_length = bucket_len;
         read_length = read_len;
 
         // q-gram index related information
-        q_gram_shape = shape;
-        size = std::ranges::size(shape);
-        q = shape.count();
-        seqan3::debug_stream << "[INFO]\t\t" << "Set q-gram shape to be: " 
-                             << shape << " with number of effective characters: " << q << '\n';
+        q = index_seed_length;
+        seqan3::debug_stream << "[INFO]\t\t" << "Set index seed length to be: " << q << '.\n';
     }
 
     virtual ~bucket_indexer() = default;
@@ -186,8 +181,6 @@ public:
          * @brief Release the memory storing the sequences and index.
          * 
          */
-        //bucket_seq.clear();
-        //bucket_seq.shrink_to_fit();
         bucket_id.clear();
         bucket_id.shrink_to_fit();
         q_grams_index.clear();
