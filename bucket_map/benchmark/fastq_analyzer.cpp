@@ -86,5 +86,5 @@ public:
 
 int main() {
     fastq_analyzer analyzer(20);
-    analyzer.read("/mnt/d/genome/TS1.81.90.001.fq");
+    analyzer.read("/home/guzh/data/mapping/GCA_022991725.1_PDT001286877.1_genomic.fna");
 }

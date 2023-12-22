@@ -36,12 +36,12 @@ private:
     unsigned int allowed_max_candidate_buckets;
     std::vector<std::bitset<NUM_BUCKETS>> filters;
 
-    std::vector<int> _set_bits(int index) {
+    std::vector<unsigned int> _set_bits(int index) {
         /**
          * @brief Find all set bits in filters[index]
          * @param index indicates which filter we want to check.
          */
-        std::vector<int> res;
+        std::vector<unsigned int> res;
         if (index >= num_fault_tolerance || index < 0) {
             seqan3::debug_stream << "[ERROR]\t\t" << "The input index "
                                  << index << " exceeds the fault tolerance level." << '\n';
@@ -49,7 +49,7 @@ private:
         } else if (filters[index].none()) {
             return res;
         }
-        for (int i = filters[index]._Find_first(); i < NUM_BUCKETS; i = filters[index]._Find_next(i)) {
+        for (unsigned int i = filters[index]._Find_first(); i < NUM_BUCKETS; i = filters[index]._Find_next(i)) {
             res.push_back(i);
         }
         return res;
@@ -67,7 +67,7 @@ public:
     }
 
     void reset() {
-        for (int i = 0; i < num_fault_tolerance; i++) {
+        for (unsigned int i = 0; i < num_fault_tolerance; i++) {
             filters[i].set();
         }
     }
@@ -87,12 +87,12 @@ public:
         filters[num_fault_tolerance - 1] &= input;
     }
 
-    std::vector<int> best_results() {
+    std::vector<unsigned int> best_results() {
         /**
          * @brief Return the buckets that contains the most number of k-mers.
          */
-        std::vector<int> res;
-        for (int i = num_fault_tolerance-1; i >= 0; i--) {
+        std::vector<unsigned int> res;
+        for (unsigned int i = num_fault_tolerance-1; i >= 0; i--) {
             res = _set_bits(i);
             if (!res.empty()) {
                 return res;
@@ -101,12 +101,12 @@ public:
         return res;
     }
 
-    std::vector<int> ok_results() {
+    std::vector<unsigned int> ok_results() {
         /**
          * @brief Return the best `allowed_max_candidate_buckets` buckets.
          */
-        std::vector<int> res;
-        for (int i = num_fault_tolerance-1; i >= 0; i--) {
+        std::vector<unsigned int> res;
+        for (unsigned int i = num_fault_tolerance-1; i >= 0; i--) {
             if (i == 0 || (filters[i-1].count() > allowed_max_candidate_buckets && filters[i].count() != 0)) {
                 res = _set_bits(i);
                 return res;
@@ -187,7 +187,9 @@ class q_gram_mapper : public mapper {
 private:
     // q-gram index related information
     std::vector<std::bitset<NUM_BUCKETS>> q_grams_index;
-    unsigned int k; // query seed length
+    uint8_t q; // index seed length
+    uint8_t k; // query seed length
+    unsigned int Q_BITS; // bits representing the length of q-gram, used to find q-grams contained in a k-mer
     unsigned int size;
 
     // bucket index related information
@@ -238,7 +240,7 @@ private:
         for (auto & qual: quality) {
             if (qual.to_rank() >= min_base_quality) {
                 consecutive_high_quality_base++;
-                if (consecutive_high_quality_base >= q) {
+                if (consecutive_high_quality_base >= k) {
                     high_quality_kmers.push_back(true);
                     continue;
                 }
@@ -246,16 +248,17 @@ private:
                 consecutive_high_quality_base = 0;
             }
             index++;
-            if (index >= q) {
+            if (index >= k) {
                 high_quality_kmers.push_back(false);
             }
         }
-        assert(high_quality_kmers.size() == quality.size() - q + 1);
+        assert(high_quality_kmers.size() == quality.size() - k + 1);
     }
 
 
 public:
-    q_gram_mapper(unsigned int bucket_len, unsigned int read_len, unsigned int query_seed_length, 
+    q_gram_mapper(unsigned int bucket_len, unsigned int read_len, 
+                  uint8_t query_seed_length, uint8_t index_seed_length,
                   unsigned int samples, unsigned int fault, float distinguishability,
                   unsigned int quality_threshold = 35, 
                   unsigned int num_candidate_buckets = 30) : mapper() {
@@ -263,7 +266,9 @@ public:
         bucket_length = bucket_len;
         read_length = read_len;
         
-        k = unsigned int query_seed_length;
+        k = query_seed_length;
+        q = index_seed_length;
+        Q_BITS = pow(2, q) - 1;
         
         num_samples = samples;
         num_fault_tolerance = fault;
@@ -272,7 +277,7 @@ public:
         // initialize filter
         filter = new fault_tolerate_filter<NUM_BUCKETS>(num_fault_tolerance, num_candidate_buckets);
         dist_filter = new distinguishability_filter<NUM_BUCKETS>(distinguishability);
-        min_base_quality = quality_threshold * q;
+        min_base_quality = quality_threshold * k;
 
         // Initialize sampler
         sampler = new Sampler(num_samples);
@@ -325,33 +330,41 @@ public:
     }
 
 
-    std::vector<unsigned int> query(const std::vector<unsigned int>& q_gram_hash) {
+    std::vector<unsigned int> query(const std::vector<unsigned int>& kmer_hash) {
         /**
          * @brief From `q_grams_index`, determine where the sequence may be coming from.
-         * @param q_gram_hash the vector containing all hash values of q-grams in the
-         *                    query sequence.
+         * @param kmer_hash the vector containing all hash values of k-mers in the
+         *                  query sequence.
          * @returns a vector of integers indicating the possible regions that the sequence
          *          may belong to.
          */
         // q_grams_index should not be empty
         if (q_grams_index.empty()) {
             seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram index is empty. Cannot accept query.\n";
-            std::vector<int> res;
+            std::vector<unsigned int> res;
             return res;
         }
         // Reset the filter
         filter->reset();
 
-        // insert those samples into the filter
-        for (int h : q_gram_hash) {
-            filter->read(q_grams_index[h]);
+        // insert sampled k-mers into the filter
+        for (unsigned int h : kmer_hash) {
+            // find the buckets that contains all the smaller q-grams in the k-mer
+            std::bitset<NUM_BUCKETS> bf_res;
+            bf_res.set();
+
+            for (unsigned int i = 0; i <= k - q; i++) {
+                unsigned int q_gram_hash = (h >> (2 * i)) & Q_BITS;
+                bf_res &= q_grams_index[q_gram_hash];
+            }
+            filter->read(bf_res);
         }
         return filter->best_results();
         //return filter->all_results();
         //return filter->ok_results();
     }
 
-    std::pair<std::vector<int>, std::vector<int>> 
+    std::pair<std::vector<unsigned int>, std::vector<unsigned int>> 
     query_sequence(const std::vector<seqan3::dna4>& sequence,
                    const std::vector<seqan3::phred94>& quality) {
         /**
@@ -364,8 +377,8 @@ public:
          *          reverse complementing.
          */
         // initialize results
-        std::vector<int> candidates_orig;
-        std::vector<int> candidates_rev_comp;
+        std::vector<unsigned int> candidates_orig;
+        std::vector<unsigned int> candidates_rev_comp;
         
         // get satisfactory k-mers that passes through quality filter and distinguishability filter
         auto kmers = sequence | seqan3::views::kmer_hash(seqan3::ungapped{k});
@@ -374,19 +387,19 @@ public:
         std::vector<unsigned int> qualities(kmer_qualities.begin(), kmer_qualities.end());
         int num_kmers = kmers.size();
 
-        auto good_kmers = std::ranges::iota_view{0, num_kmers} | std::views::filter([&](unsigned int i) {
+        auto good_kmers = std::ranges::iota_view{0, num_kmers} | std::views::filter([&](int i) {
                               return dist_filter->is_highly_distinguishable(kmers[i]) && qualities[i] >= min_base_quality;
-                          }) | std::views::transform([&](unsigned int i) {
-                              return kmers[i];
+                          }) | std::views::transform([&](int i) {
+                              return (unsigned int)kmers[i];
                           });
-        std::vector<int> hash_values(good_kmers.begin(), good_kmers.end());
+        std::vector<unsigned int> hash_values(good_kmers.begin(), good_kmers.end());
 
         // if not enough q-grams ramained to determine the exact location, simply ignore this query sequence.
         if (hash_values.size() < 0.2 * num_samples){
             return std::make_pair(candidates_orig, candidates_rev_comp);
         }
 
-        std::vector<int> samples_orig;
+        std::vector<unsigned int> samples_orig;
         /*
         // Randomly sample `num_samples` q-grams for query.
         std::sample(hash_values.begin(), hash_values.end(), 
@@ -405,7 +418,7 @@ public:
         auto samples_rev_comp = samples_orig | std::views::transform([&](unsigned int hash) {
             return hash_reverse_complement(hash, k);
         });
-        std::vector<int> samples_rev_comp_vec(samples_rev_comp.begin(), samples_rev_comp.end());
+        std::vector<unsigned int> samples_rev_comp_vec(samples_rev_comp.begin(), samples_rev_comp.end());
         candidates_rev_comp = query(samples_rev_comp_vec);
         if (candidates_orig.size() > allowed_max_candidate_buckets) {
             candidates_orig.clear();
@@ -473,13 +486,13 @@ public:
     }
 
 
-    std::vector<std::vector<int>> _query_file(std::filesystem::path sequence_file) {
+    std::vector<std::vector<unsigned int>> _query_file(std::filesystem::path sequence_file) {
         /**
          * * This function is just for benchmarking.
          * @brief Read a query fastq file and output the bucket ids each query belongs to.
          * TODO: include the quality information for fastq.
          */
-        std::vector<std::vector<int>> res;
+        std::vector<std::vector<unsigned int>> res;
         seqan3::sequence_file_input<_phred94_traits> fin{sequence_file};
         Timer clock;
         clock.tick();
@@ -495,7 +508,7 @@ public:
         return res;
     }
 
-    void _check_ground_truth(const std::vector<std::vector<int>>& query_results, std::filesystem::path ground_truth_file) {
+    void _check_ground_truth(const std::vector<std::vector<unsigned int>>& query_results, std::filesystem::path ground_truth_file) {
         /**
          * * This function is just for benchmarking.
          * @brief Check the performance of query results against the ground truth.

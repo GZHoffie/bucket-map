@@ -9,7 +9,6 @@
 #include <seqan3/alignment/cigar_conversion/cigar_from_alignment.hpp>
 #include <seqan3/alignment/configuration/all.hpp>
 #include <seqan3/alignment/pairwise/align_pairwise.hpp>
-#include <seqan3/argument_parser/all.hpp>
 #include <seqan3/io/sam_file/output.hpp>
 #include <seqan3/io/sequence_file/input.hpp>
 #include <seqan3/search/all.hpp>
@@ -101,9 +100,7 @@ private:
     unsigned int read_length;
     unsigned int min_base_quality;
     std::vector<bool> high_quality_kmers;
-    seqan3::shape q_gram_shape;
-    unsigned int k; //size of k-mer
-    unsigned int kmer_span; //span of spaced k-mer
+    uint8_t k; //size of k-mer
 
     // Parameters for verification
     int allowed_mismatch;
@@ -143,7 +140,7 @@ private:
         index.clear();
         // insert the k-mers.
         int offset = 0;
-        for (auto hash : seq | seqan3::views::kmer_hash(q_gram_shape)) {
+        for (auto hash : seq | seqan3::views::kmer_hash(seqan3::ungapped{k})) {
             // Only record the last appearance of the k-mer
             index.emplace(hash, offset);
             offset++;
@@ -210,7 +207,7 @@ private:
             unsigned int current_kmer = *(record + i), current_index = *(index + i);
             if (reverse_complement) {
                 current_kmer = hash_reverse_complement(current_kmer, k);
-                current_index = length - kmer_span - current_index;
+                current_index = length - k - current_index;
             }
             auto range = bucket_kmer_index.equal_range(current_kmer);
             for (auto it = range.first; it != range.second; ++it) {
@@ -256,8 +253,8 @@ private:
         seqan3::sequence_file_input<_phred94_traits> fastq_file{sequence_file};
 
         for (auto & rec : fastq_file) {
-            auto kmers = rec.sequence() | seqan3::views::kmer_hash(q_gram_shape);
-            auto kmer_qualities = rec.base_qualities() | seqan3::views::kmer_quality(q_gram_shape);
+            auto kmers = rec.sequence() | seqan3::views::kmer_hash(seqan3::ungapped{k});
+            auto kmer_qualities = rec.base_qualities() | seqan3::views::kmer_quality(seqan3::ungapped{k});
 
             int num_kmers = kmers.size();
 
@@ -293,15 +290,13 @@ private:
 
 public:
     bucket_locator(indexer* ind, mapper* map, unsigned int bucket_len, 
-                   unsigned int read_len, seqan3::shape shape, 
+                   unsigned int read_len, uint8_t seed_len, 
                    float mismatch_rate, float indel_rate, 
                    unsigned int sample_size, unsigned int quality_threshold) : locator(ind) {
         _m = map;
         bucket_length = bucket_len;
         read_length = read_len;
-        q_gram_shape = shape;
-        k = shape.count();
-        kmer_span = std::ranges::size(shape);
+        k = seed_len;
 
         allowed_mismatch = ceil(mismatch_rate * sample_size);
         allowed_indel = ceil(indel_rate * sample_size);
@@ -554,6 +549,7 @@ public:
 
         // create k-mer index
         std::unordered_multimap<unsigned int, int> bucket_kmer_index;
+        bucket_kmer_index.reserve(BM_BUCKET_LEN);
 
         for (int i = 0; i < sequence_ids_orig.size(); i++) {
             auto & bucket_sequence_orig = sequence_ids_orig[i];

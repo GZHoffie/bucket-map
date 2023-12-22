@@ -33,7 +33,7 @@ protected:
 
     // q-gram index related information
     std::vector<std::bitset<NUM_BUCKETS>> q_grams_index;
-    unsigned int q;
+    uint8_t q;
 
 
     void _insert_into_bucket(const seqan3::bitpacked_sequence<seqan3::dna4>& sequence, unsigned int bucket_num) {
@@ -102,7 +102,7 @@ protected:
                              << index_directory / (indicator + ".bucket_id") << ".\n";
     }
 
-    void _init_qgram_index(unsigned int q) {
+    void _init_qgram_index() {
         // initialize q_gram index
         int total_q_grams = (int) pow(4, q);
         for (int i = 0; i < total_q_grams; i++) {
@@ -112,13 +112,13 @@ protected:
     }
 
 public:
-    bucket_indexer(unsigned int bucket_len, unsigned int read_len, unsigned int index_seed_length) : indexer() {
+    bucket_indexer(unsigned int bucket_len, unsigned int read_len, uint8_t index_seed_length) : indexer() {
         bucket_length = bucket_len;
         read_length = read_len;
 
         // q-gram index related information
         q = index_seed_length;
-        seqan3::debug_stream << "[INFO]\t\t" << "Set index seed length to be: " << q << '.\n';
+        seqan3::debug_stream << "[INFO]\t\t" << "Set index seed length to be: " << q << ".\n";
     }
 
     virtual ~bucket_indexer() = default;
@@ -148,7 +148,7 @@ public:
         clock.tick();
 
         // initialize index
-        _init_qgram_index(q);
+        _init_qgram_index();
 
         unsigned int bucket_num = 0;
         auto operation = [&](const seqan3::bitpacked_sequence<seqan3::dna4>& seq, const std::string& id) {
@@ -170,7 +170,7 @@ public:
 
         clock.tock();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for creating and storing index files: " 
-                             << clock.elapsed_seconds() << " s." << '\n';
+                             << clock.elapsed_seconds() << " s.\n";
 
         // Create and store 
         return bucket_id.size();

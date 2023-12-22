@@ -17,8 +17,8 @@ struct cmd_arguments
     std::string index_indicator;
     std::filesystem::path output_sam_path{};
 
-    unsigned int query_seed_length = 12;
-    unsigned int index_seed_length = 9;
+    uint8_t query_seed_length = 12;
+    uint8_t index_seed_length = 9;
 
     unsigned int max_read_length = 300;
 
@@ -181,6 +181,7 @@ int main(int argc, char ** argv) {
     q_gram_mapper<BM_BUCKET_NUM> map(BM_BUCKET_LEN, 
                                      args.max_read_length, 
                                      args.query_seed_length, 
+                                     args.index_seed_length,
                                      args.mapper_sample_size, 
                                      ceil(args.mapper_sample_size * args.allowed_seed_miss_rate),
                                      args.mapper_distinguishability_threshold,
