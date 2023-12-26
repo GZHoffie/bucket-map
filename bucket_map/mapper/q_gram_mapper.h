@@ -268,7 +268,8 @@ public:
         
         k = query_seed_length;
         q = index_seed_length;
-        Q_BITS = pow(2, q) - 1;
+        Q_BITS = pow(4, q) - 1;
+        seqan3::debug_stream << "[INFO]\t\tSet query seed length to be " << k << ", and index seed length " << q << ".\n";
         
         num_samples = samples;
         num_fault_tolerance = fault;
@@ -354,7 +355,8 @@ public:
             bf_res.set();
 
             for (unsigned int i = 0; i <= k - q; i++) {
-                unsigned int q_gram_hash = (h >> (2 * i)) & Q_BITS;
+                unsigned int q_gram_hash = ((h >> (2 * i)) & Q_BITS);
+                //seqan3::debug_stream << q_gram_hash << "\n";
                 bf_res &= q_grams_index[q_gram_hash];
             }
             filter->read(bf_res);
@@ -382,7 +384,9 @@ public:
         
         // get satisfactory k-mers that passes through quality filter and distinguishability filter
         auto kmers = sequence | seqan3::views::kmer_hash(seqan3::ungapped{k});
+        seqan3::debug_stream << kmers << "\n.";
         auto kmer_qualities = quality | seqan3::views::kmer_quality(seqan3::ungapped{k});
+        seqan3::debug_stream << kmer_qualities << "\n.";
         //_high_quality_kmers(quality);
         std::vector<unsigned int> qualities(kmer_qualities.begin(), kmer_qualities.end());
         int num_kmers = kmers.size();

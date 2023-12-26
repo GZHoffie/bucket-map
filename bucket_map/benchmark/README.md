@@ -14,7 +14,7 @@ We write down how we download the read mapping tools for future reference. We al
   or from source
   ```bash
   git clone https://github.com/BenLangmead/bowtie2.git
-  cd bwa; make
+  cd bowtie2; make
   echo "export PATH=\${PATH}:$(pwd)" >> ~/.bashrc
   ```
 
@@ -32,6 +32,7 @@ We write down how we download the read mapping tools for future reference. We al
   git clone https://github.com/ShiLab-Bioinformatics/subread.git
   cd subread/src
   make -f Makefile.Linux
+  cd ..
   echo "export PATH=\${PATH}:$(pwd)/bin" >> ~/.bashrc
   ```
 
@@ -48,6 +49,19 @@ After adding everything to `.bashrc`, we can run
 source ~/.bashrc
 ```
 to use the binaries by their names directly.
+
+## Dataset generation
+
+```bash
+python3 gen_reads.py -r /home/guzh/data/mapping/GCA_022991725.1_PDT001286877.1_genomic.fna -R 150 -o simulated_data --bam --vcf
+
+# Convert BAM file to SAM file
+samtools index simulated_data_golden.bam
+samtools view -h -o simulated_data_golden.sam simulated_data_golden.bam
+
+# Decompress fq.gz file
+zcat simulated_data_read1.fq.gz >> simulated_data_read1.fq
+```
 
 ## Benchmarking Time & Memory Usage
 To benchmark the time and memory usage, we mainly use Linux's [`time`](https://man7.org/linux/man-pages/man1/time.1.html) command. An example usage is

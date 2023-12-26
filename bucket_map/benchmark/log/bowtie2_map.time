@@ -1,21 +1,21 @@
-	Command being timed: "bowtie2 -x EColi_bowtie -U /mnt/d/genome/DRR035999.fastq -S /home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam"
-	User time (seconds): 196.40
-	System time (seconds): 2.52
-	Percent of CPU this job got: 98%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 3:21.23
+	Command being timed: "bowtie2 -x EColi_bowtie -U /home/guzh/neat-genreads/simulated_data_read1.fq -S /home/guzh/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam"
+	User time (seconds): 54.70
+	System time (seconds): 0.58
+	Percent of CPU this job got: 201%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:27.44
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 30520
+	Maximum resident set size (kbytes): 28084
 	Average resident set size (kbytes): 0
 	Major (requiring I/O) page faults: 0
-	Minor (reclaiming a frame) page faults: 6632
-	Voluntary context switches: 31347
-	Involuntary context switches: 223
+	Minor (reclaiming a frame) page faults: 6889
+	Voluntary context switches: 12366
+	Involuntary context switches: 67
 	Swaps: 0
-	File system inputs: 8
-	File system outputs: 1688680
+	File system inputs: 0
+	File system outputs: 301456
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0

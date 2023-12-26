@@ -1,8 +1,8 @@
-[M::main::0.041*1.20] loaded/built the index for 1 target sequence(s)
-[M::mm_mapopt_update::0.051*1.16] mid_occ = 12
-[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 1
-[M::mm_idx_stat::0.058*1.14] distinct minimizers: 838542 (98.18% are singletons); average occurrences: 1.034; average spacing: 5.352; total length: 4641652
-[M::worker_pipeline::40.979*2.58] mapped 1302395 sequences
-[M::main] Version: 2.24-r1150-dirty
-[M::main] CMD: minimap2 -a EColi_minimap.mmi /mnt/d/genome/DRR035999.fastq
-[M::main] Real time: 40.984 sec; CPU: 105.929 sec; Peak RSS: 1.043 GB
+[M::main::0.050*1.09] loaded/built the index for 133 target sequence(s)
+[M::mm_mapopt_update::0.062*1.07] mid_occ = 10
+[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 133
+[M::mm_idx_stat::0.072*1.06] distinct minimizers: 979931 (97.75% are singletons); average occurrences: 1.027; average spacing: 5.352; total length: 5387493
+[M::worker_pipeline::4.910*2.71] mapped 352436 sequences
+[M::main] Version: 2.26-r1175
+[M::main] CMD: minimap2 -a EColi_minimap.mmi /home/guzh/neat-genreads/simulated_data_read1.fq
+[M::main] Real time: 4.914 sec; CPU: 13.303 sec; Peak RSS: 0.233 GB

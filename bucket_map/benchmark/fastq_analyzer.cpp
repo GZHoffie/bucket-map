@@ -86,5 +86,5 @@ public:
 
 int main() {
     fastq_analyzer analyzer(20);
-    analyzer.read("/home/guzh/data/mapping/GCA_022991725.1_PDT001286877.1_genomic.fna");
+    analyzer.read("/home/guzh/neat-genreads/simulated_data_read1.fq");
 }

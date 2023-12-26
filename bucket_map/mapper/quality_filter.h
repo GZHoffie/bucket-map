@@ -74,11 +74,6 @@ public:
      */
     explicit kmer_quality_view(urng_t urange_, shape const & s_) : urange{std::move(urange_)}, shape_{s_}
     {
-        if (shape_.count() > (64 / std::log2(alphabet_size<std::ranges::range_reference_t<urng_t>>)))
-        {
-            throw std::invalid_argument{"The chosen shape/alphabet combination is not valid. "
-                                        "The alphabet or shape size must be reduced."};
-        }
     }
 
     /*!\brief Construct from a non-view that can be view-wrapped and a given shape.
@@ -92,11 +87,6 @@ public:
         urange{std::views::all(std::forward<rng_t>(urange_))},
         shape_{s_}
     {
-        if (shape_.count() > (64 / std::log2(alphabet_size<std::ranges::range_reference_t<urng_t>>)))
-        {
-            throw std::invalid_argument{"The chosen shape/alphabet combination is not valid. "
-                                        "The alphabet or shape size must be reduced."};
-        }
     }
     //!\}
 
@@ -288,7 +278,7 @@ public:
         // distance(text_left, text_right) = 2
         if (shape_.size() <= std::ranges::distance(text_left, text_right) + 1)
         {
-            roll_factor = pow(sigma, static_cast<size_t>(std::ranges::size(shape_) - 1));
+            roll_factor = 1;
             hash_full();
         }
     }
@@ -331,7 +321,7 @@ public:
         // distance(text_left, text_right) = 2
         if (shape_.size() <= std::ranges::distance(text_left, it_end) + 1)
         {
-            roll_factor = pow(sigma, static_cast<size_t>(std::ranges::size(shape_) - 1));
+            roll_factor = 1;
             hash_full();
         }
 
