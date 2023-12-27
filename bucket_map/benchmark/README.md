@@ -53,14 +53,18 @@ to use the binaries by their names directly.
 ## Dataset generation
 
 ```bash
-python3 gen_reads.py -r /home/guzh/data/mapping/GCA_022991725.1_PDT001286877.1_genomic.fna -R 150 -o simulated_data --bam --vcf
+DATASET_NAME=ecoli_simulated
+python ~/neat-genreads/gen_reads.py -r GCF_001890245.1_ASM189024v1_genomic.fna -R150 -o ${DATASET_NAME} --bam
 
 # Convert BAM file to SAM file
-samtools index simulated_data_golden.bam
-samtools view -h -o simulated_data_golden.sam simulated_data_golden.bam
+samtools index ${DATASET_NAME}_golden.bam
+samtools view -h -o ${DATASET_NAME}_golden.sam ${DATASET_NAME}_golden.bam
 
 # Decompress fq.gz file
-zcat simulated_data_read1.fq.gz >> simulated_data_read1.fq
+zcat ${DATASET_NAME}_read1.fq.gz >> ${DATASET_NAME}_read1.fq
+
+# Remove spaces in the simulated read names
+~/bucket-map/bucket_map/benchmark/rename_reads.sh ${DATASET_NAME}_read1.fq >> ${DATASET_NAME}_read1_renamed.fq
 ```
 
 ## Benchmarking Time & Memory Usage

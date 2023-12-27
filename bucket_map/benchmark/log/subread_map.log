@@ -1,1 +1,81 @@
-/usr/bin/time: cannot run subread-align: No such file or directory
+
+        ==========     _____ _    _ ____  _____  ______          _____  
+        =====         / ____| |  | |  _ \|  __ \|  ____|   /\   |  __ \ 
+          =====      | (___ | |  | | |_) | |__) | |__     /  \  | |  | |
+            ====      \___ \| |  | |  _ <|  _  /|  __|   / /\ \ | |  | |
+              ====    ____) | |__| | |_) | | \ \| |____ / ____ \| |__| |
+        ==========   |_____/ \____/|____/|_|  \_\______/_/    \_\_____/
+	  v2.0.6
+
+//================================= setting ==================================\\
+||                                                                            ||
+|| Function      : Read alignment (DNA-Seq)                                   ||
+|| Input file    : ecoli_simulated_read1_renamed.fq                           ||
+|| Output file   : subread_map.sam (SAM)                                      ||
+|| Index name    : EColi_subread                                              ||
+||                                                                            ||
+||                    ------------------------------------                    ||
+||                                                                            ||
+||                               Threads : 1                                  ||
+||                          Phred offset : 33                                 ||
+||                             Min votes : 3 / 10                             ||
+||                        Max mismatches : 3                                  ||
+||                      Max indel length : 5                                  ||
+||            Report multi-mapping reads : no                                 ||
+|| Max alignments per multi-mapping read : 1                                  ||
+||                                                                            ||
+\\============================================================================//
+
+//=============== Running (27-Dec-2023 17:20:51, pid=1184981) ================\\
+||                                                                            ||
+|| Check the input reads.                                                     ||
+|| The input file contains base space reads.                                  ||
+|| Initialise the memory objects.                                             ||
+|| Estimate the mean read length.                                             ||
+|| The range of Phred scores observed in the data is [1,38]                   ||
+|| Create the output SAM file.                                                ||
+|| Check the index.                                                           ||
+|| Init the voting space.                                                     ||
+|| Global environment is initialised.                                         ||
+|| Load the 1-th index block...                                               ||
+|| The index block has been loaded.                                           ||
+|| Start read mapping in chunk.                                               ||
+||    1% completed, 0.0 mins elapsed, rate=74.1k reads per second             ||
+||    8% completed, 0.0 mins elapsed, rate=73.3k reads per second             ||
+||   15% completed, 0.0 mins elapsed, rate=73.5k reads per second             ||
+||   21% completed, 0.1 mins elapsed, rate=72.4k reads per second             ||
+||   28% completed, 0.1 mins elapsed, rate=71.9k reads per second             ||
+||   35% completed, 0.1 mins elapsed, rate=71.9k reads per second             ||
+||   41% completed, 0.1 mins elapsed, rate=72.4k reads per second             ||
+||   48% completed, 0.1 mins elapsed, rate=72.6k reads per second             ||
+||   55% completed, 0.1 mins elapsed, rate=71.6k reads per second             ||
+||   61% completed, 0.1 mins elapsed, rate=71.2k reads per second             ||
+||   69% completed, 0.1 mins elapsed, rate=43.4k reads per second             ||
+||   73% completed, 0.1 mins elapsed, rate=42.7k reads per second             ||
+||   76% completed, 0.1 mins elapsed, rate=42.0k reads per second             ||
+||   79% completed, 0.1 mins elapsed, rate=41.3k reads per second             ||
+||   83% completed, 0.1 mins elapsed, rate=40.7k reads per second             ||
+||   86% completed, 0.1 mins elapsed, rate=40.3k reads per second             ||
+||   89% completed, 0.1 mins elapsed, rate=39.9k reads per second             ||
+||   93% completed, 0.1 mins elapsed, rate=39.6k reads per second             ||
+||   96% completed, 0.2 mins elapsed, rate=39.3k reads per second             ||
+||                                                                            ||
+||                           Completed successfully.                          ||
+||                                                                            ||
+\\====================================    ====================================//
+
+//================================   Summary =================================\\
+||                                                                            ||
+||                 Total reads : 367738                                       ||
+||                      Mapped : 342141 (93.0%)                               ||
+||             Uniquely mapped : 342141                                       ||
+||               Multi-mapping : 0                                            ||
+||                                                                            ||
+||                    Unmapped : 25597                                        ||
+||                                                                            ||
+||                      Indels : 2401                                         ||
+||                                                                            ||
+||                Running time : 0.2 minutes                                  ||
+||                                                                            ||
+\\============================================================================//
+

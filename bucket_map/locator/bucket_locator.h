@@ -75,7 +75,6 @@ public:
 
     void push_back(index_t read_len, const std::vector<index_t>& kmer_indices, const std::vector<kmer_hash_t>& kmer_samples) {
         // check the size of the two vectors
-        seqan3::debug_stream << kmer_indices.size() << " " << kmers.size() << " " << s << "\n";
         assert(kmer_indices.size() == s && kmer_samples.size() == s);
 
         // insert the contents into the class

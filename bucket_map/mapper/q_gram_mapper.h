@@ -92,7 +92,7 @@ public:
          * @brief Return the buckets that contains the most number of k-mers.
          */
         std::vector<unsigned int> res;
-        for (unsigned int i = num_fault_tolerance-1; i >= 0; i--) {
+        for (int i = num_fault_tolerance-1; i >= 0; i--) {
             res = _set_bits(i);
             if (!res.empty()) {
                 return res;
@@ -142,16 +142,21 @@ class distinguishability_filter {
      */
 private:
     unsigned int threshold;
+    unsigned int k, q;
+    unsigned int Q_BITS;
 
 public:
     std::vector<unsigned int> zeros;
 
-    distinguishability_filter(float distinguishability) {
+    distinguishability_filter(float distinguishability, unsigned int index_seed, unsigned int query_seed) {
         /**
          * @brief Initializer of the filter.
          * @param distinguishability the percentage of zeros in the bitset for each Q-gram.
          */
         threshold = (unsigned int) (distinguishability * NUM_BUCKETS);
+        q = index_seed;
+        k = query_seed;
+        Q_BITS = pow(4, q) - 1;
     }
 
     void read(const std::vector<std::bitset<NUM_BUCKETS>>& q_grams_index) {
@@ -173,7 +178,11 @@ public:
     }
 
     bool is_highly_distinguishable(unsigned int kmer_hash) {
-        return zeros[kmer_hash] >= threshold;
+        for (unsigned int i = 0; i <= k - q; i++) {
+            unsigned int h = ((kmer_hash >> (2 * i)) & Q_BITS);
+                if (zeros[h] >= threshold) return true;
+            }
+        return false;
     }
 };
 
@@ -277,7 +286,7 @@ public:
 
         // initialize filter
         filter = new fault_tolerate_filter<NUM_BUCKETS>(num_fault_tolerance, num_candidate_buckets);
-        dist_filter = new distinguishability_filter<NUM_BUCKETS>(distinguishability);
+        dist_filter = new distinguishability_filter<NUM_BUCKETS>(distinguishability, q, k);
         min_base_quality = quality_threshold * k;
 
         // Initialize sampler
@@ -353,10 +362,8 @@ public:
             // find the buckets that contains all the smaller q-grams in the k-mer
             std::bitset<NUM_BUCKETS> bf_res;
             bf_res.set();
-
             for (unsigned int i = 0; i <= k - q; i++) {
                 unsigned int q_gram_hash = ((h >> (2 * i)) & Q_BITS);
-                //seqan3::debug_stream << q_gram_hash << "\n";
                 bf_res &= q_grams_index[q_gram_hash];
             }
             filter->read(bf_res);
@@ -384,9 +391,7 @@ public:
         
         // get satisfactory k-mers that passes through quality filter and distinguishability filter
         auto kmers = sequence | seqan3::views::kmer_hash(seqan3::ungapped{k});
-        seqan3::debug_stream << kmers << "\n.";
         auto kmer_qualities = quality | seqan3::views::kmer_quality(seqan3::ungapped{k});
-        seqan3::debug_stream << kmer_qualities << "\n.";
         //_high_quality_kmers(quality);
         std::vector<unsigned int> qualities(kmer_qualities.begin(), kmer_qualities.end());
         int num_kmers = kmers.size();

@@ -1,1 +1,72 @@
-/usr/bin/time: cannot run subread-buildindex: No such file or directory
+
+        ==========     _____ _    _ ____  _____  ______          _____  
+        =====         / ____| |  | |  _ \|  __ \|  ____|   /\   |  __ \ 
+          =====      | (___ | |  | | |_) | |__) | |__     /  \  | |  | |
+            ====      \___ \| |  | |  _ <|  _  /|  __|   / /\ \ | |  | |
+              ====    ____) | |__| | |_) | | \ \| |____ / ____ \| |__| |
+        ==========   |_____/ \____/|____/|_|  \_\______/_/    \_\_____/
+	  v2.0.6
+
+//================================= setting ==================================\\
+||                                                                            ||
+||                Index name : EColi_subread                                  ||
+||               Index space : base space                                     ||
+||                    Memory : 8000 Mbytes                                    ||
+||          Repeat threshold : 100 repeats                                    ||
+||              Gapped index : yes                                            ||
+||                                                                            ||
+||       Free / total memory : 4.2GB / 7.6GB                                  ||
+||                                                                            ||
+||               Input files : 1 file in total                                ||
+||                             o GCF_001890245.1_ASM189024v1_genomic.fna      ||
+||                                                                            ||
+\\============================================================================//
+
+//================================= Running ==================================\\
+||                                                                            ||
+|| Check the integrity of provided reference sequences ...                    ||
+|| No format issues were found                                                ||
+|| Scan uninformative subreads in reference sequences ...                     ||
+|| Estimate the index size...                                                 ||
+||    8%,   0 mins elapsed, rate=16141.7k bps/s                               ||
+||   16%,   0 mins elapsed, rate=22290.9k bps/s                               ||
+||   24%,   0 mins elapsed, rate=25533.2k bps/s                               ||
+||   33%,   0 mins elapsed, rate=27946.7k bps/s                               ||
+||   41%,   0 mins elapsed, rate=29627.2k bps/s                               ||
+||   49%,   0 mins elapsed, rate=30528.8k bps/s                               ||
+||   58%,   0 mins elapsed, rate=31207.3k bps/s                               ||
+||   66%,   0 mins elapsed, rate=31736.2k bps/s                               ||
+||   74%,   0 mins elapsed, rate=32160.2k bps/s                               ||
+||   83%,   0 mins elapsed, rate=32734.9k bps/s                               ||
+||   91%,   0 mins elapsed, rate=33007.7k bps/s                               ||
+|| 0.9 GB of memory is needed for index building.                             ||
+|| Build the index...                                                         ||
+||    8%,   0 mins elapsed, rate=3805.8k bps/s                                ||
+||   16%,   0 mins elapsed, rate=6040.1k bps/s                                ||
+||   24%,   0 mins elapsed, rate=7430.3k bps/s                                ||
+||   33%,   0 mins elapsed, rate=8549.9k bps/s                                ||
+||   41%,   0 mins elapsed, rate=9399.8k bps/s                                ||
+||   49%,   0 mins elapsed, rate=10066.9k bps/s                               ||
+||   58%,   0 mins elapsed, rate=10604.4k bps/s                               ||
+||   66%,   0 mins elapsed, rate=11014.3k bps/s                               ||
+||   74%,   0 mins elapsed, rate=11386.4k bps/s                               ||
+||   83%,   0 mins elapsed, rate=11702.7k bps/s                               ||
+||   91%,   0 mins elapsed, rate=11947.1k bps/s                               ||
+|| Save current index block...                                                ||
+||  [ 0.0% finished ]                                                         ||
+||  [ 10.0% finished ]                                                        ||
+||  [ 20.0% finished ]                                                        ||
+||  [ 30.0% finished ]                                                        ||
+||  [ 40.0% finished ]                                                        ||
+||  [ 50.0% finished ]                                                        ||
+||  [ 60.0% finished ]                                                        ||
+||  [ 70.0% finished ]                                                        ||
+||  [ 80.0% finished ]                                                        ||
+||  [ 90.0% finished ]                                                        ||
+||  [ 100.0% finished ]                                                       ||
+||                                                                            ||
+||                      Total running time: 0.1 minutes.                      ||
+||                Index EColi_subread was successfully built.                 ||
+||                                                                            ||
+\\============================================================================//
+

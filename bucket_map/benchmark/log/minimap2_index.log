@@ -1,8 +1,8 @@
-[M::mm_idx_gen::0.136*0.97] collected minimizers
-[M::mm_idx_gen::0.166*1.32] sorted minimizers
-[M::main::0.205*1.26] loaded/built the index for 133 target sequence(s)
-[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 133
-[M::mm_idx_stat::0.216*1.25] distinct minimizers: 979931 (97.75% are singletons); average occurrences: 1.027; average spacing: 5.352; total length: 5387493
+[M::mm_idx_gen::0.100*1.01] collected minimizers
+[M::mm_idx_gen::0.129*1.41] sorted minimizers
+[M::main::0.159*1.33] loaded/built the index for 2 target sequence(s)
+[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 2
+[M::mm_idx_stat::0.168*1.31] distinct minimizers: 973930 (96.25% are singletons); average occurrences: 1.077; average spacing: 5.349; total length: 5608872
 [M::main] Version: 2.26-r1175
-[M::main] CMD: minimap2 -d EColi_minimap.mmi /home/guzh/data/mapping/GCA_022991725.1_PDT001286877.1_genomic.fna
-[M::main] Real time: 0.221 sec; CPU: 0.275 sec; Peak RSS: 0.050 GB
+[M::main] CMD: minimap2 -d EColi_minimap.mmi /home/zhenhao/data/mapping/GCF_001890245.1_ASM189024v1_genomic.fna
+[M::main] Real time: 0.172 sec; CPU: 0.225 sec; Peak RSS: 0.058 GB

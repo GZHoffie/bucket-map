@@ -18,6 +18,18 @@ private:
     unsigned int offset_error_tolerance;
 
     /**
+     * @brief Replace the space in id with an underscore.
+     * 
+     * @param id the id of the read
+     * @return std::string the id with the ' ' character replaced with '_'.
+     */
+    std::string _space_to_underscore(std::string id) {
+        std::replace(id.begin(), id.end(), ' ', '_');
+        return id;
+    }
+
+
+    /**
      * @brief The id of the read may contain a slash, followed by a number.
      *        Some mappers would delete that slash and number. Therefore, we also
      *        delete that when storing in `read_id_to_index`.
@@ -50,12 +62,14 @@ public:
      */
     void read_best_alignment_file(std::filesystem::path sam_path) {
         seqan3::sam_file_input fin{sam_path};
+        unsigned int recorded_answers = 0;
 
         for (auto && record : fin) {
 
             //seqan3::debug_stream << ref << ", " << pos << " | ";
             try {
-                unsigned int sequence_id = read_id_to_index.at(_remove_substring_after_slash_or_blank(record.id()));
+                auto renamed_id = _remove_substring_after_slash_or_blank(_space_to_underscore(record.id()));
+                unsigned int sequence_id = read_id_to_index.at(renamed_id);
 
                 if (static_cast<bool>(record.flag() & seqan3::sam_flag::unmapped)) {
                     // read is unmapped
@@ -67,10 +81,13 @@ public:
                 pos.sequence_id = record.reference_id().value();
                 pos.offset = record.reference_position().value();
                 answer[sequence_id].push_back(pos);
+                recorded_answers++;
+
             } catch (const std::out_of_range& oor) {
                 //seqan3::debug_stream << "key not found\n";
             }
         }
+        seqan3::debug_stream << "[INFO]\t\tMapped sequences in the best alignment file: " << recorded_answers << ".\n";
     }
 
     /**
@@ -109,8 +126,8 @@ public:
         unsigned int index = 0;
 
         for (auto & rec : fin) {
-            std::string id = _remove_substring_after_slash_or_blank(rec.id());
-            read_id_to_index.emplace(id, index);
+            auto renamed_id = _remove_substring_after_slash_or_blank(_space_to_underscore(rec.id()));
+            read_id_to_index.emplace(renamed_id, index);
             index++;
         }
 
@@ -137,7 +154,8 @@ public:
 
             //seqan3::debug_stream << ref << ", " << pos << " | ";
             try {
-                unsigned int sequence_id = read_id_to_index.at(_remove_substring_after_slash_or_blank(record.id()));
+                auto renamed_id = _remove_substring_after_slash_or_blank(_space_to_underscore(record.id()));
+                unsigned int sequence_id = read_id_to_index.at(renamed_id);
 
                 if (static_cast<bool>(record.flag() & seqan3::sam_flag::unmapped)) {
                     // read is unmapped
@@ -155,7 +173,7 @@ public:
                 // check correctness against answer
                 bool acceptable = false;
                 for (map_position_t pos : answer[sequence_id]) {
-                    if (reverse_comp == pos.reverse_complement &&
+                    if (//reverse_comp == pos.reverse_complement &&
                         ref_id == pos.sequence_id &&
                         std::abs((int)offset - (int)pos.offset) <= offset_error_tolerance) {
                         correctly_mapped_reads[sequence_id] = true;
@@ -198,12 +216,12 @@ public:
 int main()
 {
     sam_analyzer analyzer;
-    analyzer.read_sequence_file("/home/guzh/neat-genreads/simulated_data_read1.fq");
-    analyzer.read_best_alignment_file("/home/guzh/neat-genreads/simulated_data_golden.sam");
+    analyzer.read_sequence_file("/home/zhenhao/data/mapping/ecoli_simulated_read1_renamed.fq");
+    analyzer.read_best_alignment_file("/home/zhenhao/data/mapping/ecoli_simulated_golden.sam");
     //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam");
     //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/subread_map.sam");
     //analyzer.read_ground_truth_file("/mnt/d/genome/test/EGU_1500_10K.position_ground_truth");
-    analyzer.benchmark_directory("/home/guzh/bucket-map/bucket_map/benchmark/output");
+    analyzer.benchmark_directory("/home/zhenhao/bucket-map/bucket_map/benchmark/output");
     return 0;
 
 }

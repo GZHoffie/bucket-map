@@ -1,11 +1,16 @@
 [INFO]		Not using Smith-Waterman for alignment verifications.
-[INFO]		Initializing indexer and mapper with bucket length: 65536, and number of buckets: 186.
+[INFO]		Initializing indexer and mapper with bucket length: 65536, and number of buckets: 87.
 [INFO]		Set index seed length to be: 9.
-[INFO]		Set query seed length to be 10, and index seed length 9.
-[ERROR]		The specified file already exists in directory: "/home/guzh/bucket-map/bucket_map/benchmark/index/EColi_bucketmap.qgram".
-[BENCHMARK]	Number of Q-grams with distinguishability >= 0.5: 262144 (100%).
-[BENCHMARK]	Elapsed time for loading index files: 0.104 s.
-[INFO]		Successfully loaded "/home/guzh/bucket-map/bucket_map/benchmark/index/EColi_bucketmap.qgram".
-[344049,327621,261908,1047634,1044808,1033504,988291,807438,84027,336111,295869,134903,539614,61304,245217,980870,777753,1013861,909718,493145,924007,550301,104053,416215,616286,367995,423407,645054,483067,883694,389051,507631,981950,782073,1031141,978837,769621,981335,779615,1021309,939508,612305,352070,359706,390250,512426,1001128,858784,289411,109068,436272,696513,688900,658449,536645,49430,197723,790892,17841,71364,285457,93254,373017,443494,725401,804455,72093,288373,104917,419668,630098,423243,644397,480438,873178,346984,339361,308868,186898,747593,893222,427163,660077,543156,75475,301901,159030,636120,447331,740750,865849,317669,222103,888414,407929,583140,235408,941633,620806,386074,495722,934314,591531,268974,27320,109283,437135,699967,702718,713723,757742,933817,589541,261012,1044050,1030472,976160,758913,938502,608281,335974,295321,132710,530841,26213,104854,419417,629095,419228,628336,416193,616198,367641,421989,639383,460383,792957,26100,104401,417606,621850]
-.[321,318,328,319,325,330,314,304,299,299,297,289,268,298,299,292,309,323,331,332,335,343,365,365,359,368,367,356,356,355,355,356,355,353,360,348,349,361,360,361,361,362,363,355,354,366,365,343,326,317,308,309,308,318,318,318,303,321,318,327,336,329,316,316,311,309,323,325,346,346,343,349,363,348,354,356,358,359,359,358,361,361,361,376,377,377,371,365,365,361,361,360,360,346,344,343,343,349,346,351,347,346,345,358,360,361,348,349,351,351,352,354,355,351,348,341,360,356,341,341,343,342,342,346,348,355,355,359,371,345,345,347,344,340,334,334,333,333,321,347,347]
-.
+[INFO]		Set query seed length to be 13, and index seed length 9.
+[ERROR]		The specified file already exists in directory: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/EColi_bucketmap.qgram".
+[BENCHMARK]	Number of Q-grams with distinguishability >= 0.494253: 252000 (96.1304%).
+[BENCHMARK]	Elapsed time for loading index files: 0.068 s.
+[INFO]		Successfully loaded "/home/zhenhao/bucket-map/bucket_map/benchmark/index/EColi_bucketmap.qgram".
+[BENCHMARK]	Elapsed time for bucket mapping: 2.275 s (6.18647 μs/seq).
+[BENCHMARK]	Number of reads that have at least one candidate bucket: 367736  (99.9995%).
+[BENCHMARK]	Average number of buckets an original read is mapped to: 1.07117.
+[BENCHMARK]	Average number of buckets a reverse complement of the read is mapped to: 0.112559.
+[BENCHMARK]	Total time used for building k-mer index for each bucket: 0.171 s.
+[BENCHMARK]	Total time used for finding exact location of the sequences: 0.715 s (1.94432 μs/seq).
+[BENCHMARK]	Total mapped locations: 421088 (1.14508 per sequence).
+[BENCHMARK]	Total time used for alignment verification and output: 0.38 s (0.902424 μs per pairwise alignment).

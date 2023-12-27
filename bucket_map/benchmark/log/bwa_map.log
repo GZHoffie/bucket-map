@@ -1,16 +1,16 @@
 [M::bwa_idx_load_from_disk] read 0 ALT contigs
 [M::process] read 66668 sequences (10000200 bp)...
 [M::process] read 66668 sequences (10000200 bp)...
-[M::mem_process_seqs] Processed 66668 reads in 2.851 CPU sec, 2.819 real sec
+[M::mem_process_seqs] Processed 66668 reads in 2.423 CPU sec, 2.404 real sec
 [M::process] read 66668 sequences (10000200 bp)...
-[M::mem_process_seqs] Processed 66668 reads in 3.048 CPU sec, 2.988 real sec
+[M::mem_process_seqs] Processed 66668 reads in 2.989 CPU sec, 2.934 real sec
 [M::process] read 66668 sequences (10000200 bp)...
-[M::mem_process_seqs] Processed 66668 reads in 2.897 CPU sec, 2.828 real sec
+[M::mem_process_seqs] Processed 66668 reads in 2.747 CPU sec, 2.704 real sec
 [M::process] read 66668 sequences (10000200 bp)...
-[M::mem_process_seqs] Processed 66668 reads in 2.948 CPU sec, 2.890 real sec
-[M::process] read 19096 sequences (2864400 bp)...
-[M::mem_process_seqs] Processed 66668 reads in 2.960 CPU sec, 2.929 real sec
-[M::mem_process_seqs] Processed 19096 reads in 1.017 CPU sec, 0.994 real sec
+[M::mem_process_seqs] Processed 66668 reads in 2.421 CPU sec, 2.378 real sec
+[M::process] read 34398 sequences (5159700 bp)...
+[M::mem_process_seqs] Processed 66668 reads in 2.353 CPU sec, 2.322 real sec
+[M::mem_process_seqs] Processed 34398 reads in 1.259 CPU sec, 1.243 real sec
 [main] Version: 0.7.17-r1198-dirty
-[main] CMD: bwa mem EColi_bwa /home/guzh/neat-genreads/simulated_data_read1.fq
-[main] Real time: 15.641 sec; CPU: 15.792 sec
+[main] CMD: bwa mem EColi_bwa /home/zhenhao/data/mapping/ecoli_simulated_read1_renamed.fq
+[main] Real time: 14.087 sec; CPU: 14.257 sec

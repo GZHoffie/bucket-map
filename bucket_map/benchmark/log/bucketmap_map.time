@@ -1,22 +1,21 @@
-Command terminated by signal 11
-	Command being timed: "bucketmap --version-check 0 -r 160 -s 30 -e 0.6 -l 10 -i EColi_bucketmap -q /home/guzh/neat-genreads/simulated_data_read1.fq -o /home/guzh/bucket-map/bucket_map/benchmark/output/bucketmap_map.sam"
-	User time (seconds): 0.11
-	System time (seconds): 0.00
-	Percent of CPU this job got: 88%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.12
+	Command being timed: "bucketmap --version-check 0 -r 160 -s 30 -p 20 -e 0.6 -l 13 -i EColi_bucketmap -q /home/zhenhao/data/mapping/ecoli_simulated_read1_renamed.fq -o /home/zhenhao/bucket-map/bucket_map/benchmark/output/bucketmap_map.sam"
+	User time (seconds): 4.33
+	System time (seconds): 0.25
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:04.60
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 14044
+	Maximum resident set size (kbytes): 77936
 	Average resident set size (kbytes): 0
 	Major (requiring I/O) page faults: 0
-	Minor (reclaiming a frame) page faults: 2254
-	Voluntary context switches: 106
-	Involuntary context switches: 1
+	Minor (reclaiming a frame) page faults: 7482
+	Voluntary context switches: 1
+	Involuntary context switches: 7
 	Swaps: 0
 	File system inputs: 0
-	File system outputs: 8
+	File system outputs: 355728
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0
