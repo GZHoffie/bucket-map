@@ -301,5 +301,12 @@ unsigned int hash_reverse_complement(unsigned int hash_value, unsigned int k) {
     return hash_rev_comp;
 }
 
+/**
+ * @brief Record the information of the segment taken from the longer/paired-end read.
+ * first argument indicate the read id, and the second indicate where the segment is located inside the read.
+ */
+typedef std::pair<unsigned int, int> segment_info_t;
+
+typedef std::vector<std::vector<segment_info_t>> segments_t;
 
 #endif

@@ -24,7 +24,7 @@ public:
      *          of the reads that are mapped to the bucket. In the first vector stores the read that can be mapped directly,
      *          while the second vector is the reads that need to be reverse complemented.
      */
-    virtual std::pair<std::vector<std::vector<unsigned int>>, std::vector<std::vector<unsigned int>>>
+    virtual std::pair<segments_t, segments_t>
     map(std::filesystem::path const & sequence_file) = 0;
 
     /**

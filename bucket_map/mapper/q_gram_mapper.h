@@ -222,6 +222,7 @@ private:
 
     // sampling k-mers
     Sampler* sampler;
+    Sampler* segment_sampler;
 
     std::bitset<NUM_BUCKETS> _bitset_from_bytes(const std::vector<char>& buf) {
         /**
@@ -270,7 +271,8 @@ public:
                   uint8_t query_seed_length, uint8_t index_seed_length,
                   unsigned int samples, unsigned int fault, float distinguishability,
                   unsigned int quality_threshold = 35, 
-                  unsigned int num_candidate_buckets = 30) : mapper() {
+                  unsigned int num_candidate_buckets = 30,
+                  unsigned int num_segment_samples = 5) : mapper() {
         // initialize private variables
         bucket_length = bucket_len;
         read_length = read_len;
@@ -291,12 +293,14 @@ public:
 
         // Initialize sampler
         sampler = new Sampler(num_samples);
+        segment_sampler = new Sampler(num_segment_samples);
     }
 
     ~q_gram_mapper() {
         delete filter;
         delete dist_filter;
         delete sampler;
+        delete segment_sampler;
     }
 
 
@@ -441,8 +445,7 @@ public:
     }
 
 
-
-    std::pair<std::vector<std::vector<unsigned int>>, std::vector<std::vector<unsigned int>>>
+    std::pair<segments_t, segments_t>
     map(std::filesystem::path const & sequence_file) {
         /**
          * @brief Read a query fastq file and output the ids of the sequence that are mapped 
@@ -454,30 +457,54 @@ public:
         
         seqan3::sequence_file_input<_phred94_traits> fin{sequence_file};
         // initialize returning result
-        std::vector<std::vector<unsigned int>> res_orig;
-        std::vector<std::vector<unsigned int>> res_rev_comp;
+        segments_t res_orig;
+        segments_t res_rev_comp;
         for (int i = 0; i < NUM_BUCKETS; i++) {
-            std::vector<unsigned int> sequence_ids_orig;
+            std::vector<segment_info_t> sequence_ids_orig;
             res_orig.push_back(sequence_ids_orig);
-            std::vector<unsigned int> sequence_ids_rev_comp;
+            std::vector<segment_info_t> sequence_ids_rev_comp;
             res_rev_comp.push_back(sequence_ids_rev_comp);
         }
 
         Timer clock;
         clock.tick();
         for (auto & rec : fin) {
-            // find if read is present in the buckets
-            auto [buckets_orig, buckets_rev_comp] = query_sequence(rec.sequence(), rec.base_qualities());
-            for (auto & b : buckets_orig) {
-                res_orig[b].push_back(num_records);
+            bool mapped;
+
+            // the positions of the read where we want to query.
+            std::vector<unsigned int> starting_positions{0};
+
+            // if long read, break it down into several shorter reads.
+            if (rec.sequence().size() > 2 * read_length) {
+                segment_sampler->sample_deterministically(rec.sequence().size() - read_length - 1);
+                starting_positions = segment_sampler->samples;
             }
-            for (auto & b_ : buckets_rev_comp) {
-                res_rev_comp[b_].push_back(num_records);
+            for (auto i : starting_positions) {
+                // copy the segment of length read_length
+                //TODO: optimize this by not copying the segment, but simply indicate the range.
+                auto begin = rec.sequence().begin() + i;
+                auto end = rec.sequence().begin() + std::min(i + read_length, (unsigned int)rec.sequence().size());
+                seqan3::dna4_vector segment_sequence(begin, end);
+                std::vector<seqan3::phred94> segment_quality(begin, end);
+
+                // find if the segment is present in the buckets
+                auto [buckets_orig, buckets_rev_comp] = query_sequence(rec.sequence(), rec.base_qualities());
+                segment_info_t seg{num_records, (int)i};
+                for (auto & b : buckets_orig) {
+                    res_orig[b].push_back(seg);
+                }
+                for (auto & b_ : buckets_rev_comp) {
+                    res_rev_comp[b_].push_back(seg);
+                }
+                if (!buckets_orig.empty() || !buckets_rev_comp.empty()) {
+                    mapped = true;
+                    num_buckets_orig += buckets_orig.size();
+                    num_buckets_rev_comp += buckets_rev_comp.size();
+                }
             }
-            if (!buckets_orig.empty() || !buckets_rev_comp.empty()) {
+
+            if (mapped) {
                 ++mapped_reads;
-                num_buckets_orig += buckets_orig.size();
-                num_buckets_rev_comp += buckets_rev_comp.size();
             }
             ++num_records;
         }
