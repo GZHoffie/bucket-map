@@ -482,10 +482,10 @@ public:
             for (auto i : starting_positions) {
                 // copy the segment of length read_length
                 //TODO: optimize this by not copying the segment, but simply indicate the range.
-                auto begin = rec.sequence().begin() + i;
-                auto end = rec.sequence().begin() + std::min(i + read_length, (unsigned int)rec.sequence().size());
-                seqan3::dna4_vector segment_sequence(begin, end);
-                std::vector<seqan3::phred94> segment_quality(begin, end);
+                auto begin = i;
+                auto end = std::min(i + read_length, (unsigned int)rec.sequence().size());
+                seqan3::dna4_vector segment_sequence(rec.sequence().begin() + begin, rec.sequence().begin() + end);
+                std::vector<seqan3::phred94> segment_quality(rec.base_qualities().begin() + begin, rec.base_qualities().begin() + end);
 
                 // find if the segment is present in the buckets
                 auto [buckets_orig, buckets_rev_comp] = query_sequence(rec.sequence(), rec.base_qualities());

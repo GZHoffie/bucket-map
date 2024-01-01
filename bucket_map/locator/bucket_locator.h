@@ -53,7 +53,7 @@ public:
      * 
      * @param segment_id the index of sequence in the storage type.
      */
-    std::vector<kmer_hash_t>& get_samples(segment_info_t segment_id) {
+    std::vector<kmer_hash_t>& get_samples(const segment_info_t& segment_id) {
         unsigned int segment_index = segment_to_index[segment_id];
         return kmers[segment_index];
     }
@@ -63,7 +63,7 @@ public:
      * 
      * @param segment_id the index of sequence in the storage type.
      */
-    std::vector<index_t>& get_indices(segment_info_t segment_id) {
+    std::vector<index_t>& get_indices(const segment_info_t& segment_id) {
         unsigned int segment_index = segment_to_index[segment_id];
         return indices[segment_index];
     }
@@ -73,13 +73,15 @@ public:
         return read_length[sequence_id];
     }
 
-    void push_back(segment_info_t segment_id, const std::vector<index_t>& kmer_indices, const std::vector<kmer_hash_t>& kmer_samples) {
+    void push_back(const segment_info_t& segment_id, const std::vector<index_t>& kmer_indices, const std::vector<kmer_hash_t>& kmer_samples) {
         // check the size of the two vectors
         assert(kmer_indices.size() == s && kmer_samples.size() == s);
+    
 
         indices.push_back(kmer_indices);
         kmers.push_back(kmer_samples);
         segment_to_index[segment_id] = current_index;
+        
         current_index++;
     }
 
@@ -204,10 +206,11 @@ private:
 
         // record the possible starting positions
         std::unordered_set<unsigned int> votes;
+        std::vector<unsigned int> mapped_positions;
 
         for (unsigned int i = 0; i < num_samples; i++) {
             // find the positions of the k-mer
-            unsigned int current_kmer = record[i], current_index = index[i] + std::get<1>(segment);
+            unsigned int current_kmer = record[i], current_index = index[i];
             if (reverse_complement) {
                 current_kmer = hash_reverse_complement(current_kmer, k);
                 current_index = length - k - current_index;
@@ -215,7 +218,8 @@ private:
             auto range = bucket_kmer_index.equal_range(current_kmer);
             for (auto it = range.first; it != range.second; ++it) {
                 votes.clear();
-                auto position = it->second - current_index;
+                auto position = it->second - current_index + std::get<1>(segment);
+                mapped_positions.push_back(position);
                 for (int indel = -allowed_indel; indel <= allowed_indel; indel++) {
                     votes.emplace(position + indel);
                 }
@@ -233,18 +237,10 @@ private:
                                         });
             if (max->second >= num_samples - allowed_mismatch && max->first >= 0) {
                 // This position is a good fit... Now find where the segment starts
-                for (unsigned int i = 0; i < num_samples; i++) {
-                    unsigned int current_kmer = record[i], current_index = index[i] + std::get<1>(segment);
-                    if (reverse_complement) {
-                        current_kmer = hash_reverse_complement(current_kmer, k);
-                        current_index = length - k - current_index;
-                    }
-                    auto range = bucket_kmer_index.equal_range(current_kmer);
-                    for (auto it = range.first; it != range.second; ++it) {
-                        auto position = it->second - current_index;
-                        if (position <= max->first + allowed_indel && position >= max->first - allowed_indel) {
-                            return std::make_pair(position, max->second);
-                        }
+                for (unsigned int i = 0; i < mapped_positions.size(); i++) {
+                    auto position = mapped_positions[i];
+                    if (position <= max->first + allowed_indel && position >= max->first - allowed_indel) {
+                        return std::make_pair(position, max->second);
                     }
                 }
                 return std::make_pair(max->first, max->second);
@@ -270,32 +266,26 @@ private:
                 starting_positions = segment_sampler->samples;
             }
 
+            // break the read down into k-mers
+            auto kmers = rec.sequence() | seqan3::views::kmer_hash(seqan3::ungapped{k});
+            auto kmer_qualities = rec.sequence() | seqan3::views::kmer_quality(seqan3::ungapped{k});
+
             for (auto i : starting_positions) {
                 // copy the segment of length read_length
-                //TODO: optimize this by not copying the segment, but simply indicate the range.
-                auto begin = rec.sequence().begin() + i;
-                auto end = rec.sequence().begin() + std::min(i + read_length, (unsigned int)rec.sequence().size());
-                seqan3::dna4_vector segment_sequence(begin, end);
-                std::vector<seqan3::phred94> segment_quality(begin, end);
-
-                // break down into k-mers
-                auto kmers = segment_sequence | seqan3::views::kmer_hash(seqan3::ungapped{k});
-                auto kmer_qualities = segment_quality | seqan3::views::kmer_quality(seqan3::ungapped{k});
-
-                int num_kmers = kmers.size();
+                int num_kmers = std::min(i + read_length, (unsigned int)rec.sequence().size()) - i - k + 1;
 
                 // filter out low-quality k-mers
-                auto good_kmers = std::ranges::iota_view{0, num_kmers} | std::views::filter([&](unsigned int i) {
-                                      return kmer_qualities[i] >= min_base_quality;
+                auto good_kmers = std::ranges::iota_view{0, num_kmers} | std::views::filter([&](unsigned int j) {
+                                      return kmer_qualities[j + i] >= min_base_quality;
                                   });
                 // sample kmers
                 std::vector<uint16_t> good_indices(good_kmers.begin(), good_kmers.end());
                 if (good_indices.empty()) { // consider all k-mers if none of the kmers are high-quality.
-                    for (uint16_t i = 0; i < num_kmers; i++) good_indices.push_back(i);
+                    for (uint16_t j = 0; j < num_kmers; j++) good_indices.push_back(j + i);
                 }
                 sampler->sample_deterministically(good_indices.size() - 1);
-                auto sampled_indices = sampler->samples | std::views::transform([&](unsigned int i) { return good_indices[i]; });
-                auto selected_kmers = sampled_indices | std::views::transform([&](unsigned int i) { return kmers[i]; });
+                auto sampled_indices = sampler->samples | std::views::transform([&](unsigned int j) { return good_indices[j + i]; });
+                auto selected_kmers = sampled_indices | std::views::transform([&](unsigned int j) { return kmers[j + i]; });
 
                 // convert to vectors and store them
                 std::vector<uint16_t> sampled_indices_vec(sampled_indices.begin(), sampled_indices.end());
@@ -306,6 +296,8 @@ private:
 
             // store the read length as well
             records->push_back_length(rec.sequence().size());
+
+            read_index++;
         }
         
 
@@ -323,7 +315,7 @@ public:
         read_length = read_len;
         k = seed_len;
 
-        allowed_mismatch = ceil(mismatch_rate * read_len);
+        allowed_mismatch = ceil(mismatch_rate * sample_size);
         allowed_indel = ceil(indel_rate * read_len);
 
         // random number generator
