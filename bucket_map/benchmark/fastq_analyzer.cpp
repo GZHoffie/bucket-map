@@ -85,6 +85,6 @@ public:
 
 
 int main() {
-    fastq_analyzer analyzer(20);
-    analyzer.read("/home/zhenhao/data/mapping/ecoli_simulated_read1_renamed.fq");
+    fastq_analyzer analyzer(10);
+    analyzer.read("/home/guzh/data/mapping/lr_simulated/sd_0001.fastq");
 }

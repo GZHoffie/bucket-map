@@ -1,0 +1,8 @@
+[M::main::0.054*1.10] loaded/built the index for 133 target sequence(s)
+[M::mm_mapopt_update::0.067*1.08] mid_occ = 10
+[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 133
+[M::mm_idx_stat::0.078*1.07] distinct minimizers: 979931 (97.75% are singletons); average occurrences: 1.027; average spacing: 5.352; total length: 5387493
+[M::worker_pipeline::1.865*2.78] mapped 1639 sequences
+[M::main] Version: 2.26-r1175
+[M::main] CMD: minimap2 -a EColi_minimap.mmi /home/guzh/data/mapping/lr_simulated/sd_0001.fastq
+[M::main] Real time: 1.869 sec; CPU: 5.192 sec; Peak RSS: 0.406 GB

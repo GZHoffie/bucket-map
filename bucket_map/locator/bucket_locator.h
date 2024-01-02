@@ -120,7 +120,7 @@ private:
     Sampler* segment_sampler;
 
     // counter to calculate the possible starting positions
-    std::unordered_map<unsigned int, unsigned int> fuzzy_counter;
+    std::unordered_map<int, unsigned int> vote_counter;
     //std::unordered_map<unsigned int, unsigned int> exact_counter;
 
     // the path to the genome file
@@ -202,7 +202,7 @@ private:
         std::vector<std::pair<unsigned int, unsigned int>> res;
 
         // reset counter
-        fuzzy_counter.clear();
+        vote_counter.clear();
 
         // record the possible starting positions
         std::unordered_set<unsigned int> votes;
@@ -218,21 +218,23 @@ private:
             auto range = bucket_kmer_index.equal_range(current_kmer);
             for (auto it = range.first; it != range.second; ++it) {
                 votes.clear();
-                auto position = it->second - current_index + std::get<1>(segment);
+                auto position = it->second - current_index;
                 mapped_positions.push_back(position);
                 for (int indel = -allowed_indel; indel <= allowed_indel; indel++) {
                     votes.emplace(position + indel);
                 }
                 for (auto & vote : votes) {
-                    fuzzy_counter[vote]++;
+                    vote_counter[vote]++;
                 }
             }
         }
 
+        seqan3::debug_stream << segment << vote_counter << "\n";
+
         // find potential good offset
         // We choose the smallest offset that contains a specific number of k-mers
-        if (!fuzzy_counter.empty()) {
-            auto max = std::max_element(fuzzy_counter.begin(), fuzzy_counter.end(), [&](const auto &x, const auto &y) {
+        if (!vote_counter.empty()) {
+            auto max = std::max_element(vote_counter.begin(), vote_counter.end(), [&](const auto &x, const auto &y) {
                                             return (x.second < y.second) || (x.second == y.second && x.first > y.first);
                                         });
             if (max->second >= num_samples - allowed_mismatch && max->first >= 0) {
@@ -266,26 +268,33 @@ private:
                 starting_positions = segment_sampler->samples;
             }
 
-            // break the read down into k-mers
-            auto kmers = rec.sequence() | seqan3::views::kmer_hash(seqan3::ungapped{k});
-            auto kmer_qualities = rec.sequence() | seqan3::views::kmer_quality(seqan3::ungapped{k});
-
             for (auto i : starting_positions) {
                 // copy the segment of length read_length
-                int num_kmers = std::min(i + read_length, (unsigned int)rec.sequence().size()) - i - k + 1;
+                //TODO: optimize this by not copying the segment, but simply indicate the range.
+                auto begin = i;
+                auto end = std::min(i + read_length, (unsigned int)rec.sequence().size());
+                seqan3::dna4_vector segment_sequence(rec.sequence().begin() + begin, rec.sequence().begin() + end);
+                std::vector<seqan3::phred94> segment_quality(rec.base_qualities().begin() + begin, rec.base_qualities().begin() + end);
+
+                // break the read down into k-mers
+                auto kmers = segment_sequence | seqan3::views::kmer_hash(seqan3::ungapped{k});
+                auto kmer_qualities = segment_quality | seqan3::views::kmer_quality(seqan3::ungapped{k});
+
+                // copy the segment of length read_length
+                int num_kmers = kmers.size();
 
                 // filter out low-quality k-mers
                 auto good_kmers = std::ranges::iota_view{0, num_kmers} | std::views::filter([&](unsigned int j) {
-                                      return kmer_qualities[j + i] >= min_base_quality;
+                                      return kmer_qualities[j] >= min_base_quality;
                                   });
                 // sample kmers
                 std::vector<uint16_t> good_indices(good_kmers.begin(), good_kmers.end());
                 if (good_indices.empty()) { // consider all k-mers if none of the kmers are high-quality.
-                    for (uint16_t j = 0; j < num_kmers; j++) good_indices.push_back(j + i);
+                    for (uint16_t j = 0; j < num_kmers; j++) good_indices.push_back(j);
                 }
                 sampler->sample_deterministically(good_indices.size() - 1);
-                auto sampled_indices = sampler->samples | std::views::transform([&](unsigned int j) { return good_indices[j + i]; });
-                auto selected_kmers = sampled_indices | std::views::transform([&](unsigned int j) { return kmers[j + i]; });
+                auto sampled_indices = sampler->samples | std::views::transform([&](unsigned int j) { return good_indices[j]; });
+                auto selected_kmers = sampled_indices | std::views::transform([&](unsigned int j) { return kmers[j]; });
 
                 // convert to vectors and store them
                 std::vector<uint16_t> sampled_indices_vec(sampled_indices.begin(), sampled_indices.end());
@@ -323,7 +332,7 @@ public:
         srand(time(NULL));
 
         // initialize counter
-        fuzzy_counter.reserve(sample_size * allowed_indel);
+        vote_counter.reserve(sample_size * 2 * allowed_indel);
         //exact_counter.reserve(sample_size);
 
         // initialize sampler
@@ -439,6 +448,8 @@ public:
             // find the locations with the most votes
             unsigned int most_votes = 0;
 
+            seqan3::debug_stream << read_id << locate_res[read_id] << "\n.";
+
 #ifndef BM_ALIGN
             for (auto & loc : locate_res[read_id]) {
                 // get the components of the locate_t
@@ -527,7 +538,7 @@ public:
     }
 
     typedef std::tuple<unsigned int, // bucket id
-                       unsigned int, // offset within the bucket
+                       int, // offset within the bucket
                        unsigned int, // number of votes get
                        bool          // whether the original read (true) or its reverse complement (false) is mapped
                        > locate_t;
@@ -544,6 +555,8 @@ public:
 
         // map reads to buckets
         auto [sequence_ids_orig, sequence_ids_rev_comp] = _m->map(sequence_file);
+        seqan3::debug_stream << sequence_ids_orig << "\n";
+        seqan3::debug_stream << sequence_ids_rev_comp << "\n";
 
         // reset mapper to release memory
         _m->reset();
@@ -593,7 +606,7 @@ public:
                 auto offset_res = _find_offset(bucket_kmer_index, id, records, false);
                 auto & [offset, vote] = offset_res;
                 if (offset > 0) {
-                    res[std::get<0>(id)].push_back(std::make_tuple(i, offset, vote, true));
+                    res[std::get<0>(id)].push_back(std::make_tuple(i, offset - std::get<1>(id), vote, true));
                 }
             }
             
@@ -602,7 +615,7 @@ public:
                 auto offset_res = _find_offset(bucket_kmer_index, id_rev, records, true);
                 auto & [offset, vote] = offset_res;
                 if (offset > 0) {
-                    res[std::get<0>(id_rev)].push_back(std::make_tuple(i, offset, vote, false));
+                    res[std::get<0>(id_rev)].push_back(std::make_tuple(i, offset - std::get<1>(id_rev), vote, false));
                 }
             }
             query_timer.tock();

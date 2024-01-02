@@ -52,6 +52,8 @@ to use the binaries by their names directly.
 
 ## Dataset generation
 
+For short reads,
+
 ```bash
 DATASET_NAME=ecoli_simulated
 python ~/neat-genreads/gen_reads.py -r GCF_001890245.1_ASM189024v1_genomic.fna -R150 -o ${DATASET_NAME} --bam
@@ -65,6 +67,13 @@ zcat ${DATASET_NAME}_read1.fq.gz >> ${DATASET_NAME}_read1.fq
 
 # Remove spaces in the simulated read names
 ~/bucket-map/bucket_map/benchmark/rename_reads.sh ${DATASET_NAME}_read1.fq >> ${DATASET_NAME}_read1_renamed.fq
+```
+
+For long reads, we use [pbsim](https://github.com/yukiteruono/pbsim3).
+
+```bash
+mkdir lr_simulated; cd lr_simulated
+pbsim --strategy wgs --method qshmm --qshmm ~/pbsim3/data/QSHMM-ONT-HQ.model --depth 20 --genome ~/data/mapping/GCA_022991725.1_PDT001286877.1_genomic.fna
 ```
 
 ## Benchmarking Time & Memory Usage

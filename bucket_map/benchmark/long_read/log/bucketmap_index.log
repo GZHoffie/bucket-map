@@ -1,0 +1,4 @@
+[INFO]		Not using Smith-Waterman for alignment verifications.
+[INFO]		Initializing indexer and mapper with bucket length: 65536, and number of buckets: 186.
+[INFO]		Set index seed length to be: 9.
+[ERROR]		The specified file already exists in directory: "/home/guzh/bucket-map/bucket_map/benchmark/long_read/index/EColi_bucketmap.qgram".
