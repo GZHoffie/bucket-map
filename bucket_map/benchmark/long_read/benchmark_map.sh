@@ -16,4 +16,4 @@ echo "Mapping using minimap2"
 
 # run bucketmap
 echo "Mapping using BucketMap"
-/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_map.time" -v bucketmap --version-check 0 -s 20 -e 0.7 -n 0.05 -u 10 -l 14 -i "${INDEX_INDICATOR}_bucketmap" -q ${FASTQ_PATH} -o "${BENCHMARK_PATH}/output/bucketmap_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_map.log"
+/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_map.time" -v bucketmap --version-check 0 -s 20 -e 0.8 -n 0.05 -l 13 -p 20 -i "${INDEX_INDICATOR}_bucketmap" -q ${FASTQ_PATH} -o "${BENCHMARK_PATH}/output/bucketmap_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_map.log"

@@ -45,7 +45,8 @@ public:
     }
 
     index_t get_read_length(segment_info_t segment_id) {
-        return read_length[std::get<0>(segment_id)];
+        unsigned int segment_index = segment_to_index[segment_id];
+        return read_length[segment_index];
     }
 
     /**
@@ -73,21 +74,24 @@ public:
         return read_length[sequence_id];
     }
 
-    void push_back(const segment_info_t& segment_id, const std::vector<index_t>& kmer_indices, const std::vector<kmer_hash_t>& kmer_samples) {
+    /**
+     * @brief Store the segment information, including the segment id, length of the segment, and the k-mer samples.
+     * 
+    */
+    void push_back(const segment_info_t& segment_id, unsigned int segment_length,
+                   const std::vector<index_t>& kmer_indices, const std::vector<kmer_hash_t>& kmer_samples) {
         // check the size of the two vectors
         assert(kmer_indices.size() == s && kmer_samples.size() == s);
     
 
         indices.push_back(kmer_indices);
         kmers.push_back(kmer_samples);
+        read_length.push_back(segment_length);
         segment_to_index[segment_id] = current_index;
         
         current_index++;
     }
 
-    void push_back_length(unsigned int length) {
-        read_length.push_back(length);
-    }
 };
 
 
@@ -111,6 +115,7 @@ private:
     // Parameters for verification
     int allowed_mismatch;
     int allowed_indel;
+    float allowed_indel_rate;
 
     // number of samples drawn
     int num_samples;
@@ -120,11 +125,19 @@ private:
     Sampler* segment_sampler;
 
     // counter to calculate the possible starting positions
-    std::unordered_map<int, unsigned int> vote_counter;
+    std::map<int, unsigned int> vote_counter;
     //std::unordered_map<unsigned int, unsigned int> exact_counter;
 
     // the path to the genome file
     std::filesystem::path genome_file_name;
+
+    // type used to store mapped locations
+    typedef std::tuple<unsigned int, // bucket id
+                       int,          // segment offset within the bucket
+                       unsigned int, // segment offset in the read
+                       unsigned int, // number of votes get
+                       bool          // whether the original read (true) or its reverse complement (false) is mapped
+                       > locate_t;
 
 
     void _initialize_kmer_index(std::filesystem::path const & fasta_file_name) {
@@ -209,23 +222,45 @@ private:
         std::vector<unsigned int> mapped_positions;
 
         for (unsigned int i = 0; i < num_samples; i++) {
-            // find the positions of the k-mer
-            unsigned int current_kmer = record[i], current_index = index[i];
+            // start from the first sample in original string, or start from last sample for reverse string.
+            unsigned int sample_index = i;
+            if (reverse_complement) sample_index = num_samples - 1 - i;
+
+            // find the positions of the k-mer (adjust if in the reverse string)
+            unsigned int current_kmer = record[sample_index], current_index = index[sample_index];
             if (reverse_complement) {
                 current_kmer = hash_reverse_complement(current_kmer, k);
-                current_index = length - k - current_index;
+                current_index = length - k - current_index;  // where the k-mer starts
             }
+
+            // Cast the vote if found in the k-mer index
             auto range = bucket_kmer_index.equal_range(current_kmer);
-            for (auto it = range.first; it != range.second; ++it) {
-                votes.clear();
-                auto position = it->second - current_index;
-                mapped_positions.push_back(position);
-                for (int indel = -allowed_indel; indel <= allowed_indel; indel++) {
-                    votes.emplace(position + indel);
+            if (vote_counter.empty()) {
+                // if there's no proposal, make a proposal
+                for (auto it = range.first; it != range.second; ++it) {
+                    auto position = it->second - current_index;  // where the k-mer propose as the starting point of the read
+                    vote_counter[position]++;
                 }
-                for (auto & vote : votes) {
-                    vote_counter[vote]++;
+            } else {
+                for (auto it = range.first; it != range.second; ++it) {
+                    // if there is a close enough proposal, vote for it
+                    bool voted = false;
+                    auto position = it->second - current_index;
+
+                    auto lower_bound = vote_counter.lower_bound(position - allowed_indel);
+                    auto upper_bound = vote_counter.upper_bound(position + allowed_indel);
+
+                    for (auto it = lower_bound; it != upper_bound; ++it) {
+                        vote_counter[it->first]++;
+                        voted = true;
+                    }
+                    
+                    if (!voted) {
+                        // otherwise, propose the new position
+                        vote_counter[position]++;
+                    }
                 }
+
             }
         }
 
@@ -238,13 +273,7 @@ private:
                                             return (x.second < y.second) || (x.second == y.second && x.first > y.first);
                                         });
             if (max->second >= num_samples - allowed_mismatch && max->first >= 0) {
-                // This position is a good fit... Now find where the segment starts
-                for (unsigned int i = 0; i < mapped_positions.size(); i++) {
-                    auto position = mapped_positions[i];
-                    if (position <= max->first + allowed_indel && position >= max->first - allowed_indel) {
-                        return std::make_pair(position, max->second);
-                    }
-                }
+                // This position is a good fit...
                 return std::make_pair(max->first, max->second);
             }
         }
@@ -300,16 +329,71 @@ private:
                 std::vector<uint16_t> sampled_indices_vec(sampled_indices.begin(), sampled_indices.end());
                 std::vector<unsigned int> sampled_kmers_vec(selected_kmers.begin(), selected_kmers.end());
                 segment_info_t segment{read_index, (int)i};
-                records->push_back(segment, sampled_indices_vec, sampled_kmers_vec);
+                records->push_back(segment, segment_sequence.size(), sampled_indices_vec, sampled_kmers_vec);
             }
-
-            // store the read length as well
-            records->push_back_length(rec.sequence().size());
 
             read_index++;
         }
-        
+    }
 
+
+    std::vector<locate_t> _filter_best_locations(std::vector<locate_t>& mapped_locations) {
+        /**
+         * @brief find the best mapped locations. Let them vote for the best final location.
+         */
+        seqan3::debug_stream << mapped_locations << "\n";
+        // All locations cast their votes
+        std::map<std::tuple<unsigned int, int, bool>, unsigned int> loc_votes;
+        for (auto &[bucket_id, bucket_offset, segment_offset, votes, rev_comp] : mapped_locations) {
+            if (loc_votes.empty()) {
+                // propose as a new location
+                //seqan3::debug_stream << "Proposed new!" << {bucket_id, bucket_offset, rev_comp} << "\n";
+                loc_votes[{bucket_id, bucket_offset, rev_comp}] = votes;
+            } else {
+                bool found_close_loc = false;
+                // if a close location is proposed, vote for that position.
+                //FIXME: read_length - segment_offset for reverse complement string,
+                // or just set a unified range. 
+                int lower_bound = bucket_offset - segment_offset * allowed_indel_rate;
+                int upper_bound = bucket_offset + segment_offset * allowed_indel_rate;
+                //seqan3::debug_stream << "Will merge if " << {lower_bound, upper_bound} << "\n";
+                for (auto it = loc_votes.cbegin(); it != loc_votes.cend(); ++it) {
+                    int proposed_offset = std::get<1>(it->first);
+
+                    if (bucket_id == std::get<0>(it->first) && proposed_offset <= upper_bound 
+                                                            && proposed_offset >= lower_bound
+                                                            && std::get<2>(it->first) == rev_comp) {
+                        //seqan3::debug_stream << "Merged." << "\n";
+                        loc_votes[it->first] += votes;
+                        found_close_loc = true;
+                    }
+                }
+                if (!found_close_loc) {
+                    loc_votes[{bucket_id, bucket_offset, rev_comp}] = votes;
+                }
+            }
+        }
+
+        seqan3::debug_stream << loc_votes << "\n";
+
+        // find the locations that gets the most votes.
+        std::vector<locate_t> res;
+        unsigned int max_votes = 0;
+        for(auto it = loc_votes.cbegin(); it != loc_votes.cend(); ++it ) {
+            if (it->second > max_votes) {
+                res.clear();
+                max_votes = it->second;
+            }
+            if (it->second == max_votes) {
+                res.push_back(std::make_tuple(std::get<0>(it->first),
+                                              std::get<1>(it->first),
+                                              0,
+                                              it->second,
+                                              std::get<2>(it->first)));
+            }
+        }
+        seqan3::debug_stream << "Res: " << res << "\n";
+        return res;
     }
 
 
@@ -326,14 +410,11 @@ public:
 
         allowed_mismatch = ceil(mismatch_rate * sample_size);
         allowed_indel = ceil(indel_rate * read_len);
+        allowed_indel_rate = indel_rate;
 
         // random number generator
         num_samples = sample_size;
         srand(time(NULL));
-
-        // initialize counter
-        vote_counter.reserve(sample_size * 2 * allowed_indel);
-        //exact_counter.reserve(sample_size);
 
         // initialize sampler
         sampler = new Sampler(num_samples);
@@ -445,36 +526,20 @@ public:
         align_timer.tick();
         for (auto && record : query_file_in) {
             auto & query = record.sequence();
-            // find the locations with the most votes
-            unsigned int most_votes = 0;
-
-            seqan3::debug_stream << read_id << locate_res[read_id] << "\n.";
 
 #ifndef BM_ALIGN
-            for (auto & loc : locate_res[read_id]) {
-                // get the components of the locate_t
-                const auto & [bucket_id, offset, votes, is_original] = loc;
-                if (votes > most_votes) most_votes = votes;
-            }
-#else
-            // record the alignment with the highest alignment score
-            //TODO: only report one map with the highest alignment score.
+            seqan3::debug_stream << read_id << "\n";
+            locate_res[read_id] = _filter_best_locations(locate_res[read_id]);
 #endif
 
             // output to sam file
             for (auto & loc : locate_res[read_id]) {
                 // get the components of the locate_t
-                const auto & [bucket_id, offset, votes, is_original] = loc;
-
-#ifndef BM_ALIGN
-                // only output the reads with the most votes
-                if (votes < most_votes) continue;
-#endif
+                const auto & [bucket_id, offset, segment_offset, votes, is_original] = loc;
 
                 // get the part of text that the read is mapped to
                 auto start = bucket_seq[bucket_id].begin() + offset;
                 size_t width = std::min(query.size() + 1 + allowed_indel, bucket_seq[bucket_id].size() - offset);
-
                 
                 // define flag value
                 seqan3::sam_flag flag{seqan3::sam_flag::none};
@@ -515,7 +580,7 @@ public:
                     mapped_locations++;
                 }
 #else
-                size_t map_qual = 6 * votes;
+                size_t map_qual = std::min((unsigned int)60, 6 * votes);
                 size_t ref_offset = bucket_offsets[bucket_id] + offset;
                 sam_out.emplace_back(query,
                                      record.id(),
@@ -537,12 +602,6 @@ public:
                              << elapsed_seconds << " s (" << (float) elapsed_seconds / mapped_locations * 1000 * 1000 << " μs per pairwise alignment).\n";
     }
 
-    typedef std::tuple<unsigned int, // bucket id
-                       int, // offset within the bucket
-                       unsigned int, // number of votes get
-                       bool          // whether the original read (true) or its reverse complement (false) is mapped
-                       > locate_t;
-
     std::vector<std::vector<locate_t>> 
     _locate(std::filesystem::path const & sequence_file) {
         /**
@@ -555,8 +614,6 @@ public:
 
         // map reads to buckets
         auto [sequence_ids_orig, sequence_ids_rev_comp] = _m->map(sequence_file);
-        seqan3::debug_stream << sequence_ids_orig << "\n";
-        seqan3::debug_stream << sequence_ids_rev_comp << "\n";
 
         // reset mapper to release memory
         _m->reset();
@@ -586,6 +643,7 @@ public:
         for (int i = 0; i < sequence_ids_orig.size(); i++) {
             auto & bucket_sequence_orig = sequence_ids_orig[i];
             auto & bucket_sequence_rev_comp = sequence_ids_rev_comp[i];
+            seqan3::debug_stream << i << bucket_sequence_orig << bucket_sequence_rev_comp << "\n";
 
             // skip if no read is mapped to this bucket
             if (bucket_sequence_orig.empty() && bucket_sequence_rev_comp.empty()) {
@@ -601,21 +659,21 @@ public:
             // go through all sequences mapped to this bucket and check the offset.
             query_timer.tick();
 
+            // check original read
             for (auto & id : bucket_sequence_orig) {
-                // check original read
                 auto offset_res = _find_offset(bucket_kmer_index, id, records, false);
                 auto & [offset, vote] = offset_res;
                 if (offset > 0) {
-                    res[std::get<0>(id)].push_back(std::make_tuple(i, offset - std::get<1>(id), vote, true));
+                    res[std::get<0>(id)].push_back(std::make_tuple(i, offset - std::get<1>(id), std::get<1>(id), vote, true));
                 }
             }
             
             // check reverse complement of the reads read
-            for (auto & id_rev : bucket_sequence_rev_comp) {
+            for (auto & id_rev : bucket_sequence_rev_comp | std::views::reverse) {
                 auto offset_res = _find_offset(bucket_kmer_index, id_rev, records, true);
                 auto & [offset, vote] = offset_res;
                 if (offset > 0) {
-                    res[std::get<0>(id_rev)].push_back(std::make_tuple(i, offset - std::get<1>(id_rev), vote, false));
+                    res[std::get<0>(id_rev)].push_back(std::make_tuple(i, offset + std::get<1>(id_rev), std::get<1>(id_rev), vote, false));
                 }
             }
             query_timer.tock();
