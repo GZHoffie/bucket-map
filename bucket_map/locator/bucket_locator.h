@@ -19,9 +19,15 @@
 template <typename kmer_hash_t = unsigned int, typename index_t = uint16_t>
 class query_sequences_storage {
 private:
+    // a map from segment id to its index used to store `kmers`, `indices` and `segment_length`.
     std::map<segment_info_t, unsigned int> segment_to_index;
+
+    // kmer samples and their locations
     std::vector<std::vector<kmer_hash_t>> kmers;
     std::vector<std::vector<index_t>> indices;
+
+    // length of each segment and each read.
+    std::vector<unsigned int> segment_length;
     std::vector<unsigned int> read_length;
 
     unsigned int s;
@@ -44,9 +50,13 @@ public:
         current_index = 0;
     }
 
-    index_t get_read_length(segment_info_t segment_id) {
+    index_t get_segment_length(segment_info_t segment_id) {
         unsigned int segment_index = segment_to_index[segment_id];
-        return read_length[segment_index];
+        return segment_length[segment_index];
+    }
+
+    index_t get_read_length(segment_info_t segment_id) {
+        return read_length[std::get<0>(segment_id)];
     }
 
     /**
@@ -69,29 +79,27 @@ public:
         return indices[segment_index];
     }
 
-    index_t get_length(unsigned int sequence_id) {
-        assert(sequence_id < read_length.size());
-        return read_length[sequence_id];
-    }
-
     /**
      * @brief Store the segment information, including the segment id, length of the segment, and the k-mer samples.
      * 
     */
-    void push_back(const segment_info_t& segment_id, unsigned int segment_length,
+    void push_back(const segment_info_t& segment_id, unsigned int segment_len,
                    const std::vector<index_t>& kmer_indices, const std::vector<kmer_hash_t>& kmer_samples) {
         // check the size of the two vectors
         assert(kmer_indices.size() == s && kmer_samples.size() == s);
     
-
         indices.push_back(kmer_indices);
         kmers.push_back(kmer_samples);
-        read_length.push_back(segment_length);
+        segment_length.push_back(segment_len);
         segment_to_index[segment_id] = current_index;
         
         current_index++;
     }
 
+
+    void record_read_length(unsigned int read_len) {
+        read_length.push_back(read_len);
+    }
 };
 
 
@@ -209,7 +217,7 @@ private:
         // load the sequence and pick up the k-mers
         auto record = sequence_records->get_samples(segment);
         auto index = sequence_records->get_indices(segment);
-        unsigned int length = sequence_records->get_read_length(segment);
+        unsigned int length = sequence_records->get_segment_length(segment);
 
         // initialize result
         std::vector<std::pair<unsigned int, unsigned int>> res;
@@ -331,13 +339,14 @@ private:
                 segment_info_t segment{read_index, (int)i};
                 records->push_back(segment, segment_sequence.size(), sampled_indices_vec, sampled_kmers_vec);
             }
-
+            // record the length of the entire read as well
+            records->record_read_length(rec.sequence().size());
             read_index++;
         }
     }
 
 
-    std::vector<locate_t> _filter_best_locations(std::vector<locate_t>& mapped_locations) {
+    std::vector<locate_t> _filter_best_locations(std::vector<locate_t>& mapped_locations, unsigned int read_length) {
         /**
          * @brief find the best mapped locations. Let them vote for the best final location.
          */
@@ -352,10 +361,8 @@ private:
             } else {
                 bool found_close_loc = false;
                 // if a close location is proposed, vote for that position.
-                //FIXME: read_length - segment_offset for reverse complement string,
-                // or just set a unified range. 
-                int lower_bound = bucket_offset - segment_offset * allowed_indel_rate;
-                int upper_bound = bucket_offset + segment_offset * allowed_indel_rate;
+                int lower_bound = bucket_offset - read_length * allowed_indel_rate;
+                int upper_bound = bucket_offset + read_length * allowed_indel_rate;
                 //seqan3::debug_stream << "Will merge if " << {lower_bound, upper_bound} << "\n";
                 for (auto it = loc_votes.cbegin(); it != loc_votes.cend(); ++it) {
                     int proposed_offset = std::get<1>(it->first);
@@ -529,7 +536,7 @@ public:
 
 #ifndef BM_ALIGN
             seqan3::debug_stream << read_id << "\n";
-            locate_res[read_id] = _filter_best_locations(locate_res[read_id]);
+            locate_res[read_id] = _filter_best_locations(locate_res[read_id], record.sequence().size());
 #endif
 
             // output to sam file
@@ -664,7 +671,10 @@ public:
                 auto offset_res = _find_offset(bucket_kmer_index, id, records, false);
                 auto & [offset, vote] = offset_res;
                 if (offset > 0) {
-                    res[std::get<0>(id)].push_back(std::make_tuple(i, offset - std::get<1>(id), std::get<1>(id), vote, true));
+                    res[std::get<0>(id)].push_back(std::make_tuple(i, 
+                                                                   offset - std::get<1>(id), 
+                                                                   std::get<1>(id), 
+                                                                   vote, true));
                 }
             }
             
@@ -673,7 +683,11 @@ public:
                 auto offset_res = _find_offset(bucket_kmer_index, id_rev, records, true);
                 auto & [offset, vote] = offset_res;
                 if (offset > 0) {
-                    res[std::get<0>(id_rev)].push_back(std::make_tuple(i, offset + std::get<1>(id_rev), std::get<1>(id_rev), vote, false));
+                    int segment_offset_ = records->get_read_length(id_rev) - std::get<1>(id_rev) - records->get_segment_length(id_rev);
+                    res[std::get<0>(id_rev)].push_back(std::make_tuple(i, 
+                                                                       offset - segment_offset_, 
+                                                                       std::get<1>(id_rev), 
+                                                                       vote, false));
                 }
             }
             query_timer.tock();

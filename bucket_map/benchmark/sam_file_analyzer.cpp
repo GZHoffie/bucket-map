@@ -1,6 +1,8 @@
 #include <seqan3/io/sam_file/all.hpp>
 #include "../utils.h"
 
+#include <string>
+
 class sam_analyzer {
 private:
     // position of the read
@@ -97,23 +99,57 @@ public:
      */
     void read_ground_truth_file(std::filesystem::path ground_truth_path) {
         std::ifstream is(ground_truth_path);
-        unsigned int origin; 
-        unsigned int position;
-        unsigned int reverse_complement;
-        std::string cigar;
 
-        unsigned int index = 0;
+        if (ground_truth_path.extension() == ".ground_truth") {
+            // for my own simulator
+            unsigned int origin; 
+            unsigned int position;
+            unsigned int reverse_complement;
+            std::string cigar;
 
-        while (is >> origin >> position >> reverse_complement >> cigar) {
-            map_position_t pos;
-            pos.reverse_complement = static_cast<bool>(reverse_complement);
-            pos.sequence_id = origin;
-            pos.offset = position;
+            unsigned int index = 0;
 
-            answer[index].push_back(pos);
-            index++;
+            while (is >> origin >> position >> reverse_complement >> cigar) {
+                map_position_t pos;
+                pos.reverse_complement = static_cast<bool>(reverse_complement);
+                pos.sequence_id = origin;
+                pos.offset = position;
+
+                answer[index].push_back(pos);
+                index++;
+            }
+        } else if (ground_truth_path.extension() == ".maf") {
+            // for pbsim3 simulation tool
+            std::string _i; // string to be ignored.
+            unsigned int offset;
+            std::string read_name;
+            char rev_comp;
+            while (is >> _i >> _i >> _i >> offset >> _i >> _i >> _i >> _i 
+                      >> _i >> read_name >> _i >> _i >> rev_comp >> _i >> _i) {
+            
+                try {
+                    unsigned int sequence_id = read_id_to_index.at(read_name);
+
+                    map_position_t pos;
+                    pos.reverse_complement = false;
+                    if (rev_comp == '-') {
+                        pos.reverse_complement = true;
+                    }
+                    unsigned int start = read_name.find('S') + 1;
+                    unsigned int end = read_name.find('_');
+                    pos.sequence_id = std::stoi(read_name.substr(start, end - start)) - 1;
+                    pos.offset = offset;
+                    answer[sequence_id].push_back(pos);
+                } catch (const std::out_of_range& oor) {
+                    //seqan3::debug_stream << "key not found\n";
+                }
+            }
         }
+        
+        
     }
+
+    
 
     /**
      * @brief Read the fastq file, and record the sequence ids for identification 
@@ -184,6 +220,8 @@ public:
 
             } catch (const std::out_of_range& oor) {
                 //seqan3::debug_stream << "key not found\n";
+            } catch (const seqan3::format_error& fe) {
+
             }
         }
 
@@ -215,13 +253,14 @@ public:
 
 int main()
 {
-    sam_analyzer analyzer;
-    analyzer.read_sequence_file("/home/zhenhao/data/mapping/ecoli_simulated_read1_renamed.fq");
-    analyzer.read_best_alignment_file("/home/zhenhao/data/mapping/ecoli_simulated_golden.sam");
+    sam_analyzer analyzer(2000);
+    analyzer.read_sequence_file("/home/guzh/data/mapping/lr_simulated/sd_0001.fastq");
+    //analyzer.read_best_alignment_file("/home/zhenhao/data/mapping/ecoli_simulated_golden.sam");
+    analyzer.read_ground_truth_file("/home/guzh/data/mapping/lr_simulated/sd_0001.maf");
     //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam");
     //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/subread_map.sam");
     //analyzer.read_ground_truth_file("/mnt/d/genome/test/EGU_1500_10K.position_ground_truth");
-    analyzer.benchmark_directory("/home/zhenhao/bucket-map/bucket_map/benchmark/output");
+    analyzer.benchmark_directory("/home/guzh/bucket-map/bucket_map/benchmark/long_read/output");
     return 0;
 
 }

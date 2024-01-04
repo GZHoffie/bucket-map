@@ -50,6 +50,16 @@ source ~/.bashrc
 ```
 to use the binaries by their names directly.
 
+
+ - **GraphMap**.
+
+   ```bash
+   git clone https://github.com/isovic/graphmap.git  
+   cd graphmap  
+   make modules  
+   make  
+   echo "export PATH=\${PATH}:$(pwd)/bin/Linux-x64" >> ~/.bashrc
+   ```
 ## Dataset generation
 
 For short reads,
