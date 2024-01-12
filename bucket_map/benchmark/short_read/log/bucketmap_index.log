@@ -1,7 +1,7 @@
 [INFO]		Not using Smith-Waterman for alignment verifications.
-[INFO]		Initializing indexer and mapper with bucket length: 65536, and number of buckets: 87.
+[INFO]		Initializing indexer and mapper with bucket length: 65536, and number of buckets: 89.
 [INFO]		Set index seed length to be: 9.
-[INFO]		The bucket q-gram index is stored in: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/EColi_bucketmap.qgram".
-[INFO]		The number of buckets: 87.
-[INFO]		The bucket ids are stored in: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/EColi_bucketmap.bucket_id".
+[INFO]		The bucket q-gram index is stored in: "/home/zhenhao/bucket-map/bucket_map/benchmark/short_read/index/EColi_bucketmap.qgram".
+[INFO]		The number of buckets: 89.
+[INFO]		The bucket ids are stored in: "/home/zhenhao/bucket-map/bucket_map/benchmark/short_read/index/EColi_bucketmap.bucket_id".
 [BENCHMARK]	Elapsed time for creating and storing index files: 0.078 s.

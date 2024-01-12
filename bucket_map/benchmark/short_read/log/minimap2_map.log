@@ -1,8 +1,8 @@
-[M::main::0.055*1.09] loaded/built the index for 2 target sequence(s)
-[M::mm_mapopt_update::0.066*1.07] mid_occ = 18
+[M::main::0.046*1.11] loaded/built the index for 2 target sequence(s)
+[M::mm_mapopt_update::0.060*1.09] mid_occ = 13
 [M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 2
-[M::mm_idx_stat::0.074*1.06] distinct minimizers: 973930 (96.25% are singletons); average occurrences: 1.077; average spacing: 5.349; total length: 5608872
-[M::worker_pipeline::3.286*2.68] mapped 367738 sequences
+[M::mm_idx_stat::0.069*1.08] distinct minimizers: 980012 (95.16% are singletons); average occurrences: 1.102; average spacing: 5.351; total length: 5778004
+[M::worker_pipeline::22.596*2.80] mapped 1000000 sequences
 [M::main] Version: 2.26-r1175
-[M::main] CMD: minimap2 -a EColi_minimap.mmi /home/zhenhao/data/mapping/ecoli_simulated_read1_renamed.fq
-[M::main] Real time: 3.290 sec; CPU: 8.798 sec; Peak RSS: 0.271 GB
+[M::main] CMD: minimap2 -a EColi_minimap.mmi /home/zhenhao/mapping_data/EColi_sim.bwa.read1.fastq
+[M::main] Real time: 22.630 sec; CPU: 63.331 sec; Peak RSS: 0.921 GB

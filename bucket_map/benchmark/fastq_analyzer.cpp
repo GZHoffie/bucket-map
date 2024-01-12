@@ -85,6 +85,6 @@ public:
 
 
 int main() {
-    fastq_analyzer analyzer(10);
-    analyzer.read("/home/guzh/data/mapping/lr_simulated/sd_0001.fastq");
+    fastq_analyzer analyzer(20);
+    analyzer.read("/home/zhenhao/mapping_data/EColi_sim.bwa.read1.fastq");
 }

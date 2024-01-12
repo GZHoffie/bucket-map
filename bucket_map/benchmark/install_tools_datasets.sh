@@ -37,10 +37,7 @@ make modules
 make  
 echo "export PATH=\${PATH}:$(pwd)/bin/Linux-x64" >> ~/.bashrc
 cd ..
-
-# enable search in PATH
-source ~/.bashrc
-
+d
 
 # Samtools, for converting bam/sam files
 sudo apt install -y samtools
@@ -56,7 +53,11 @@ chmod +x ./datasets
 echo "export PATH=\${PATH}:$(pwd)" >> ~/.bashrc
 cd ..
 
+# enable search in PATH
+source ~/.bashrc
+
 # Human genome GRCh38 (3.1 Gb), E Coli genome (5.8 Mb)
+cd mapping_data
 for NCBI_ID in GCF_000001405.26 GCA_004358405.1
 do
     datasets download genome accession ${NCBI_ID}
@@ -64,10 +65,9 @@ do
     mv ncbi_dataset/data/${NCBI_ID}/*.fna ./
     rm -r README.md ncbi_dataset ncbi_dataset.zip
 done
+cd ..
 # Note: need to use ./delete_invalid_bases.sh to remove `N` in the genome
 
-# Generate simulated reads
-dwgsim -N 1000000 
 
 ## Install simulation tools
 # DWGSIM
@@ -82,17 +82,11 @@ make
 echo "export PATH=\${PATH}:$(pwd)" >> ~/.bashrc
 cd ..
 
-# Mason
-git clone https://github.com/seqan/seqan.git
-cd seqan/
-mkdir seqan-build
-cd seqan-build/
-cmake -DCMAKE_BUILD_TYPE=Release -DSEQAN_BUILD_SYSTEM=APP:mason2 -DCMAKE_INSTALL_PREFIX=$HOME/seqan-apps ../../seqan
-make -j
-cd bin
-echo "export PATH=\${PATH}:$(pwd)" >> ~/.bashrc
-cd ~
 
+# Do simulation
+dwgsim -N 1000000 -1 300 -2 0 GCA_004358405.1_ASM435840v1_genomic.fna EColi_sim
+zcat EColi_sim.bwa.read1.fastq.gz >> EColi_sim.bwa.read1.fastq
+rm *.fastq.gz
 
 
 # pbsim3

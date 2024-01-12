@@ -10,7 +10,7 @@ for item in items:
     data[item] = []
 
 # directory of the log files
-log_directory = "./bucket_map/benchmark/log/"
+log_directory = "./bucket_map/benchmark/short_read/log/"
 
 for tool in tools:
     with open(log_directory + tool + "_map.time", "r") as index_log:

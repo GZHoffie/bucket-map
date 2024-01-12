@@ -272,7 +272,7 @@ private:
             }
         }
 
-        seqan3::debug_stream << segment << vote_counter << "\n";
+        //seqan3::debug_stream << segment << vote_counter << "\n";
 
         // find potential good offset
         // We choose the smallest offset that contains a specific number of k-mers
@@ -350,7 +350,7 @@ private:
         /**
          * @brief find the best mapped locations. Let them vote for the best final location.
          */
-        seqan3::debug_stream << mapped_locations << "\n";
+        //seqan3::debug_stream << mapped_locations << "\n";
         // All locations cast their votes
         std::map<std::tuple<unsigned int, int, bool>, unsigned int> loc_votes;
         for (auto &[bucket_id, bucket_offset, segment_offset, votes, rev_comp] : mapped_locations) {
@@ -381,7 +381,7 @@ private:
             }
         }
 
-        seqan3::debug_stream << loc_votes << "\n";
+        //seqan3::debug_stream << loc_votes << "\n";
 
         // find the locations that gets the most votes.
         std::vector<locate_t> res;
@@ -399,7 +399,7 @@ private:
                                               std::get<2>(it->first)));
             }
         }
-        seqan3::debug_stream << "Res: " << res << "\n";
+        //seqan3::debug_stream << "Res: " << res << "\n";
         return res;
     }
 
@@ -535,7 +535,7 @@ public:
             auto & query = record.sequence();
 
 #ifndef BM_ALIGN
-            seqan3::debug_stream << read_id << "\n";
+            //seqan3::debug_stream << read_id << "\n";
             locate_res[read_id] = _filter_best_locations(locate_res[read_id], record.sequence().size());
 #endif
 
@@ -650,7 +650,7 @@ public:
         for (int i = 0; i < sequence_ids_orig.size(); i++) {
             auto & bucket_sequence_orig = sequence_ids_orig[i];
             auto & bucket_sequence_rev_comp = sequence_ids_rev_comp[i];
-            seqan3::debug_stream << i << bucket_sequence_orig << bucket_sequence_rev_comp << "\n";
+            //seqan3::debug_stream << i << bucket_sequence_orig << bucket_sequence_rev_comp << "\n";
 
             // skip if no read is mapped to this bucket
             if (bucket_sequence_orig.empty() && bucket_sequence_rev_comp.empty()) {

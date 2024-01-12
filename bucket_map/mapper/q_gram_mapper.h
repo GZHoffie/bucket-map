@@ -469,7 +469,7 @@ public:
         Timer clock;
         clock.tick();
         for (auto & rec : fin) {
-            bool mapped;
+            bool mapped = false;
 
             // the positions of the read where we want to query.
             std::vector<unsigned int> starting_positions{0};

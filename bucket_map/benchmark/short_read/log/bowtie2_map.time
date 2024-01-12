@@ -1,21 +1,21 @@
-	Command being timed: "bowtie2 -x EColi_bowtie -U /home/zhenhao/data/mapping/ecoli_simulated_read1_renamed.fq -S /home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam"
-	User time (seconds): 39.52
-	System time (seconds): 0.49
-	Percent of CPU this job got: 194%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:20.63
+	Command being timed: "bowtie2 -x EColi_bowtie -U /home/zhenhao/mapping_data/EColi_sim.bwa.read1.fastq -S /home/zhenhao/bucket-map/bucket_map/benchmark/short_read/output/bowtie2_map.sam"
+	User time (seconds): 314.78
+	System time (seconds): 2.24
+	Percent of CPU this job got: 200%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:37.80
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 26032
+	Maximum resident set size (kbytes): 31864
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 77
-	Minor (reclaiming a frame) page faults: 6498
-	Voluntary context switches: 8229
-	Involuntary context switches: 39
+	Major (requiring I/O) page faults: 74
+	Minor (reclaiming a frame) page faults: 7591
+	Voluntary context switches: 40206
+	Involuntary context switches: 323
 	Swaps: 0
-	File system inputs: 14688
-	File system outputs: 357456
+	File system inputs: 849088
+	File system outputs: 1483864
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0

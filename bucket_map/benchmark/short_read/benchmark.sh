@@ -1,8 +1,8 @@
 #!/bin/bash
 
-GENOME_FILE="/home/zhenhao/data/mapping/GCF_001890245.1_ASM189024v1_genomic.fna"
-BENCHMARK_PATH="/home/zhenhao/bucket-map/bucket_map/benchmark"
-QUERY_FILE="/home/zhenhao/data/mapping/ecoli_simulated_read1_renamed.fq"
+GENOME_FILE="/home/zhenhao/mapping_data/GCA_004358405.1_ASM435840v1_genomic.fna"
+BENCHMARK_PATH="/home/zhenhao/bucket-map/bucket_map/benchmark/short_read"
+QUERY_FILE="/home/zhenhao/mapping_data/EColi_sim.bwa.read1.fastq"
 INDICATOR="EColi"
 
 # initialize benchmark directory if it doesnt exist

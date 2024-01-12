@@ -10,11 +10,15 @@ private:
         bool reverse_complement;
         unsigned int sequence_id;
         unsigned int offset;
+        bool is_random = false;
     } map_position_t;
 
     std::unordered_map<std::string, unsigned int> read_id_to_index;
+    std::unordered_map<std::string, unsigned int> sequence_id_to_index;
     std::vector<bool> mapped_reads;
     std::vector<bool> correctly_mapped_reads;
+    std::vector<bool> mapped_random_reads;
+    std::vector<bool> is_random_read;
     std::vector<std::vector<map_position_t>> answer;
 
     unsigned int offset_error_tolerance;
@@ -54,6 +58,20 @@ public:
     sam_analyzer(unsigned int error_tolerance = 5) {
         //read_id_to_index.clear();
         offset_error_tolerance = error_tolerance;
+    }
+
+    /**
+     * Optional, only required for dwgsim files
+     */
+    void read_fasta_file(std::filesystem::path fasta_path) {
+        seqan3::sequence_file_input fin{fasta_path};
+        unsigned int index = 0;
+ 
+        for (auto & record : fin) {
+            sequence_id_to_index[_remove_substring_after_slash_or_blank(record.id())] = index;
+            index++;
+        }
+        seqan3::debug_stream << sequence_id_to_index << "\n";
     }
 
     /**
@@ -156,14 +174,42 @@ public:
      *        in the SAM file.
      * 
      * @param sequence_file path to the fastq file
+     * @param is_dwgsim if the sequence file is a dwgsim simulated fastq file. If yes, then
+     *                  record the ground truth
      */
-    void read_sequence_file(std::filesystem::path sequence_file) {
+    void read_sequence_file(std::filesystem::path sequence_file, bool is_dwgsim = false) {
         seqan3::sequence_file_input<_phred94_traits> fin{sequence_file};
         unsigned int index = 0;
 
         for (auto & rec : fin) {
             auto renamed_id = _remove_substring_after_slash_or_blank(_space_to_underscore(rec.id()));
             read_id_to_index.emplace(renamed_id, index);
+
+            if (is_dwgsim) {
+                std::size_t pos = 0, prev = 0;
+                std::vector<std::string> substrings;
+                // split the read id according to deliminators
+                while ((pos = renamed_id.find_first_of("_:", prev)) != std::string::npos) {
+                    if (pos > prev)
+                        substrings.push_back(renamed_id.substr(prev, pos-prev));
+                        prev = pos + 1;
+                }   
+                if (prev < renamed_id.length())
+                    substrings.push_back(renamed_id.substr(prev, std::string::npos));
+
+                //seqan3::debug_stream << substrings << "\n";
+                // record the ground truth
+                map_position_t gt;
+                gt.reverse_complement = static_cast<bool>(stoi(substrings[3]));
+                gt.sequence_id = sequence_id_to_index[substrings[0]];
+                gt.offset = stoi(substrings[1]);
+                gt.is_random = static_cast<bool>(stoi(substrings[5]));
+                is_random_read.push_back(gt.is_random);
+
+                //seqan3::debug_stream << gt << "\n";
+                std::vector<map_position_t> positions{gt};
+                answer.push_back(positions);
+            }
             index++;
         }
 
@@ -171,8 +217,7 @@ public:
         for (int i = 0; i < index; i++) {
             mapped_reads.push_back(false);
             correctly_mapped_reads.push_back(false);
-            std::vector<map_position_t> positions;
-            answer.push_back(positions);
+            mapped_random_reads.push_back(false);
         }
     }
 
@@ -182,6 +227,7 @@ public:
         int mapped_locations = 0; // number of mapped locations
         std::fill(mapped_reads.begin(), mapped_reads.end(), false);
         std::fill(correctly_mapped_reads.begin(), correctly_mapped_reads.end(), false);
+        std::fill(mapped_random_reads.begin(), mapped_random_reads.end(), false);
         unsigned int acceptable_maps = 0;
 
         seqan3::sam_file_input fin{sam_path};
@@ -201,6 +247,12 @@ public:
                 mapped_reads[sequence_id] = true;
                 mapped_locations++;
 
+                // if this read is random, stop evaluating
+                if (is_random_read[sequence_id]) {
+                    mapped_random_reads[sequence_id] = true;
+                    continue;
+                }
+
                 // get the mapping information
                 bool reverse_comp = static_cast<bool>(record.flag() & seqan3::sam_flag::on_reverse_strand);
                 unsigned int ref_id = record.reference_id().value();
@@ -209,7 +261,7 @@ public:
                 // check correctness against answer
                 bool acceptable = false;
                 for (map_position_t pos : answer[sequence_id]) {
-                    if (//reverse_comp == pos.reverse_complement &&
+                    if (reverse_comp == pos.reverse_complement &&
                         ref_id == pos.sequence_id &&
                         std::abs((int)offset - (int)pos.offset) <= offset_error_tolerance) {
                         correctly_mapped_reads[sequence_id] = true;
@@ -228,16 +280,24 @@ public:
         // print out benchmark results
         unsigned int num_mapped_reads = std::count(mapped_reads.begin(), mapped_reads.end(), true);
         unsigned int num_correct_mapped_reads = std::count(correctly_mapped_reads.begin(), correctly_mapped_reads.end(), true);
-        seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of mapped reads: " 
-                             << num_mapped_reads << " (" << ((float) num_mapped_reads) / read_id_to_index.size() * 100 << "%).\n";
-        seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of correctly mapped reads: " 
-                             << num_correct_mapped_reads << " (" << ((float) num_correct_mapped_reads) / read_id_to_index.size() * 100 << "%).\n";
-        seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of sequences: " 
+        unsigned int num_random_reads = std::count(is_random_read.begin(), is_random_read.end(), true);
+        unsigned int num_mapped_random_reads = std::count(mapped_random_reads.begin(), mapped_random_reads.end(), true);
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of reads: " 
                              << read_id_to_index.size() << ".\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of random reads: " 
+                             << num_random_reads << ".\n";
+
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of mapped reads: " 
+                             << num_mapped_reads << " (" << ((float) num_mapped_reads) / (read_id_to_index.size() - num_random_reads) * 100 << "%).\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of correctly mapped reads (sensitivity): " 
+                             << num_correct_mapped_reads << " (" << ((float) num_correct_mapped_reads) / (read_id_to_index.size() - num_random_reads) * 100 << "%).\n";
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of mapped random reads (false positives): " 
+                             << num_mapped_random_reads << " (" << ((float) num_mapped_random_reads) / (num_random_reads) * 100 << "%).\n";
+        
         seqan3::debug_stream << "[BENCHMARK]\t" << "Number of mapped locations returned: " 
                              << mapped_locations << " (" << ((float) mapped_locations) / num_mapped_reads << " per mapped read).\n";
         
-        seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of acceptable mapped locations: " 
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of acceptable mapped locations (precision): " 
                              << acceptable_maps << " (precision: " << ((float) acceptable_maps) / mapped_locations * 100 << "%).\n";
     }
 
@@ -253,14 +313,16 @@ public:
 
 int main()
 {
-    sam_analyzer analyzer(2000);
-    analyzer.read_sequence_file("/home/guzh/data/mapping/lr_simulated/sd_0001.fastq");
+    sam_analyzer analyzer(10);
+    analyzer.read_fasta_file("/home/zhenhao/mapping_data/GCA_004358405.1_ASM435840v1_genomic.fna");
+    analyzer.read_sequence_file("/home/zhenhao/mapping_data/EColi_sim.bwa.read1.fastq", true);
     //analyzer.read_best_alignment_file("/home/zhenhao/data/mapping/ecoli_simulated_golden.sam");
-    analyzer.read_ground_truth_file("/home/guzh/data/mapping/lr_simulated/sd_0001.maf");
+    //analyzer.read_ground_truth_file("/home/guzh/data/mapping/lr_simulated/sd_0001.maf");
+
     //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam");
     //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/subread_map.sam");
     //analyzer.read_ground_truth_file("/mnt/d/genome/test/EGU_1500_10K.position_ground_truth");
-    analyzer.benchmark_directory("/home/guzh/bucket-map/bucket_map/benchmark/long_read/output");
+    analyzer.benchmark_directory("/home/zhenhao/bucket-map/bucket_map/benchmark/short_read/output");
     return 0;
 
 }

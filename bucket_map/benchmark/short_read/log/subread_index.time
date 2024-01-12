@@ -1,21 +1,21 @@
-	Command being timed: "subread-buildindex -o EColi_subread /home/zhenhao/data/mapping/GCF_001890245.1_ASM189024v1_genomic.fna"
+	Command being timed: "subread-buildindex -o EColi_subread /home/zhenhao/mapping_data/GCA_004358405.1_ASM435840v1_genomic.fna"
 	User time (seconds): 1.64
-	System time (seconds): 2.37
+	System time (seconds): 1.03
 	Percent of CPU this job got: 99%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:04.04
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.70
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 1770768
+	Maximum resident set size (kbytes): 1774820
 	Average resident set size (kbytes): 0
 	Major (requiring I/O) page faults: 9
-	Minor (reclaiming a frame) page faults: 505889
-	Voluntary context switches: 111
-	Involuntary context switches: 6
+	Minor (reclaiming a frame) page faults: 508338
+	Voluntary context switches: 109
+	Involuntary context switches: 4
 	Swaps: 0
-	File system inputs: 1648
-	File system outputs: 211976
+	File system inputs: 1408
+	File system outputs: 213048
 	Socket messages sent: 0
 	Socket messages received: 0
 	Signals delivered: 0

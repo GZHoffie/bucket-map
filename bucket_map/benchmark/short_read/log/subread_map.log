@@ -10,7 +10,7 @@
 //================================= setting ==================================\\
 ||                                                                            ||
 || Function      : Read alignment (DNA-Seq)                                   ||
-|| Input file    : ecoli_simulated_read1_renamed.fq                           ||
+|| Input file    : EColi_sim.bwa.read1.fastq                                  ||
 || Output file   : subread_map.sam (SAM)                                      ||
 || Index name    : EColi_subread                                              ||
 ||                                                                            ||
@@ -26,13 +26,13 @@
 ||                                                                            ||
 \\============================================================================//
 
-//=============== Running (27-Dec-2023 17:20:51, pid=1184981) ================\\
+//================ Running (12-Jan-2024 14:40:03, pid=32990) =================\\
 ||                                                                            ||
 || Check the input reads.                                                     ||
 || The input file contains base space reads.                                  ||
 || Initialise the memory objects.                                             ||
 || Estimate the mean read length.                                             ||
-|| The range of Phred scores observed in the data is [1,38]                   ||
+|| The range of Phred scores observed in the data is [8,26]                   ||
 || Create the output SAM file.                                                ||
 || Check the index.                                                           ||
 || Init the voting space.                                                     ||
@@ -40,25 +40,25 @@
 || Load the 1-th index block...                                               ||
 || The index block has been loaded.                                           ||
 || Start read mapping in chunk.                                               ||
-||    1% completed, 0.0 mins elapsed, rate=74.1k reads per second             ||
-||    8% completed, 0.0 mins elapsed, rate=73.3k reads per second             ||
-||   15% completed, 0.0 mins elapsed, rate=73.5k reads per second             ||
-||   21% completed, 0.1 mins elapsed, rate=72.4k reads per second             ||
-||   28% completed, 0.1 mins elapsed, rate=71.9k reads per second             ||
-||   35% completed, 0.1 mins elapsed, rate=71.9k reads per second             ||
-||   41% completed, 0.1 mins elapsed, rate=72.4k reads per second             ||
-||   48% completed, 0.1 mins elapsed, rate=72.6k reads per second             ||
-||   55% completed, 0.1 mins elapsed, rate=71.6k reads per second             ||
-||   61% completed, 0.1 mins elapsed, rate=71.2k reads per second             ||
-||   69% completed, 0.1 mins elapsed, rate=43.4k reads per second             ||
-||   73% completed, 0.1 mins elapsed, rate=42.7k reads per second             ||
-||   76% completed, 0.1 mins elapsed, rate=42.0k reads per second             ||
-||   79% completed, 0.1 mins elapsed, rate=41.3k reads per second             ||
-||   83% completed, 0.1 mins elapsed, rate=40.7k reads per second             ||
-||   86% completed, 0.1 mins elapsed, rate=40.3k reads per second             ||
-||   89% completed, 0.1 mins elapsed, rate=39.9k reads per second             ||
-||   93% completed, 0.1 mins elapsed, rate=39.6k reads per second             ||
-||   96% completed, 0.2 mins elapsed, rate=39.3k reads per second             ||
+||    0% completed, 0.1 mins elapsed, rate=10.0k reads per second             ||
+||    7% completed, 0.1 mins elapsed, rate=11.6k reads per second             ||
+||   14% completed, 0.2 mins elapsed, rate=12.7k reads per second             ||
+||   20% completed, 0.3 mins elapsed, rate=13.1k reads per second             ||
+||   27% completed, 0.4 mins elapsed, rate=13.4k reads per second             ||
+||   34% completed, 0.5 mins elapsed, rate=13.2k reads per second             ||
+||   40% completed, 0.6 mins elapsed, rate=13.3k reads per second             ||
+||   47% completed, 0.6 mins elapsed, rate=13.5k reads per second             ||
+||   54% completed, 0.7 mins elapsed, rate=13.5k reads per second             ||
+||   60% completed, 0.8 mins elapsed, rate=13.6k reads per second             ||
+||   69% completed, 0.9 mins elapsed, rate=13.1k reads per second             ||
+||   73% completed, 0.9 mins elapsed, rate=13.3k reads per second             ||
+||   76% completed, 0.9 mins elapsed, rate=13.5k reads per second             ||
+||   79% completed, 1.0 mins elapsed, rate=13.7k reads per second             ||
+||   83% completed, 1.0 mins elapsed, rate=13.8k reads per second             ||
+||   86% completed, 1.0 mins elapsed, rate=14.0k reads per second             ||
+||   90% completed, 1.1 mins elapsed, rate=14.1k reads per second             ||
+||   93% completed, 1.1 mins elapsed, rate=14.2k reads per second             ||
+||   96% completed, 1.1 mins elapsed, rate=14.4k reads per second             ||
 ||                                                                            ||
 ||                           Completed successfully.                          ||
 ||                                                                            ||
@@ -66,16 +66,16 @@
 
 //================================   Summary =================================\\
 ||                                                                            ||
-||                 Total reads : 367738                                       ||
-||                      Mapped : 342141 (93.0%)                               ||
-||             Uniquely mapped : 342141                                       ||
+||                 Total reads : 1000000                                      ||
+||                      Mapped : 820244 (82.0%)                               ||
+||             Uniquely mapped : 820244                                       ||
 ||               Multi-mapping : 0                                            ||
 ||                                                                            ||
-||                    Unmapped : 25597                                        ||
+||                    Unmapped : 179756                                       ||
 ||                                                                            ||
-||                      Indels : 2401                                         ||
+||                      Indels : 645                                          ||
 ||                                                                            ||
-||                Running time : 0.2 minutes                                  ||
+||                Running time : 1.2 minutes                                  ||
 ||                                                                            ||
 \\============================================================================//
 
