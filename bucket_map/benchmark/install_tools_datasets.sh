@@ -37,7 +37,10 @@ make modules
 make  
 echo "export PATH=\${PATH}:$(pwd)/bin/Linux-x64" >> ~/.bashrc
 cd ..
-d
+
+# enable search in PATH
+source ~/.bashrc
+
 
 # Samtools, for converting bam/sam files
 sudo apt install -y samtools
@@ -82,11 +85,21 @@ make
 echo "export PATH=\${PATH}:$(pwd)" >> ~/.bashrc
 cd ..
 
+## Generate simulated datasets
+cd mapping_data
 
-# Do simulation
+# Remove the `N` characters
+~/bucket-map/bucket_map/benchmark/delete_invalid_bases.sh GCF_000001405.26_GRCh38_genomic.fna GRCh38_adjusted.fna
+
 dwgsim -N 1000000 -1 300 -2 0 GCA_004358405.1_ASM435840v1_genomic.fna EColi_sim
 zcat EColi_sim.bwa.read1.fastq.gz >> EColi_sim.bwa.read1.fastq
 rm *.fastq.gz
+
+dwgsim -N 1000000 -1 300 -2 0 GRCh38_adjusted.fna GRCh38_sim
+zcat GRCh38_sim.bwa.read1.fastq.gz >> GRCh38_sim.bwa.read1.fastq
+rm *.fastq.gz
+
+cd ..
 
 
 # pbsim3
@@ -97,7 +110,3 @@ make
 sudo make install
 cd ..
 
-## Generate simulated datasets
-cd mapping_data
-mason_simulator -ir GCA_004358405.1_ASM435840v1_genomic.fna -n 1000000 --illumina-read-length 150 -o reads_EColi.fq -oa alignments_EColi.sam
-mason_simulator -ir GCF_000001405.26_GRCh38_genomic.fna -n 1000000 --illumina-read-length 150 -o reads_GRCh38.fq -oa alignments_GRCh38.sam

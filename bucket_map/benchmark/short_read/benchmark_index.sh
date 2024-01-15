@@ -5,7 +5,7 @@ BENCHMARK_PATH=$2
 INDEX_INDICATOR=$3
 
 # go to the index directory
-cd "${BENCHMARK_PATH}/index"
+cd "${BENCHMARK_PATH}/../index"
 
 # run the indexing method of bowtie2
 echo "Indexing using bowtie2"
@@ -25,4 +25,4 @@ echo "Indexing using minimap2"
 
 # run indexing for BucketMap
 echo "Indexing using BucketMap"
-/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_index.time" -v bucketmap -x -i "${INDEX_INDICATOR}_bucketmap" &> "${BENCHMARK_PATH}/log/bucketmap_index.log"
+/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_index.time" -v ../../../build/bucketmap -x -i "${INDEX_INDICATOR}_bucketmap" &> "${BENCHMARK_PATH}/log/bucketmap_index.log"

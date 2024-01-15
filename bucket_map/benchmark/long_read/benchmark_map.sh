@@ -22,4 +22,4 @@ echo "Mapping using GraphMap"
 
 # run bucketmap
 echo "Mapping using BucketMap"
-/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_map.time" -v bucketmap --version-check 0 -s 30 -e 0.9 -n 0.1 -l 12 -p 20 -u 5 -i "${INDEX_INDICATOR}_bucketmap" -q ${FASTQ_PATH} -o "${BENCHMARK_PATH}/output/bucketmap_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_map.log"
+/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_map.time" -v ../../../build/bucketmap --version-check 0 -s 30 -e 0.9 -n 0.1 -l 12 -p 20 -u 5 -i "${INDEX_INDICATOR}_bucketmap" -q ${FASTQ_PATH} -o "${BENCHMARK_PATH}/output/bucketmap_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_map.log"
