@@ -218,6 +218,11 @@ public:
             mapped_reads.push_back(false);
             correctly_mapped_reads.push_back(false);
             mapped_random_reads.push_back(false);
+            if (!is_dwgsim) {
+                std::vector<map_position_t> positions;
+                answer.push_back(positions);
+                is_random_read.push_back(false);
+            }
         }
     }
 

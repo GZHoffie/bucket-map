@@ -546,7 +546,7 @@ public:
 
                 // get the part of text that the read is mapped to
                 auto start = bucket_seq[bucket_id].begin() + offset;
-                size_t width = std::min(query.size() + 1 + allowed_indel, bucket_seq[bucket_id].size() - offset);
+                size_t width = std::min(query.size() + 1 + (std::size_t)(allowed_indel_rate * record.sequence().size()), bucket_seq[bucket_id].size() - offset);
                 
                 // define flag value
                 seqan3::sam_flag flag{seqan3::sam_flag::none};
