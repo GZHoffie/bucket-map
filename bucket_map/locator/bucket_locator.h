@@ -166,6 +166,7 @@ private:
          * @param seq the sequence of the bucket.
          */
         index.clear();
+        index.reserve(BM_BUCKET_LEN);
         // insert the k-mers.
         int offset = 0;
         for (auto hash : seq | seqan3::views::kmer_hash(seqan3::ungapped{k})) {
