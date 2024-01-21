@@ -10,3 +10,4 @@ cmake-build-debug
 bucket_map/benchmark/short_read/output
 bucket_map/benchmark/index
 bucket_map/benchmark/long_read/output
+bucket_map/experiments/*/output

@@ -99,6 +99,10 @@ dwgsim -N 1000000 -1 300 -2 0 GRCh38_adjusted.fna GRCh38_sim
 zcat GRCh38_sim.bwa.read1.fastq.gz >> GRCh38_sim.bwa.read1.fastq
 rm *.fastq.gz
 
+dwgsim -N 10000 -1 300 -2 0 GRCh38_adjusted.fna GRCh38_sim_short
+zcat GRCh38_sim_short.bwa.read1.fastq.gz >> GRCh38_sim_short.bwa.read1.fastq
+rm *.fastq.gz
+
 cd ..
 
 
