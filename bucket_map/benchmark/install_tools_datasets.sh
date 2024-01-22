@@ -61,7 +61,7 @@ source ~/.bashrc
 
 # Human genome GRCh38 (3.1 Gb), E Coli genome (5.8 Mb)
 cd mapping_data
-for NCBI_ID in GCF_000001405.26 GCA_004358405.1
+for NCBI_ID in GCF_000001405.26 GCA_000005845.2
 do
     datasets download genome accession ${NCBI_ID}
     unzip ncbi_dataset.zip
@@ -69,6 +69,10 @@ do
     rm -r README.md ncbi_dataset ncbi_dataset.zip
 done
 cd ..
+# Pseudomonas Genus
+
+
+
 # Note: need to use ./delete_invalid_bases.sh to remove `N` in the genome
 
 
@@ -114,3 +118,14 @@ make
 sudo make install
 cd ..
 
+
+## Download real read datasets
+# Install sratools, if haven't done so
+sudo apt-get install sra-toolkit
+
+# Download datasets
+# Illumina MiSeq, Homo sapiens
+prefetch -v SRR25821753	
+
+# NextSeq 2000, Escherichia coli K-12
+prefetch -v SRR24524113
