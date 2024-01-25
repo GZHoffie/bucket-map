@@ -4,13 +4,13 @@
 [INFO]		Set query seed length to be 12, and index seed length 9.
 [ERROR]		The specified file already exists in directory: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/GRCh38_65536_bucketmap.qgram".
 [BENCHMARK]	Number of Q-grams with distinguishability >= 0.899998: 110238 (42.0525%).
-[BENCHMARK]	Elapsed time for loading index files: 46.558 s.
+[BENCHMARK]	Elapsed time for loading index files: 47.29 s.
 [INFO]		Successfully loaded "/home/zhenhao/bucket-map/bucket_map/benchmark/index/GRCh38_65536_bucketmap.qgram".
-[BENCHMARK]	Elapsed time for bucket mapping: 3.301 s (330.1 μs/seq).
-[BENCHMARK]	Number of reads that have at least one candidate bucket: 7649  (76.49%).
-[BENCHMARK]	Average number of buckets an original read is mapped to: 1.43823.
-[BENCHMARK]	Average number of buckets a reverse complement of the read is mapped to: 1.49758.
-[BENCHMARK]	Total time used for building k-mer index for each bucket: 59.002 s.
-[BENCHMARK]	Total time used for finding exact location of the sequences: 0.001 s (0.1 μs/seq).
-[BENCHMARK]	Total mapped locations: 8366 (0.8366 per sequence).
-[BENCHMARK]	Total time used for alignment verification and output: 0.035 s (4.1836 μs per pairwise alignment).
+[BENCHMARK]	Elapsed time for bucket mapping: 4.43 s (186.841 μs/seq).
+[BENCHMARK]	Number of reads that have at least one candidate bucket: 14552  (61.3749%).
+[BENCHMARK]	Average number of buckets an original read is mapped to: 3.54968.
+[BENCHMARK]	Average number of buckets a reverse complement of the read is mapped to: 3.30793.
+[BENCHMARK]	Total time used for building k-mer index for each bucket: 48.629 s.
+[BENCHMARK]	Total time used for finding exact location of the sequences: 7.031 s (296.542 μs/seq).
+[BENCHMARK]	Total mapped locations: 18379 (0.775158 per sequence).
+[BENCHMARK]	Total time used for alignment verification and output: 0.043 s (2.33963 μs per pairwise alignment).

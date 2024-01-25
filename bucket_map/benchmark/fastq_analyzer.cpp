@@ -85,6 +85,6 @@ public:
 
 
 int main() {
-    fastq_analyzer analyzer(15);
-    analyzer.read("/home/zhenhao/mapping_data/GRCh38_sim_short.bwa.read1.fastq");
+    fastq_analyzer analyzer(25);
+    analyzer.read("/mnt/c/Users/guzh/mapping_reads/SRR25821753_sampled.fastq");
 }

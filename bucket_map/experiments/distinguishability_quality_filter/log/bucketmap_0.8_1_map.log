@@ -3,3 +3,14 @@
 [INFO]		Set index seed length to be: 9.
 [INFO]		Set query seed length to be 12, and index seed length 9.
 [ERROR]		The specified file already exists in directory: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/GRCh38_65536_bucketmap.qgram".
+[BENCHMARK]	Number of Q-grams with distinguishability >= 0.799996: 154208 (58.8257%).
+[BENCHMARK]	Elapsed time for loading index files: 47.976 s.
+[INFO]		Successfully loaded "/home/zhenhao/bucket-map/bucket_map/benchmark/index/GRCh38_65536_bucketmap.qgram".
+[BENCHMARK]	Elapsed time for bucket mapping: 7.515 s (316.955 μs/seq).
+[BENCHMARK]	Number of reads that have at least one candidate bucket: 21457  (90.4977%).
+[BENCHMARK]	Average number of buckets an original read is mapped to: 1.64711.
+[BENCHMARK]	Average number of buckets a reverse complement of the read is mapped to: 1.5285.
+[BENCHMARK]	Total time used for building k-mer index for each bucket: 39.473 s.
+[BENCHMARK]	Total time used for finding exact location of the sequences: 7.253 s (305.905 μs/seq).
+[BENCHMARK]	Total mapped locations: 26607 (1.12218 per sequence).
+[BENCHMARK]	Total time used for alignment verification and output: 0.05 s (1.8792 μs per pairwise alignment).

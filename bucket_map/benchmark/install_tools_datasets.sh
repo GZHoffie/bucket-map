@@ -129,3 +129,10 @@ prefetch -v SRR25821753
 
 # NextSeq 2000, Escherichia coli K-12
 prefetch -v SRR24524113
+
+# change .sra files to .fastq
+for file in ./*/*.sra
+do
+    fasterq-dump ${file}
+    rm ${file}
+done

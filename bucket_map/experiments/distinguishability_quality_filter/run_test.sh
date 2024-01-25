@@ -3,7 +3,7 @@
 HOME_DIR="/home/zhenhao"
 GENOME_FILE="${HOME_DIR}/mapping_data/GRCh38_adjusted.fna"
 BENCHMARK_PATH="${HOME_DIR}/bucket-map/bucket_map/experiments/distinguishability_quality_filter"
-QUERY_FILE="${HOME_DIR}/mapping_data/GRCh38_sim_short.bwa.read1.fastq"
+QUERY_FILE="/mnt/c/Users/guzh/mapping_reads/ERR12333822.fastq"
 INDICATOR="GRCh38_65536"
 BUCKET_LEN=65536
 
@@ -34,6 +34,6 @@ cd "${BENCHMARK_PATH}/../../benchmark/index"
 
 for dist in 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
 do
-    /usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_map.time" -v ../../../build/bucketmap --version-check 0 -r 300 -s 20 -e 0.6 -b 15 -d ${dist} -i "${INDICATOR}_bucketmap" -q ${QUERY_FILE} -o "${BENCHMARK_PATH}/output/bucketmap_${dist}_1_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_${dist}_1_map.log"
-    #/usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_map.time" -v ../../../build/bucketmap --version-check 0 -r 300 -s 20 -e 0.6 -b 0 -d ${dist} -i "${INDICATOR}_bucketmap" -q ${QUERY_FILE} -o "${BENCHMARK_PATH}/output/bucketmap_${dist}_0_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_${dist}_0_map.log"
+    /usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_map.time" -v ../../../build/bucketmap --version-check 0 -r 300 -s 20 -e 0.6 -b 25 -d ${dist} -i "${INDICATOR}_bucketmap" -q ${QUERY_FILE} -o "${BENCHMARK_PATH}/output/bucketmap_${dist}_1_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_${dist}_1_map.log"
+    /usr/bin/time -o "${BENCHMARK_PATH}/log/bucketmap_map.time" -v ../../../build/bucketmap --version-check 0 -r 300 -s 20 -e 0.6 -b 0 -d ${dist} -i "${INDICATOR}_bucketmap" -q ${QUERY_FILE} -o "${BENCHMARK_PATH}/output/bucketmap_${dist}_0_map.sam" &> "${BENCHMARK_PATH}/log/bucketmap_${dist}_0_map.log"
 done
