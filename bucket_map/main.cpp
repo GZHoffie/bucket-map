@@ -2,6 +2,7 @@
 #include "mapper/q_gram_mapper.h"
 #include "locator/bucket_locator.h"
 #include "tools/short_read_simulator.h"
+#include "tools/hash_function_generator.h"
 #include "./utils.h"
 
 #include <sharg/all.hpp>
@@ -32,6 +33,9 @@ struct cmd_arguments
     float locator_allowed_indel_rate = 0.02;
     float locator_sample_size = 10;
     unsigned int locator_quality_threshold = 40;
+
+    // parameters for fracMinHash
+    float frac_min_hash = 0.5;
 };
  
 void initialise_parser(sharg::parser & parser, cmd_arguments & args)
@@ -112,6 +116,11 @@ void initialise_parser(sharg::parser & parser, cmd_arguments & args)
                       sharg::config{.short_id = 'u',
                                     .long_id = "quality",
                                     .description = "The minimum quality score needed for an alignment to be in the output."});
+    
+    parser.add_option(args.frac_min_hash,
+                      sharg::config{.short_id = 'f',
+                                    .long_id = "frac",
+                                    .description = "The fraction of k-mers to keep in the index."});
 }
 
 seqan3::shape string_to_shape(const std::string& seed_shape) {
@@ -162,9 +171,18 @@ int main(int argc, char ** argv) {
     seqan3::debug_stream << "[INFO]\t\tInitializing indexer and mapper with bucket length: " 
                          << BM_BUCKET_LEN << ", and number of buckets: " << BM_BUCKET_NUM << ".\n";
     
+
+    // initialize hash function for fracMinHash
+    std::size_t HASH_TABLE_SIZE = 1000;
+    hash_function_generator gen;
+    auto min_hash_function = gen.generate(HASH_TABLE_SIZE);
+    
+    // initialize indexer
     bucket_hash_indexer<BM_BUCKET_NUM> ind(BM_BUCKET_LEN, 
                                            args.max_read_length, 
-                                           args.index_seed_length);
+                                           args.index_seed_length,
+                                           min_hash_function,
+                                           (unsigned int)(HASH_TABLE_SIZE * args.frac_min_hash));
     if (args.only_indexer) {
         ind.index(BM_GENOME_PATH, std::filesystem::current_path(), args.index_indicator);
         return 0;
@@ -178,6 +196,9 @@ int main(int argc, char ** argv) {
                              << "the index seed length (currently set to " << args.index_seed_length << ").\n";
         return 1;
     }
+
+
+    // Initialize mapper instance
     q_gram_mapper<BM_BUCKET_NUM> map(BM_BUCKET_LEN, 
                                      args.max_read_length, 
                                      args.query_seed_length, 
@@ -185,7 +206,9 @@ int main(int argc, char ** argv) {
                                      args.mapper_sample_size, 
                                      ceil(args.mapper_sample_size * args.allowed_seed_miss_rate),
                                      args.mapper_distinguishability_threshold,
-                                     args.average_base_quality);
+                                     args.average_base_quality,
+                                     min_hash_function,
+                                     (unsigned int)(HASH_TABLE_SIZE * args.frac_min_hash));
     // initiate the locator instance
     bucket_locator loc(&ind, &map, 
                        BM_BUCKET_LEN, 
@@ -194,7 +217,9 @@ int main(int argc, char ** argv) {
                        args.allowed_seed_miss_rate, 
                        args.locator_allowed_indel_rate,
                        args.locator_sample_size,
-                       args.average_base_quality);
+                       args.average_base_quality
+                       min_hash_function,
+                       (unsigned int)(HASH_TABLE_SIZE * args.frac_min_hash));
     
     // initialize the locator
     loc.initialize(BM_GENOME_PATH, std::filesystem::current_path(), args.index_indicator);

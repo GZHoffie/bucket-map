@@ -11,7 +11,9 @@ private:
     uint8_t q;
 
 public:
-    bucket_hash_indexer(unsigned int bucket_len, unsigned int read_len, uint8_t seed_len) : bucket_indexer<NUM_BUCKETS>(bucket_len, read_len, seed_len) {
+    bucket_hash_indexer(unsigned int bucket_len, unsigned int read_len, uint8_t seed_len, 
+                        std::function<std::size_t(std::size_t)> min_hash_function, 
+                        unsigned int min_hash_threshold) : bucket_indexer<NUM_BUCKETS>(bucket_len, read_len, seed_len, min_hash_function, min_hash_threshold) {
         /**
          * @param bucket_shape the shape of q-gram for the mapper: to map reads to their buckets
          * @param locate_shape the shape of q-gram for the locator: to map reads to exact locations.

@@ -31,9 +31,15 @@ protected:
     unsigned int read_length;                            // maximum length of each short read
     std::string EXTENSION;                               // file name extension for the perticular indexer
 
+    // parameters for FracMinHash
+    std::function<std::size_t(std::size_t)> hash_function;
+    unsigned int hash_threshold;
+
     // q-gram index related information
     std::vector<std::bitset<NUM_BUCKETS>> q_grams_index;
     uint8_t q;
+
+    // 
 
 
     void _insert_into_bucket(const seqan3::bitpacked_sequence<seqan3::dna4>& sequence, unsigned int bucket_num) {
@@ -112,7 +118,8 @@ protected:
     }
 
 public:
-    bucket_indexer(unsigned int bucket_len, unsigned int read_len, uint8_t index_seed_length) : indexer() {
+    bucket_indexer(unsigned int bucket_len, unsigned int read_len, uint8_t index_seed_length, 
+                   std::function<std::size_t(std::size_t)> min_hash_function, unsigned int min_hash_threshold) : indexer() {
         bucket_length = bucket_len;
         read_length = read_len;
 
