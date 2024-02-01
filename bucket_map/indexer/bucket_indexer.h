@@ -39,7 +39,11 @@ protected:
     std::vector<std::bitset<NUM_BUCKETS>> q_grams_index;
     uint8_t q;
 
-    // 
+    // fracMinHash related info, each element represent a k-mer.
+    // if a k-mer is not sampled, kmer_to_index[k_mer] = -1.
+    // otherwise, kmer_to_index[k_mer] = its index in q_grams_index.
+    std::vector<int> kmer_to_index;
+    unsigned int num_valid_kmers;
 
 
     void _insert_into_bucket(const seqan3::bitpacked_sequence<seqan3::dna4>& sequence, unsigned int bucket_num) {
@@ -51,7 +55,8 @@ protected:
          */
         // Extract all q_grams from sequence
         for (auto && value : sequence | seqan3::views::kmer_hash(seqan3::ungapped{q})) {
-            q_grams_index[value].set(bucket_num);
+            int index = kmer_to_index[value];
+            if (index >= 0) q_grams_index[index].set(bucket_num);
         }
     }
 
@@ -108,10 +113,22 @@ protected:
                              << index_directory / (indicator + ".bucket_id") << ".\n";
     }
 
+    void _store_sampled_kmers(std::filesystem::path const & index_directory, const std::string& indicator) {
+        if (!check_filename_in(index_directory, indicator + ".kmers_index")) {
+            return;
+        }
+        std::ofstream index_file(index_directory / (indicator + ".kmers_index"));
+        for (const auto &i : kmer_to_index) {
+            index_file << i << "\n";
+        }
+        index_file.close();
+        seqan3::debug_stream << "[INFO]\t\t" << "The kmer indexes are stored in: " 
+                             << index_directory / (indicator + ".kmers_index") << ".\n";
+    }
+
     void _init_qgram_index() {
         // initialize q_gram index
-        int total_q_grams = (int) pow(4, q);
-        for (int i = 0; i < total_q_grams; i++) {
+        for (int i = 0; i < num_valid_kmers; i++) {
             std::bitset<NUM_BUCKETS> q_gram_bucket;
             q_grams_index.push_back(q_gram_bucket);
         }
@@ -126,6 +143,20 @@ public:
         // q-gram index related information
         q = index_seed_length;
         seqan3::debug_stream << "[INFO]\t\t" << "Set index seed length to be: " << q << ".\n";
+
+        // initialize FracMinHash
+        int index = 0;
+        for (unsigned int i = 0; i < pow(4, q); i++) {
+            if (min_hash_function(i) <= min_hash_threshold) {
+                kmer_to_index.push_back(index);
+                index++;
+            } else {
+                kmer_to_index.push_back(-1);
+            }
+        }
+        num_valid_kmers = index;
+        seqan3::debug_stream << "[INFO]\t\t" << "Number of remaining k-mers after FracMinHash is " << num_valid_kmers << " out of " 
+                             << pow(4, q) << " (" << ((float) num_valid_kmers) / pow(4, q) * 100 << "%).\n";
     }
 
     virtual ~bucket_indexer() = default;
@@ -174,6 +205,7 @@ public:
                              << bucket_id.size() << "." << '\n';
         // Store the bucket_id in the directory
         _store_bucket_ids(index_directory, indicator);
+        _store_sampled_kmers(index_directory, indicator);
 
         clock.tock();
         seqan3::debug_stream << "[BENCHMARK]\t" << "Elapsed time for creating and storing index files: " 
@@ -192,6 +224,8 @@ public:
         bucket_id.shrink_to_fit();
         q_grams_index.clear();
         q_grams_index.shrink_to_fit();
+        kmer_to_index.clear();
+        kmer_to_index.shrink_to_fit();
     }
 };
 

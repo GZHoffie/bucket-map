@@ -35,7 +35,7 @@ struct cmd_arguments
     unsigned int locator_quality_threshold = 40;
 
     // parameters for fracMinHash
-    float frac_min_hash = 0.5;
+    float frac_min_hash = 0.25;
 };
  
 void initialise_parser(sharg::parser & parser, cmd_arguments & args)
@@ -119,7 +119,7 @@ void initialise_parser(sharg::parser & parser, cmd_arguments & args)
     
     parser.add_option(args.frac_min_hash,
                       sharg::config{.short_id = 'f',
-                                    .long_id = "frac",
+                                    .long_id = "kmer-frac",
                                     .description = "The fraction of k-mers to keep in the index."});
 }
 
@@ -173,7 +173,7 @@ int main(int argc, char ** argv) {
     
 
     // initialize hash function for fracMinHash
-    std::size_t HASH_TABLE_SIZE = 1000;
+    std::size_t HASH_TABLE_SIZE = 10000;
     hash_function_generator gen;
     auto min_hash_function = gen.generate(HASH_TABLE_SIZE);
     
@@ -206,9 +206,7 @@ int main(int argc, char ** argv) {
                                      args.mapper_sample_size, 
                                      ceil(args.mapper_sample_size * args.allowed_seed_miss_rate),
                                      args.mapper_distinguishability_threshold,
-                                     args.average_base_quality,
-                                     min_hash_function,
-                                     (unsigned int)(HASH_TABLE_SIZE * args.frac_min_hash));
+                                     args.average_base_quality);
     // initiate the locator instance
     bucket_locator loc(&ind, &map, 
                        BM_BUCKET_LEN, 
@@ -217,9 +215,7 @@ int main(int argc, char ** argv) {
                        args.allowed_seed_miss_rate, 
                        args.locator_allowed_indel_rate,
                        args.locator_sample_size,
-                       args.average_base_quality
-                       min_hash_function,
-                       (unsigned int)(HASH_TABLE_SIZE * args.frac_min_hash));
+                       args.average_base_quality);
     
     // initialize the locator
     loc.initialize(BM_GENOME_PATH, std::filesystem::current_path(), args.index_indicator);

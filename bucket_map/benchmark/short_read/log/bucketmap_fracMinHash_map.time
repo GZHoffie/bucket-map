@@ -1,0 +1,23 @@
+	Command being timed: "../../../build/bucketmap --version-check 0 -r 300 -s 20 -e 0.6 -l 14 -b 10 -i GRCh38_fracMinHash_bucketmap -q /home/zhenhao/mapping_data/GRCh38_sim.bwa.read1.fastq -o /home/zhenhao/bucket-map/bucket_map/benchmark/short_read/output/bucketmap_fracMinHash_map.sam"
+	User time (seconds): 711.51
+	System time (seconds): 2.21
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 11:54.92
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 1368796
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 284139
+	Voluntary context switches: 962
+	Involuntary context switches: 519
+	Swaps: 0
+	File system inputs: 1243600
+	File system outputs: 1485424
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

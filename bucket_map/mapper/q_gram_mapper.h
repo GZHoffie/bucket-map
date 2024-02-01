@@ -144,11 +144,18 @@ private:
     unsigned int threshold;
     unsigned int k, q;
     unsigned int Q_BITS;
+    std::vector<int>* kmer_to_index;
+
+    int index_of_kmer(unsigned int k_mer_hash) {
+        if (k_mer_hash < kmer_to_index->size()) return kmer_to_index->at(k_mer_hash);
+        return -1;
+    }
 
 public:
     std::vector<unsigned int> zeros;
 
-    distinguishability_filter(float distinguishability, unsigned int index_seed, unsigned int query_seed) {
+    distinguishability_filter(float distinguishability, unsigned int index_seed, unsigned int query_seed,
+                              std::vector<int>* kmer_index) {
         /**
          * @brief Initializer of the filter.
          * @param distinguishability the percentage of zeros in the bitset for each Q-gram.
@@ -157,6 +164,8 @@ public:
         q = index_seed;
         k = query_seed;
         Q_BITS = pow(4, q) - 1;
+
+        kmer_to_index = kmer_index;
     }
 
     void read(const std::vector<std::bitset<NUM_BUCKETS>>& q_grams_index) {
@@ -180,7 +189,8 @@ public:
     bool is_highly_distinguishable(unsigned int kmer_hash) {
         for (unsigned int i = 0; i <= k - q; i++) {
             unsigned int h = ((kmer_hash >> (2 * i)) & Q_BITS);
-                if (zeros[h] >= threshold) return true;
+                int index = index_of_kmer(h);
+                if (index >= 0 && zeros[index] >= threshold) return true;
             }
         return false;
     }
@@ -204,6 +214,7 @@ private:
     // bucket index related information
     unsigned int bucket_length;
     unsigned int read_length;
+    std::vector<int> kmer_to_index;
 
     // mapper related information
     unsigned int num_samples;
@@ -288,7 +299,7 @@ public:
 
         // initialize filter
         filter = new fault_tolerate_filter<NUM_BUCKETS>(num_fault_tolerance, num_candidate_buckets);
-        dist_filter = new distinguishability_filter<NUM_BUCKETS>(distinguishability, q, k);
+        dist_filter = new distinguishability_filter<NUM_BUCKETS>(distinguishability, q, k, &kmer_to_index);
         min_base_quality = quality_threshold * k;
 
         // Initialize sampler
@@ -315,8 +326,22 @@ public:
             seqan3::debug_stream << "[ERROR]\t\t" << "The q-gram index is not empty. Terminating load.\n";
             return;
         }
+
+        // Read the kmer index with FracMinHash file
+        int sampled_q_grams = 0;
+        std::ifstream frac_min_hash_file(index_directory / (indicator + ".kmers_index"));
+        if (frac_min_hash_file) {
+            int index;
+            for (unsigned int i = 0; i < pow(4, q); i++) {
+                frac_min_hash_file >> index;
+                if (index >= 0) sampled_q_grams += 1;
+                kmer_to_index.push_back(index);
+            }
+            seqan3::debug_stream << "[INFO]\t\t" << "Successfully loaded " 
+                                 << index_directory / (indicator + ".kmers_index") << "." << '\n';
+        }
+
         // initialize q_gram index
-        int total_q_grams = (int) pow(4, q);
         int num_chars_per_q_gram = (NUM_BUCKETS + 7) >> 3;
 
         // Read the index file
@@ -327,7 +352,7 @@ public:
 
             // read several bytes from file at a time
             std::vector<char> buffer(num_chars_per_q_gram);
-            for (unsigned int i = 0; i < total_q_grams; i++) {
+            for (unsigned int i = 0; i < sampled_q_grams; i++) {
                 file.read(&buffer[0], sizeof(unsigned char) * num_chars_per_q_gram);
                 q_grams_index.push_back(_bitset_from_bytes(buffer));
             }
@@ -341,6 +366,14 @@ public:
             seqan3::debug_stream << "[INFO]\t\t" << "Successfully loaded " 
                                  << index_directory / (indicator + ".qgram") << "." << '\n';
         }
+
+        
+
+    }
+
+    int index_of_kmer(unsigned int k_mer_hash) {
+        if (k_mer_hash < kmer_to_index.size()) return kmer_to_index[k_mer_hash];
+        return -1;
     }
 
 
@@ -368,7 +401,8 @@ public:
             bf_res.set();
             for (unsigned int i = 0; i <= k - q; i++) {
                 unsigned int q_gram_hash = ((h >> (2 * i)) & Q_BITS);
-                bf_res &= q_grams_index[q_gram_hash];
+                int index = index_of_kmer(q_gram_hash);
+                if (index >= 0) bf_res &= q_grams_index[index];
             }
             filter->read(bf_res);
         }
@@ -488,7 +522,7 @@ public:
                 std::vector<seqan3::phred94> segment_quality(rec.base_qualities().begin() + begin, rec.base_qualities().begin() + end);
 
                 // find if the segment is present in the buckets
-                auto [buckets_orig, buckets_rev_comp] = query_sequence(rec.sequence(), rec.base_qualities());
+                auto [buckets_orig, buckets_rev_comp] = query_sequence(segment_sequence, segment_quality);
                 segment_info_t seg{num_records, (int)i};
                 for (auto & b : buckets_orig) {
                     res_orig[b].push_back(seg);
