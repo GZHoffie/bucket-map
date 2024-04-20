@@ -68,7 +68,7 @@ include(FetchContent)
 # seqan3 for the basic skeleton for the mapper
 FetchContent_Declare(seqan3
     GIT_REPOSITORY https://github.com/seqan/seqan3.git
-    GIT_TAG        cdb6abe5e36b958e86ff1ba94561dac4955d5f14
+    GIT_TAG        main
 )
 FetchContent_MakeAvailable(seqan3)
 

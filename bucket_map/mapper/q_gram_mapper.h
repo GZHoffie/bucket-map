@@ -467,6 +467,7 @@ public:
         });
         std::vector<unsigned int> samples_rev_comp_vec(samples_rev_comp.begin(), samples_rev_comp.end());
         candidates_rev_comp = query(samples_rev_comp_vec);
+        
         if (candidates_orig.size() > allowed_max_candidate_buckets) {
             candidates_orig.clear();
         }
@@ -556,20 +557,19 @@ public:
     }
 
 
-    std::vector<std::vector<unsigned int>> _query_file(std::filesystem::path sequence_file) {
+    std::vector<std::pair<std::vector<unsigned int>, std::vector<unsigned int>>> _query_file(std::filesystem::path sequence_file) {
         /**
          * * This function is just for benchmarking.
          * @brief Read a query fastq file and output the bucket ids each query belongs to.
          * TODO: include the quality information for fastq.
          */
-        std::vector<std::vector<unsigned int>> res;
+        std::vector<std::pair<std::vector<unsigned int>, std::vector<unsigned int>>> res;
         seqan3::sequence_file_input<_phred94_traits> fin{sequence_file};
         Timer clock;
         clock.tick();
  
         for (auto & rec : fin) {
-            auto [buckets_orig, buckets_rev_comp] = query_sequence(rec.sequence(), rec.base_qualities());
-            res.push_back(buckets_orig);
+            res.push_back(query_sequence(rec.sequence(), rec.base_qualities()));
         }
         clock.tock();
         float time = clock.elapsed_seconds();
@@ -578,7 +578,7 @@ public:
         return res;
     }
 
-    void _check_ground_truth(const std::vector<std::vector<unsigned int>>& query_results, std::filesystem::path ground_truth_file) {
+    void _check_ground_truth(const std::vector<std::pair<std::vector<unsigned int>, std::vector<unsigned int>>>& query_results, std::filesystem::path ground_truth_file) {
         /**
          * * This function is just for benchmarking.
          * @brief Check the performance of query results against the ground truth.
@@ -590,6 +590,7 @@ public:
         std::ifstream is(ground_truth_file);
         int bucket, exact_location;
         std::string cigar;
+        bool rev_comp;
 
         // Test statistics
         int correct_map = 0;
@@ -597,14 +598,17 @@ public:
         std::map<int, int> bucket_number_map;
 
         for (int i = 0; i < query_results.size(); i++) {
-            is >> bucket >> exact_location >> cigar;
-            std::vector<int> buckets = query_results[i];
+            is >> bucket >> exact_location >> rev_comp >> cigar;
+            auto& [buckets_orig, buckets_rev_comp] = query_results[i];
 
-            if (std::find(buckets.begin(), buckets.end(), bucket) != buckets.end()) {
+            if (!rev_comp && std::find(buckets_orig.begin(), buckets_orig.end(), bucket) != buckets_orig.end()) {
+                correct_map++;
+            } else if (rev_comp && std::find(buckets_rev_comp.begin(), buckets_rev_comp.end(), bucket) != buckets_rev_comp.end()) {
                 correct_map++;
             }
-            total_bucket_numbers += buckets.size();
-            ++bucket_number_map[buckets.size()];
+            total_bucket_numbers += buckets_orig.size();
+            total_bucket_numbers += buckets_rev_comp.size();
+            ++bucket_number_map[buckets_orig.size() + buckets_rev_comp.size()];
         }
 
         // output information
