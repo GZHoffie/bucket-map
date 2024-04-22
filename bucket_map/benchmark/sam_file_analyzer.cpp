@@ -16,6 +16,8 @@ private:
     std::unordered_map<std::string, unsigned int> read_id_to_index;
     std::unordered_map<std::string, unsigned int> sequence_id_to_index;
     std::vector<bool> mapped_reads;
+    std::vector<bool> unique_map;
+    std::vector<bool> reads_uniquely_mapped;
     std::vector<bool> correctly_mapped_reads;
     std::vector<bool> mapped_random_reads;
     std::vector<bool> is_random_read;
@@ -107,6 +109,16 @@ public:
                 //seqan3::debug_stream << "key not found\n";
             }
         }
+
+        // check if a read can be uniquely mapped
+        for (unsigned int i = 0; i < reads_uniquely_mapped.size(); i++) {
+            if (answer[i].size() == 1) {
+                reads_uniquely_mapped[i] = true;
+            } else {
+                reads_uniquely_mapped[i] = false;
+            }
+        }
+        
         seqan3::debug_stream << "[INFO]\t\tMapped sequences in the best alignment file: " << recorded_answers << ".\n";
     }
 
@@ -163,7 +175,14 @@ public:
                 }
             }
         }
-        
+        // check if a read can be uniquely mapped
+        for (unsigned int i = 0; i < reads_uniquely_mapped.size(); i++) {
+            if (answer[i].size() == 1) {
+                reads_uniquely_mapped[i] = true;
+            } else {
+                reads_uniquely_mapped[i] = false;
+            }
+        }
         
     }
 
@@ -218,6 +237,8 @@ public:
             mapped_reads.push_back(false);
             correctly_mapped_reads.push_back(false);
             mapped_random_reads.push_back(false);
+            reads_uniquely_mapped.push_back(true);
+            unique_map.push_back(true);
             if (!is_dwgsim) {
                 std::vector<map_position_t> positions;
                 answer.push_back(positions);
@@ -233,6 +254,7 @@ public:
         std::fill(mapped_reads.begin(), mapped_reads.end(), false);
         std::fill(correctly_mapped_reads.begin(), correctly_mapped_reads.end(), false);
         std::fill(mapped_random_reads.begin(), mapped_random_reads.end(), false);
+        std::fill(unique_map.begin(), unique_map.end(), true);
         unsigned int acceptable_maps = 0;
 
         seqan3::sam_file_input fin{sam_path};
@@ -249,6 +271,7 @@ public:
                     continue;
                 }
                 // otherwise, the read is mapped
+                if (mapped_reads[sequence_id]) unique_map[sequence_id] = false;
                 mapped_reads[sequence_id] = true;
                 mapped_locations++;
 
@@ -283,19 +306,47 @@ public:
         }
 
         // print out benchmark results
-        unsigned int num_mapped_reads = std::count(mapped_reads.begin(), mapped_reads.end(), true);
-        unsigned int num_correct_mapped_reads = std::count(correctly_mapped_reads.begin(), correctly_mapped_reads.end(), true);
+        unsigned int num_mapped_reads = 0;
+        unsigned int num_correct_mapped_reads = 0;
+
+        // check uniquely mapped
+        unsigned int both_uniquely_mapped = 0;
+        unsigned int answer_uniquely_mapped = 0;
+        unsigned int test_uniquely_mapped = 0;
+        unsigned int none_uniquely_mapped = 0;
+
         unsigned int num_random_reads = std::count(is_random_read.begin(), is_random_read.end(), true);
         unsigned int num_mapped_random_reads = std::count(mapped_random_reads.begin(), mapped_random_reads.end(), true);
+        unsigned int num_reads_uniquely_mapped = std::count(reads_uniquely_mapped.begin(), reads_uniquely_mapped.end(), true);
+ 
+        for (unsigned int i = 0; i < mapped_reads.size(); i++) {
+            if (unique_map[i]) {
+                if (answer[i].size() == 1) {
+                    both_uniquely_mapped += 1;
+                } else {
+                    test_uniquely_mapped += 1;
+                }
+                if (mapped_reads[i]) num_mapped_reads += 1;
+                if (correctly_mapped_reads[i]) num_correct_mapped_reads += 1;
+            } else {
+                if (answer[i].size() == 1) {
+                    answer_uniquely_mapped += 1;
+                } else {
+                    none_uniquely_mapped += 1;
+                }
+            }
+        }
         seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of reads: " 
                              << read_id_to_index.size() << ".\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of random reads: " 
                              << num_random_reads << ".\n";
-
+        seqan3::debug_stream << "[BENCHMARK]\t" << "Number of Uniquely mapped reads: " 
+                             << num_reads_uniquely_mapped << ".\n";
+        seqan3::debug_stream << both_uniquely_mapped << " " << answer_uniquely_mapped << " " << test_uniquely_mapped << " " << none_uniquely_mapped << ".\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of mapped reads: " 
                              << num_mapped_reads << " (" << ((float) num_mapped_reads) / (read_id_to_index.size() - num_random_reads) * 100 << "%).\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of correctly mapped reads (sensitivity): " 
-                             << num_correct_mapped_reads << " (" << ((float) num_correct_mapped_reads) / (read_id_to_index.size() - num_random_reads) * 100 << "%).\n";
+                             << num_correct_mapped_reads << " (" << ((float) num_correct_mapped_reads) / (num_reads_uniquely_mapped) * 100 << "%).\n";
         seqan3::debug_stream << "[BENCHMARK]\t" << "Total number of mapped random reads (false positives): " 
                              << num_mapped_random_reads << " (" << ((float) num_mapped_random_reads) / (num_random_reads) * 100 << "%).\n";
         
@@ -325,9 +376,9 @@ int main()
     //analyzer.read_ground_truth_file("/home/guzh/data/mapping/lr_simulated/sd_0001.maf");
 
     //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/bowtie2_map.sam");
-    //analyzer.read_best_alignment_file("/home/zhenhao/bucket-map/bucket_map/benchmark/output/subread_map.sam");
+    analyzer.read_best_alignment_file("/mnt/c/Users/zhenh/mapping_data/bucket-map/bucket_map/benchmark/short_read/output/minimap2_map.sam");
     //analyzer.read_ground_truth_file("/mnt/d/genome/test/EGU_1500_10K.position_ground_truth");
-    analyzer.benchmark_directory("/home/zhenhao/bucket-map/bucket_map/benchmark/short_read/output");
+    analyzer.benchmark_directory("/mnt/c/Users/zhenh/mapping_data/bucket-map/bucket_map/benchmark/short_read/output/");
     return 0;
 
 }
