@@ -4,7 +4,7 @@ HOME_DIR="/home/zhenhao"
 GENOME_FILE="${HOME_DIR}/mapping_data/GRCh38_adjusted.fna"
 BENCHMARK_PATH="${HOME_DIR}/bucket-map/bucket_map/benchmark/short_read"
 QUERY_FILE="${HOME_DIR}/mapping_data/GRCh38_sim.bwa.read1.fastq"
-INDICATOR="GRCh38_fracMinHash"
+INDICATOR="GRCh38_65536"
 BUCKET_LEN=65536
 
 BUILD_BUCKETMAP=1

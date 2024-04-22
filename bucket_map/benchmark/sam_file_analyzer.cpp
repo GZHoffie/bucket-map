@@ -200,10 +200,10 @@ public:
                 //seqan3::debug_stream << substrings << "\n";
                 // record the ground truth
                 map_position_t gt;
-                gt.reverse_complement = static_cast<bool>(stoi(substrings[3]));
-                gt.sequence_id = sequence_id_to_index[substrings[0]];
-                gt.offset = stoi(substrings[1]);
-                gt.is_random = static_cast<bool>(stoi(substrings[5]));
+                gt.reverse_complement = static_cast<bool>(stoi(substrings[4]));
+                gt.sequence_id = sequence_id_to_index[substrings[0] + "_" + substrings[1]];
+                gt.offset = stoi(substrings[2]);
+                gt.is_random = static_cast<bool>(stoi(substrings[6]));
                 is_random_read.push_back(gt.is_random);
 
                 //seqan3::debug_stream << gt << "\n";
@@ -319,8 +319,8 @@ public:
 int main()
 {
     sam_analyzer analyzer(10);
-    analyzer.read_fasta_file("/home/zhenhao/mapping_data/GCA_004358405.1_ASM435840v1_genomic.fna");
-    analyzer.read_sequence_file("/home/zhenhao/mapping_data/EColi_sim.bwa.read1.fastq", true);
+    analyzer.read_fasta_file("/home/zhenhao/mapping_data/GRCh38_adjusted.fna");
+    analyzer.read_sequence_file("/home/zhenhao/mapping_data/GRCh38_sim.bwa.read1.fastq", true);
     //analyzer.read_best_alignment_file("/home/zhenhao/data/mapping/ecoli_simulated_golden.sam");
     //analyzer.read_ground_truth_file("/home/guzh/data/mapping/lr_simulated/sd_0001.maf");
 

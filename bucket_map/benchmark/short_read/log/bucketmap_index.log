@@ -1,5 +1,9 @@
 [INFO]		Not using Smith-Waterman for alignment verifications.
 [INFO]		Initializing indexer and mapper with bucket length: 65536, and number of buckets: 46789.
 [INFO]		Set index seed length to be: 9.
-[INFO]		Number of remaining k-mers after FracMinHash is 67399 out of 262144 (25.7107%).
-[ERROR]		The specified file already exists in directory: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/GRCh38_fracMinHash_bucketmap.qgram".
+[INFO]		Number of remaining k-mers after FracMinHash is 262144 out of 262144 (100%).
+[INFO]		The bucket q-gram index is stored in: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/GRCh38_65536_bucketmap.qgram".
+[INFO]		The number of buckets: 46788.
+[INFO]		The bucket ids are stored in: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/GRCh38_65536_bucketmap.bucket_id".
+[INFO]		The kmer indexes are stored in: "/home/zhenhao/bucket-map/bucket_map/benchmark/index/GRCh38_65536_bucketmap.kmers_index".
+[BENCHMARK]	Elapsed time for creating and storing index files: 147.793 s.
