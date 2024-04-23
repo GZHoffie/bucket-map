@@ -20,11 +20,11 @@ with open("/home/zhenhao/bucket-map/seed_selection/index/9-mers.json", 'r') as d
 
 # We define a utility function here that turns sequences to their 9-mer profiles.
 
-def sequence_to_kmer_profile(sequence : str, k : int = 9):
+def sequence_to_kmer_profile(sequence : str, k : int = 9, dtype=np.float32):
     """
     Return the k-mer profile of the input sequence (string)
     """
-    res = np.zeros(len(set(canonical_kmer_dict.values())), dtype=np.float32)
+    res = np.zeros(len(set(canonical_kmer_dict.values())), dtype=dtype)
     for i in range(len(sequence) - k + 1):
         k_mer = sequence[i:i + k]
         if k_mer in canonical_kmer_dict:
@@ -56,7 +56,7 @@ def sample_read_from_sequence(sequence : str, read_len : int):
 
 
 class DNAReadDataset(Dataset):
-    def __init__(self, sequence_file, k=9, bucket_len=65536, read_len=150, num_reads_per_epoch=10000):
+    def __init__(self, sequence_file, k=9, bucket_len=65536, read_len=150, num_reads_per_epoch=1000):
         """
         Dataset class to load large CS4220 sequence database. 
 
@@ -98,54 +98,65 @@ class DNAReadDataset(Dataset):
         read_tensor = torch.tensor(sequence_to_kmer_profile(read, self.k))
         return read_tensor, bucket
 
+if __name__ == "__main__":
+    # Example usage
+    #input_file_path = './training_data/train_raw_reads.fasta'
+    input_file_path = '/home/zhenhao/mapping_data/GRCh38_adjusted.fna'
+    #input_file_path = '/home/zhenhao/mapping_data/GCA_000005845.2_ASM584v2_genomic.fna'
+    dataset = DNAReadDataset(input_file_path)
+    dataloader = DataLoader(dataset, batch_size=32, shuffle=False)
 
-# Example usage
-#input_file_path = './training_data/train_raw_reads.fasta'
-input_file_path = '/home/zhenhao/mapping_data/GCA_000005845.2_ASM584v2_genomic.fna'
-dataset = DNAReadDataset(input_file_path)
-dataloader = DataLoader(dataset, batch_size=32, shuffle=False)
 
+    ## Define the model
+    class BucketClassifier(nn.Module):
+        # build the constructor
+        def __init__(self, n_inputs, n_outputs):
+            super(BucketClassifier, self).__init__()
 
-## Define the model
-class BucketClassifier(nn.Module):
-    # build the constructor
-    def __init__(self, n_inputs, n_outputs):
-        super(BucketClassifier, self).__init__()
-        self.linear = torch.nn.Linear(n_inputs, n_outputs)
-    # make predictions
-    def forward(self, x):
-        y_pred = torch.sigmoid(self.linear(x))
-        return y_pred
+            d_model = 2048
 
-n_inputs = len(set(canonical_kmer_dict.values()))
-n_outputs = len(dataset.bucket_sequences)
-classifier = BucketClassifier(n_inputs, n_outputs)
+            self.l1 = torch.nn.Linear(n_inputs, d_model)
+            self.l2 = torch.nn.Linear(d_model, n_outputs)
+            self.ReLU = nn.ReLU()
 
-optimizer = torch.optim.Adam(classifier.parameters(), lr=0.001)
-# defining Cross-Entropy loss
-criterion = torch.nn.CrossEntropyLoss()
- 
-epochs = 50
-Loss = []
-acc = []
-for epoch in range(epochs):
-    train_loss = 0.0
-    train_correct_predictions = 0
-    for i, (reads, labels) in enumerate(dataloader):
-        optimizer.zero_grad()
-        outputs = classifier(reads)
-        loss = criterion(outputs, labels)
+        # make predictions
+        def forward(self, x):
+            x = self.l1(x)
+            x = self.ReLU(x)
+            x = self.l2(x)
+            x = torch.sigmoid(x)
 
-        # Record the performance
-        train_loss += loss.item()
-        _, predicted = torch.max(outputs.data, 1)
-        train_correct_predictions += (predicted == labels).sum()
+            return x
 
-        # Training
-        loss.backward()
-        optimizer.step()
+    n_inputs = len(set(canonical_kmer_dict.values()))
+    n_outputs = len(dataset.bucket_sequences)
+    classifier = BucketClassifier(n_inputs, n_outputs)
 
-    Loss.append(train_loss)
-    accuracy = 100 * (train_correct_predictions.item()) / len(dataset)
-    acc.append(accuracy)
-    print('Epoch: {}. Loss: {}. Accuracy: {}'.format(epoch, train_loss, accuracy))
+    optimizer = torch.optim.Adam(classifier.parameters(), lr=0.001)
+    # defining Cross-Entropy loss
+    criterion = torch.nn.CrossEntropyLoss()
+    
+    epochs = 50
+    Loss = []
+    acc = []
+    for epoch in range(epochs):
+        train_loss = 0.0
+        train_correct_predictions = 0
+        for i, (reads, labels) in enumerate(dataloader):
+            optimizer.zero_grad()
+            outputs = classifier(reads)
+            loss = criterion(outputs, labels)
+
+            # Record the performance
+            train_loss += loss.item()
+            _, predicted = torch.max(outputs.data, 1)
+            train_correct_predictions += (predicted == labels).sum()
+
+            # Training
+            loss.backward()
+            optimizer.step()
+
+        Loss.append(train_loss)
+        accuracy = 100 * (train_correct_predictions.item()) / len(dataset)
+        acc.append(accuracy)
+        print('Epoch: {}. Loss: {}. Accuracy: {}'.format(epoch, train_loss, accuracy))
